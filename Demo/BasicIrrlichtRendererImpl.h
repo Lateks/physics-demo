@@ -17,6 +17,8 @@ namespace irr
 	class IrrlichtDevice;
 }
 
+class MessagingWindow;
+
 struct BasicIrrlichtRendererImpl
 {
 	BasicIrrlichtRendererImpl() { }
@@ -26,6 +28,8 @@ struct BasicIrrlichtRendererImpl
 	irr::video::IVideoDriver *driver;
 	irr::scene::ISceneManager *scene;
 	irr::gui::IGUIEnvironment *gui;
+	float lastMessage;
+	MessagingWindow *messages;
 
 	void Update();
 };

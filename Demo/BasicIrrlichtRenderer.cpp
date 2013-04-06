@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "BasicIrrlichtRenderer.h"
 #include "BasicIrrlichtRendererImpl.h"
+#include "MessagingWindow.h"
 #include <irrlicht.h>
 #include <iostream>
 
@@ -36,7 +37,7 @@ bool BasicIrrlichtRenderer::SetupAndOpenWindow(unsigned int width, unsigned int 
 	irr::scene::ISceneNode *cube = pImpl->scene->addCubeSceneNode();
 	if (cube)
 	{
-		cube->setMaterialTexture(0, pImpl->driver->getTexture("..\\texture\\woodbox.jpg"));
+		cube->setMaterialTexture(0, pImpl->driver->getTexture("..\\texture\\woodbox2.jpg"));
 		cube->setMaterialFlag(irr::video::EMF_LIGHTING, false);
 		irr::scene::ISceneNodeAnimator *anim = pImpl->scene
 			->createFlyStraightAnimator(irr::core::vector3df(-25,0,60),
@@ -69,6 +70,11 @@ bool BasicIrrlichtRenderer::SetupAndOpenWindow(unsigned int width, unsigned int 
 		pCamera->setPosition(irr::core::vector3df(0,100,0));
 		pCamera->setTarget(irr::core::vector3df(0,0,0));
 	}
+
+	irr::gui::IGUIFont *font = pImpl->gui->getFont("..\\font\\fontlucida.png");
+	pImpl->messages = new MessagingWindow(200, 150);
+	pImpl->messages->SetPosition(10, 10);
+	pImpl->messages->SetFont(font);
 
 	return true;
 }

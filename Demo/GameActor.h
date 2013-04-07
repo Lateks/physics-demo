@@ -1,21 +1,18 @@
 #ifndef GAME_ACTOR_H
 #define GAME_ACTOR_H
 
-namespace irr
-{
-	namespace scene
-	{
-		class ISceneNode;
-	}
-}
+#include <irrlicht.h>
 
 class GameActor
 {
 public:
 	GameActor(irr::scene::ISceneNode *model);
-	~GameActor();
+	virtual ~GameActor();
 	unsigned int GetID() { return actorId; }
+	void Move(float seconds);
 	irr::scene::ISceneNode *pModel;
+	irr::core::vector3df movementNormal;
+	float movementSpeed;
 	// CollisionShape *pCollShape;
 private:
 	unsigned int actorId;

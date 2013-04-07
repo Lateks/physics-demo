@@ -12,6 +12,8 @@ struct GameImpl
 	GameImpl(IrrlichtRenderer *pRendererNew)
 		: pRenderer(pRendererNew) { }
 	~GameImpl();
+	unsigned int CurrentTime();
+	void MoveAllActors(float scale);
 
 	IrrlichtRenderer *pRenderer;
 	// ICollisionEngine *collisionEngine;

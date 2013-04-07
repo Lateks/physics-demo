@@ -61,8 +61,4 @@ bool IrrlichtRenderer::SetupAndOpenWindow(unsigned int width, unsigned int heigh
 	return true;
 }
 
-IrrlichtRenderer::~IrrlichtRenderer()
-{
-	if (pDevice != nullptr)
-		pDevice->drop();
-}
+IrrlichtRenderer::~IrrlichtRenderer() { }

@@ -92,6 +92,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="GameActor.cpp" />
     <ClCompile Include="IrrlichtRenderer.cpp" />
     <ClCompile Include="Demo.cpp" />
     <ClCompile Include="Game.cpp" />

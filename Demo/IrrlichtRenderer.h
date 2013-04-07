@@ -5,6 +5,8 @@
 
 class MessagingWindow;
 
+// This struct holds all the components required to render
+// scenes with Irrlicht as well as some helper methods.
 struct IrrlichtRenderer
 {
 	IrrlichtRenderer() { }

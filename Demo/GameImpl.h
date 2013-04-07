@@ -12,6 +12,7 @@ struct GameImpl
 	GameImpl(IrrlichtRenderer *pRendererNew)
 		: pRenderer(pRendererNew) { }
 	~GameImpl();
+
 	IrrlichtRenderer *pRenderer;
 	// ICollisionEngine *collisionEngine;
 	std::map<unsigned int, GameActor*> actors;

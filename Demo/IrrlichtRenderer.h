@@ -26,7 +26,7 @@ struct IrrlichtRenderer
 	MessagingWindow *pMessages;
 
 	bool SetupAndOpenWindow(unsigned int width, unsigned int height, irr::video::E_DRIVER_TYPE driverType, bool fpsCamera = true);
-	void DrawScene(bool debug = false);
+	void DrawScene(bool debug = false, bool drawAxes = false);
 };
 
 #endif

@@ -2,11 +2,13 @@
 #include "IrrlichtRenderer.h"
 #include "MessagingWindow.h"
 #include <irrlicht.h>
+#include <iostream>
 
 using irr::video::SColor;
 using irr::u32;
+using irr::core::vector3df;
 
-void IrrlichtRenderer::DrawScene(bool debug)
+void IrrlichtRenderer::DrawScene(bool debug, bool drawAxes)
 {
 	pDriver->beginScene(true, true, SColor(0,0,0,0));
 
@@ -16,6 +18,14 @@ void IrrlichtRenderer::DrawScene(bool debug)
 	{
 		pDriver->clearZBuffer();
 		pDebugSmgr->drawAll();
+	}
+	if (drawAxes)
+	{
+		pDriver->clearZBuffer();
+		SColor red(255,255,0,0);
+		pDriver->draw3DLine(vector3df(-100,0,0),vector3df(100,0,0), red);
+		pDriver->draw3DLine(vector3df(0,-100,0),vector3df(0,100,0), red);
+		pDriver->draw3DLine(vector3df(0,0,-100),vector3df(0,0,100), red);
 	}
 
 	pGui->drawAll();

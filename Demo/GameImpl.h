@@ -5,7 +5,7 @@
 
 // class ICollisionEngine;
 struct IrrlichtRenderer;
-struct GameActor;
+class GameActor;
 
 struct GameImpl
 {

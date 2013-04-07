@@ -4,15 +4,15 @@
 #include <map>
 
 // class ICollisionEngine;
-class BasicIrrlichtRenderer;
+struct IrrlichtRenderer;
 struct GameActor;
 
 struct GameImpl
 {
-	GameImpl(BasicIrrlichtRenderer *pRenderer)
-		: renderer(pRenderer) { }
+	GameImpl(IrrlichtRenderer *pRendererNew)
+		: pRenderer(pRendererNew) { }
 	~GameImpl();
-	BasicIrrlichtRenderer *renderer;
+	IrrlichtRenderer *pRenderer;
 	// ICollisionEngine *collisionEngine;
 	std::map<unsigned int, GameActor*> actors;
 };

@@ -24,12 +24,6 @@
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="BasicIrrlichtRenderer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="BasicIrrlichtRendererImpl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="MessagingWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -45,18 +39,15 @@
     <ClInclude Include="GameActor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="IrrlichtRenderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Demo.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BasicIrrlichtRenderer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BasicIrrlichtRendererImpl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="MessagingWindow.cpp">
@@ -66,6 +57,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GameImpl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="IrrlichtRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

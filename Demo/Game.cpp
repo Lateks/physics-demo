@@ -1,13 +1,13 @@
 #include "stdafx.h"
 #include "Game.h"
 #include "GameImpl.h"
-#include "BasicIrrlichtRenderer.h"
+#include "IrrlichtRenderer.h"
 #include <irrlicht.h>
 #include <iostream>
 
 Game::Game()
 {
-	BasicIrrlichtRenderer *renderer = new BasicIrrlichtRenderer();
+	IrrlichtRenderer *renderer = new IrrlichtRenderer();
 
 	if (!renderer->SetupAndOpenWindow(800, 600, irr::video::EDT_OPENGL))
 	{
@@ -35,14 +35,19 @@ Game::Game(Game& game)
 
 int Game::Run()
 {
-	if (pImpl->renderer == nullptr)
+	if (pImpl->pRenderer == nullptr)
 		return 1;
 
-	while (pImpl->renderer->IsRunning())
+	while (pImpl->pRenderer->pDevice->run())
 	{
-		// TODO: test collisions
-		// TODO: move actors
-		pImpl->renderer->UpdateScene();
+		if (pImpl->pRenderer->pDevice->isWindowActive())
+		{
+			// TODO: test collisions
+			// TODO: move actors
+			pImpl->pRenderer->DrawScene();
+		}
+		else
+			pImpl->pRenderer->pDevice->yield();
 	}
 
 	return 0;

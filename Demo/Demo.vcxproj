@@ -82,8 +82,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="BasicIrrlichtRenderer.h" />
-    <ClInclude Include="BasicIrrlichtRendererImpl.h" />
+    <ClInclude Include="IrrlichtRenderer.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameActor.h" />
     <ClInclude Include="GameImpl.h" />
@@ -93,8 +92,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="BasicIrrlichtRenderer.cpp" />
-    <ClCompile Include="BasicIrrlichtRendererImpl.cpp" />
+    <ClCompile Include="IrrlichtRenderer.cpp" />
     <ClCompile Include="Demo.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameImpl.cpp" />

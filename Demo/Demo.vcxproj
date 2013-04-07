@@ -82,6 +82,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Cube.h" />
     <ClInclude Include="IrrlichtRenderer.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameActor.h" />
@@ -93,6 +94,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Cube.cpp" />
     <ClCompile Include="GameActor.cpp" />
     <ClCompile Include="IrrlichtRenderer.cpp" />
     <ClCompile Include="Demo.cpp" />

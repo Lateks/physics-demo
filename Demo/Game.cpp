@@ -2,6 +2,7 @@
 #include "Game.h"
 #include "GameImpl.h"
 #include "Sphere.h"
+#include "Cube.h"
 #include "IrrlichtRenderer.h"
 #include <irrlicht.h>
 #include <iostream>
@@ -18,17 +19,27 @@ void SetupCamera(irr::scene::ICameraSceneNode *pCamera)
 void SetupGameActors(GameImpl *game)
 {
 	auto mudTexture = game->pRenderer->pDriver->getTexture("..\\texture\\cracked_mud.jpg");
+	auto woodBoxTexture = game->pRenderer->pDriver->getTexture("..\\texture\\woodbox2.jpg");
+
 	Sphere *sphere1 = new Sphere(7.5f, game->pRenderer->pSmgr);
 	sphere1->SetPosition(vector3df(25, 0, 20));
 	sphere1->pModel->setMaterialTexture(0, mudTexture);
+
 	Sphere *sphere2 = new Sphere(4.5f, game->pRenderer->pSmgr);
 	sphere2->SetPosition(vector3df(-25, 0, 20));
 	sphere2->pModel->setMaterialTexture(0, mudTexture);
 	sphere2->movementNormal = vector3df(1,0,0);
 	sphere2->movementSpeed = 7.0f;
 
+	Cube *box1 = new Cube(10.0f, game->pRenderer->pSmgr);
+	box1->SetPosition(vector3df(0, 0, 0));
+	box1->pModel->setMaterialTexture(0, woodBoxTexture);
+	box1->movementNormal = vector3df(1, 0, 1).normalize();
+	box1->movementSpeed = 10.0f;
+
 	game->actors[sphere1->GetID()] = sphere1;
 	game->actors[sphere2->GetID()] = sphere2;
+	game->actors[box1->GetID()] = box1;
 }
 
 Game::Game()
@@ -73,7 +84,7 @@ int Game::Run()
 		{
 			// TODO: test collisions
 			pImpl->MoveAllActors(frameDeltaSec);
-			pImpl->pRenderer->DrawScene(false, true);
+			pImpl->pRenderer->DrawScene(false, false);
 		}
 		else
 			pImpl->pRenderer->pDevice->yield();

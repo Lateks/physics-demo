@@ -84,6 +84,9 @@
   <ItemGroup>
     <ClInclude Include="BasicIrrlichtRenderer.h" />
     <ClInclude Include="BasicIrrlichtRendererImpl.h" />
+    <ClInclude Include="Game.h" />
+    <ClInclude Include="GameActor.h" />
+    <ClInclude Include="GameImpl.h" />
     <ClInclude Include="MessagingWindow.h" />
     <ClInclude Include="MessagingWindowImpl.h" />
     <ClInclude Include="stdafx.h" />
@@ -93,6 +96,8 @@
     <ClCompile Include="BasicIrrlichtRenderer.cpp" />
     <ClCompile Include="BasicIrrlichtRendererImpl.cpp" />
     <ClCompile Include="Demo.cpp" />
+    <ClCompile Include="Game.cpp" />
+    <ClCompile Include="GameImpl.cpp" />
     <ClCompile Include="MessagingWindow.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

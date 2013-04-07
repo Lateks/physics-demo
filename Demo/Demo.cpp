@@ -2,26 +2,12 @@
 //
 
 #include "stdafx.h"
-#include "BasicIrrlichtRenderer.h"
-#include <irrlicht.h>
-#include <memory>
-#include <iostream>
+#include "Game.h"
 
 int main()
 {
-	BasicIrrlichtRenderer renderer;
+	Game game;
 
-	if (!renderer.SetupAndOpenWindow(800, 600, irr::video::EDT_OPENGL))
-	{
-		std::cout << "Failed to open device." << std::endl;
-		return 1;
-	}
-
-	while (renderer.IsRunning())
-	{
-		renderer.UpdateScene();
-	}
-
-	return 0;
+	return game.Run();
 }
 

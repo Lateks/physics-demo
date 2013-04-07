@@ -1,21 +1,7 @@
 #ifndef BASIC_IRRLICHT_RENDERER_IMPL_H
 #define BASIC_IRRLICHT_RENDERER_IMPL_H
-namespace irr
-{
-	namespace video
-	{
-		class IVideoDriver;
-	}
-	namespace scene
-	{
-		class ISceneManager;
-	}
-	namespace gui
-	{
-		class IGUIEnvironment;
-	}
-	class IrrlichtDevice;
-}
+
+#include <irrlicht.h>
 
 class MessagingWindow;
 
@@ -28,7 +14,7 @@ struct BasicIrrlichtRendererImpl
 	irr::video::IVideoDriver *driver;
 	irr::scene::ISceneManager *scene;
 	irr::gui::IGUIEnvironment *gui;
-	float lastMessage;
+	irr::u32 lastMessage;
 	MessagingWindow *messages;
 
 	void Update();

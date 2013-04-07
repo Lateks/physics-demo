@@ -7,14 +7,14 @@ using irr::video::SColor;
 
 void BasicIrrlichtRendererImpl::Update()
 {
-	float currentFrame = device->getTimer()->getTime();
+	irr::u32 currentFrame = device->getTimer()->getTime();
 	if (lastMessage != 0)
 	{
-		float deltaTime = (currentFrame - lastMessage) / 1000.0;
-		if (deltaTime >= 1.0f)
+		double deltaTime = (currentFrame - lastMessage) / 1000.0;
+		if (deltaTime >= 1.0)
 		{
 			irr::core::stringw message = L"Current time: ";
-			message += currentFrame;
+			message += deltaTime;
 			messages->AddMessage(message);
 			lastMessage = currentFrame;
 		}

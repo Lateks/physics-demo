@@ -8,6 +8,7 @@
 using irr::IrrlichtDevice;
 using irr::createDevice;
 using irr::u32;
+using irr::video::SColor;
 
 BasicIrrlichtRenderer::BasicIrrlichtRenderer()
 {

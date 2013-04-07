@@ -10,7 +10,7 @@ using irr::core::vector3df;
 
 void SetupCamera(irr::scene::ICameraSceneNode *pCamera)
 {
-	pCamera->setPosition(vector3df(0, 60, -50));
+	pCamera->setPosition(vector3df(-25, 60, -50));
 	pCamera->setTarget(vector3df(17, 3, 0));
 	pCamera->updateAbsolutePosition();
 }
@@ -19,15 +19,11 @@ void SetupGameActors(GameImpl *game)
 {
 	auto mudTexture = game->pRenderer->pDriver->getTexture("..\\texture\\cracked_mud.jpg");
 	Sphere *sphere1 = new Sphere(7.5f, game->pRenderer->pSmgr);
-	sphere1->pModel->setPosition(vector3df(25, 0, 20));
-	sphere1->pModel->updateAbsolutePosition();
-	sphere1->pModel->setMaterialFlag(irr::video::EMF_LIGHTING, false);
+	sphere1->SetPosition(vector3df(25, 0, 20));
 	sphere1->pModel->setMaterialTexture(0, mudTexture);
 	Sphere *sphere2 = new Sphere(4.5f, game->pRenderer->pSmgr);
-	sphere2->pModel->setPosition(vector3df(-25, 0, 10));
-	sphere2->pModel->setMaterialFlag(irr::video::EMF_LIGHTING, false);
+	sphere2->SetPosition(vector3df(-25, 0, 20));
 	sphere2->pModel->setMaterialTexture(0, mudTexture);
-	sphere2->pModel->updateAbsolutePosition();
 	sphere2->movementNormal = vector3df(1,0,0);
 	sphere2->movementSpeed = 7.0f;
 
@@ -77,7 +73,7 @@ int Game::Run()
 		{
 			// TODO: test collisions
 			pImpl->MoveAllActors(frameDeltaSec);
-			pImpl->pRenderer->DrawScene(false, false);
+			pImpl->pRenderer->DrawScene(false, true);
 		}
 		else
 			pImpl->pRenderer->pDevice->yield();

@@ -13,12 +13,19 @@ namespace
 GameActor::GameActor(irr::scene::ISceneNode *model)
 	: pModel(model), movementNormal(0)
 {
+	pModel->setMaterialFlag(irr::video::EMF_LIGHTING, false);
 	actorId = ID++;
 }
 
 GameActor::~GameActor()
 {
 	pModel->drop();
+}
+
+void GameActor::SetPosition(const vector3df& newPos)
+{
+	pModel->setPosition(newPos);
+	pModel->updateAbsolutePosition();
 }
 
 void GameActor::Move(float seconds)

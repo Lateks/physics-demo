@@ -22,6 +22,7 @@ void IrrlichtRenderer::DrawScene(bool debug, bool drawAxes)
 	if (drawAxes)
 	{
 		pDriver->clearZBuffer();
+		pDriver->setTransform(irr::video::ETS_WORLD, irr::core::IdentityMatrix);
 		SColor red(255,255,0,0);
 		pDriver->draw3DLine(vector3df(-100,0,0),vector3df(100,0,0), red);
 		pDriver->draw3DLine(vector3df(0,-100,0),vector3df(0,100,0), red);

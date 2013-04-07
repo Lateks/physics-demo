@@ -10,6 +10,7 @@ public:
 	virtual ~GameActor();
 	unsigned int GetID() { return actorId; }
 	void Move(float seconds);
+	void SetPosition(const irr::core::vector3df& newPos);
 	irr::scene::ISceneNode *pModel;
 	irr::core::vector3df movementNormal;
 	float movementSpeed;

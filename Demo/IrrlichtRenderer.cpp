@@ -56,6 +56,7 @@ bool IrrlichtRenderer::SetupAndOpenWindow(unsigned int width, unsigned int heigh
 		pCamera = pSmgr->addCameraSceneNode();
 	}
 	pDebugSmgr->setActiveCamera(pCamera);
+	pDevice->getCursorControl()->setVisible(false);
 
 	return true;
 }

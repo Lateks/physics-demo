@@ -26,6 +26,9 @@ void BasicIrrlichtRendererImpl::Update()
 	driver->beginScene(true, true, SColor(0,0,0,0));
 
 	scene->drawAll();
+	driver->clearZBuffer();
+	debugSmgr->drawAll();
+
 	gui->drawAll();
 
 	messages->Render();

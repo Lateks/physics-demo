@@ -34,6 +34,7 @@ bool BasicIrrlichtRenderer::SetupAndOpenWindow(unsigned int width, unsigned int 
 	pImpl->driver = pImpl->device->getVideoDriver();
 	pImpl->scene = pImpl->device->getSceneManager();
 	pImpl->gui = pImpl->device->getGUIEnvironment();
+	pImpl->debugSmgr = pImpl->scene->createNewSceneManager(false);
 
 	irr::scene::ISceneNode *cube = pImpl->scene->addCubeSceneNode();
 	if (cube)
@@ -65,13 +66,22 @@ bool BasicIrrlichtRenderer::SetupAndOpenWindow(unsigned int width, unsigned int 
 			anim->drop();
 		}
 	}
+	irr::scene::IAnimatedMesh *arrow = pImpl->debugSmgr->addArrowMesh("arrowMesh", SColor(255, 255, 0, 0), SColor(255, 255, 0, 0), 4u, 8u, 20.0f, 19.0f, 0.05f, 0.5f);
+	irr::scene::ISceneNode *arrowNode = pImpl->debugSmgr->addAnimatedMeshSceneNode(arrow);
+	if (arrowNode)
+	{
+		arrowNode->setPosition(irr::core::vector3df(0,0,60));
+		arrowNode->setRotation(irr::core::vector3df(270,0,0));
+		arrowNode->setMaterialFlag(irr::video::EMF_LIGHTING, false);
+		arrowNode->setVisible(true);
+	}
 	irr::scene::ICameraSceneNode *pCamera = pImpl->scene->addCameraSceneNodeFPS();
 	if (pCamera)
 	{
 		pCamera->setPosition(irr::core::vector3df(0,100,0));
 		pCamera->setTarget(irr::core::vector3df(0,0,0));
 	}
-
+	pImpl->debugSmgr->setActiveCamera(pCamera);
 	irr::gui::IGUIFont *font = pImpl->gui->getFont("..\\font\\fontlucida.png");
 	pImpl->messages = new MessagingWindow(200, 150);
 	pImpl->messages->SetPosition(10, 10);

@@ -13,6 +13,7 @@ struct BasicIrrlichtRendererImpl
 	irr::IrrlichtDevice *device;
 	irr::video::IVideoDriver *driver;
 	irr::scene::ISceneManager *scene;
+	irr::scene::ISceneManager *debugSmgr;
 	irr::gui::IGUIEnvironment *gui;
 	irr::u32 lastMessage;
 	MessagingWindow *messages;

@@ -24,6 +24,12 @@
     <ClInclude Include="CollisionShape.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="SphereShape.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IPositionedObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CollisionMath.cpp">

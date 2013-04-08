@@ -14,7 +14,7 @@ namespace
  * in the convex hull of the "Minkowski difference" of shape1 and shape2
  * (the Minkowski sum shape1 + (-shape2)).
  */
-Point3D Support(const CollisionShape& shape1, const CollisionShape& shape2, const Vector3D& direction)
+Point3D Support(const ICollisionShape& shape1, const ICollisionShape& shape2, const Vector3D& direction)
 {
 	Point3D p1 = shape1.GetFarthestPointInDirection(direction);
 	Point3D p2 = shape2.GetFarthestPointInDirection(direction);
@@ -191,7 +191,7 @@ bool CheckForCollisionAndUpdateSearch(std::vector<Point3D>& simplex, Vector3D& d
 	return false;
 }
 
-bool GJKCollide(const CollisionShape& shape1, const CollisionShape& shape2)
+bool GJKCollide(const ICollisionShape& shape1, const ICollisionShape& shape2)
 {
 	Vector3D d = Vector3D(1,0,0); // select the starting direction of the search
 	std::vector<Point3D> simplex;

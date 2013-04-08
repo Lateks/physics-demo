@@ -80,6 +80,8 @@
   <ItemGroup>
     <ClInclude Include="CollisionMath.h" />
     <ClInclude Include="CollisionShape.h" />
+    <ClInclude Include="IPositionedObject.h" />
+    <ClInclude Include="SphereShape.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CollisionMath.cpp" />

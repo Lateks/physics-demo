@@ -53,7 +53,7 @@ bool IrrlichtRenderer::SetupAndOpenWindow(unsigned int width, unsigned int heigh
 	pGui = pDevice->getGUIEnvironment();
 	pDebugSmgr = pSmgr->createNewSceneManager(false);
 
-	irr::gui::IGUIFont *font = pGui->getFont("..\\font\\fontlucida.png");
+	irr::gui::IGUIFont *font = pGui->getFont("..\\assets\\fontlucida.png");
 	pMessages = new MessagingWindow(200, 150);
 	pMessages->SetPosition(10, 10);
 	pMessages->SetFont(font);

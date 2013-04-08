@@ -18,8 +18,9 @@ void SetupCamera(irr::scene::ICameraSceneNode *pCamera)
 
 void SetupGameActors(GameImpl *game)
 {
-	auto mudTexture = game->pRenderer->pDriver->getTexture("..\\texture\\cracked_mud.jpg");
-	auto woodBoxTexture = game->pRenderer->pDriver->getTexture("..\\texture\\woodbox2.jpg");
+	auto mudTexture = game->pRenderer->pDriver->getTexture("..\\assets\\cracked_mud.jpg");
+	auto woodBoxTexture = game->pRenderer->pDriver->getTexture("..\\assets\\woodbox2.jpg");
+	auto headCrabTexture = game->pRenderer->pDriver->getTexture("..\\assets\\headcrabsheet.tga");
 
 	Sphere *sphere1 = new Sphere(7.5f, game->pRenderer->pSmgr);
 	sphere1->SetPosition(vector3df(25, 0, 20));
@@ -36,6 +37,11 @@ void SetupGameActors(GameImpl *game)
 	box1->pModel->setMaterialTexture(0, woodBoxTexture);
 	box1->movementNormal = vector3df(1, 0, 1).normalize();
 	box1->movementSpeed = 10.0f;
+
+	auto headCrab = game->pRenderer->pSmgr->getMesh("..\\assets\\headcrabclassic.obj");
+	auto headCrabNode = game->pRenderer->pSmgr->addAnimatedMeshSceneNode(headCrab);
+	headCrabNode->setMaterialFlag(irr::video::EMF_LIGHTING, false);
+	headCrabNode->setMaterialTexture(0, headCrabTexture);
 
 	game->actors[sphere1->GetID()] = sphere1;
 	game->actors[sphere2->GetID()] = sphere2;

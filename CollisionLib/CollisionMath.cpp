@@ -1,7 +1,8 @@
 #include "CollisionMath.h"
 #include "CollisionShape.h"
-#include <vector>
+#include "LinearAlgebraTypes.h"
 #include <cassert>
+#include <vector>
 
 /* A note on the linear algebra terminology used in the comments:
  * I usually call vectors that are perpendicular to a plane/vector/line

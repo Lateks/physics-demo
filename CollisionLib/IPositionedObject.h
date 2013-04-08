@@ -1,20 +1,14 @@
 #ifndef I_POSITIONED_OBJECT_H
 #define I_POSITIONED_OBJECT_H
-
-struct Vec3d
-{
-	double X;
-	double Y;
-	double Z;
-};
+#include "LinearAlgebraTypes.h"
 
 class IPositionedObject
 {
 public:
-	virtual ~IPositionedObject();
-	virtual Vec3d GetWorldLocation() = 0;
+	virtual ~IPositionedObject() { };
+	virtual Vector3D GetWorldLocation() = 0;
 protected:
-	IPositionedObject();
+	IPositionedObject() { };
 };
 
 #endif

@@ -81,10 +81,14 @@
     <ClInclude Include="CollisionMath.h" />
     <ClInclude Include="CollisionShape.h" />
     <ClInclude Include="IPositionedObject.h" />
+    <ClInclude Include="LinearAlgebraTypes.h" />
     <ClInclude Include="SphereShape.h" />
+    <ClInclude Include="Vector3DImpl.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CollisionMath.cpp" />
+    <ClCompile Include="LinearAlgebraTypes.cpp" />
+    <ClCompile Include="SphereShape.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

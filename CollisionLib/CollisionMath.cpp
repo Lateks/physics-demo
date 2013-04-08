@@ -3,6 +3,21 @@
 #include <vector>
 #include <cassert>
 
+/* A note on the linear algebra terminology used in the comments:
+ * I usually call vectors that are perpendicular to a plane/vector/line
+ * normals of that plane/vector/line, but I don't necessarily normalize
+ * them because this is not required in the algorithm. (This is just
+ * for brevity of expression.)
+ *
+ * In variable naming, A is always the node added last to a simplex and
+ * O is the origin.
+ *
+ * Materials used for GJK:
+ * - tutorial explaining 2D GJK: http://www.codezealot.org/archives/88
+ * - video tutorial explaining 3D GJK: http://mollyrocket.com/849
+ *   (this implementation is directly based on the latter)
+ */
+
 namespace
 {
 	// A maximum iteration count for GJK to avoid infinite loops
@@ -23,23 +38,28 @@ Point3D Support(const ICollisionShape& shape1, const ICollisionShape& shape2, co
 
 void UpdateForLine(std::vector<Point3D>& simplex, Vector3D& direction)
 {
-	/* In all UpdateFor<Simplex> functions, the variable A represents
-	 * the point that was added to the simplex last and O represents
-	 * the origin.
-	 */
 	assert(simplex.size() == 2);
 	Point3D A = simplex[1];
 	Point3D B = simplex[0];
 	Vector3D AB = B = A;
 	Vector3D AO = -A;
 
-	// TODO: what happens here?
 	if (AB.dot(AO) > 0)
 	{
+		/* The origin is contained in the Voronoi region of the
+		 * line AB. The new search direction will be a normal
+		 * of the line AB that is perpendicular to the plane
+		 * normal of ABO (and thus points toward the origin).
+		 */
 		direction = AB.cross(AO).cross(AB);
 	}
 	else
 	{
+		/* The origin is in the Voronoi region of the point A,
+		 * so just search straight toward the origin from A.
+		 * We can forget B since it is not even close to the origin.
+		 */
+		simplex.erase(simplex.begin());
 		direction = AO;
 	}
 }
@@ -55,19 +75,21 @@ void UpdateForTriangle(std::vector<Point3D>& simplex, Vector3D& direction)
 	Vector3D AC = C - A;
 	Vector3D AO = -A;
 
-	Plane3D ABC = AB.cross(AC).normalized();
+	Plane3D ABC = AB.cross(AC);
 
-	// TODO: rename
-	auto s = ABC.cross(AC).dot(AO);
+	bool ACnormalCloseToOrigin = ABC.cross(AC).dot(AO) > 0;
 
-	if (s > 0 && AC.dot(AO) > 0)
+	if (ACnormalCloseToOrigin && AC.dot(AO) > 0)
 	{
+		/* Origin is in the Voronoi region of the point C.
+		 * B is the furthest away from the origin and can be forgotten.
+		 */
 		simplex.erase(simplex.begin() + 1); // remove the vertex B
 		direction = AC.cross(AO).cross(AC);
 		return;
 	}
 
-	if (s > 0 || AB.cross(ABC).dot(AO) > 0)
+	if (ACnormalCloseToOrigin || AB.cross(ABC).dot(AO) > 0)
 	{
 		if (AB.dot(AO) > 0)
 		{
@@ -76,16 +98,25 @@ void UpdateForTriangle(std::vector<Point3D>& simplex, Vector3D& direction)
 		}
 		else
 		{
+			/* Origin is in the Voronoi region of the point A.
+			 * All other nodes are too far away and can be removed.
+			 */
 			simplex.erase(simplex.begin(), simplex.begin() + 1); // remove all except A
 			direction = AO;
 		}
 	}
 	else if (ABC.dot(AO) > 0)
 	{
+		/* Origin is in the Voronoi region of the whole plane
+		 * defined by the simplex, in the direction of the
+		 * plane normal.
+		 */
 		direction = ABC;
 	}
 	else
-	{ // TODO: what effect does this reordering of vertices have?
+	{
+		// Reverse the handedness of the ABC face by reordering
+		// the vertices.
 		simplex.clear();
 		simplex.push_back(B);
 		simplex.push_back(C);

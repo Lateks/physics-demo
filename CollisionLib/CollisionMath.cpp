@@ -215,10 +215,13 @@ bool CheckForCollisionAndUpdateSearch(std::vector<Point3D>& simplex, Vector3D& d
 	{
 	case 2:
 		UpdateForLine(simplex, direction);
+		break;
 	case 3:
 		UpdateForTriangle(simplex, direction);
+		break;
 	case 4: // this is the only case where we test for intersections
 		return UpdateForTetrahedron(simplex, direction);
+		break;
 	}
 	return false;
 }

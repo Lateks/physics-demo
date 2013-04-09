@@ -35,6 +35,8 @@ namespace GameEngine
 			
 			BulletDebugRenderer *m_pDebugRenderer;
 
+			XMLPhysicsData *m_physicsMaterialData;
+
 			// TODO: reading material and density information from an xml file
 			// This should actually be in a completely separate struct since
 			// it has nothing to do with Bullet specifically.

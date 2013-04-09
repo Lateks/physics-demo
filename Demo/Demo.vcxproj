@@ -105,6 +105,7 @@
     <ClInclude Include="utils.h" />
     <ClInclude Include="Vec3.h" />
     <ClInclude Include="Vec3Impl.h" />
+    <ClInclude Include="XMLPhysicsData.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BulletPhysics.cpp" />
@@ -119,6 +120,7 @@
     <ClCompile Include="MessagingWindow.cpp" />
     <ClCompile Include="Sphere.cpp" />
     <ClCompile Include="Vec3.cpp" />
+    <ClCompile Include="XMLPhysicsData.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,5 +1,6 @@
 #include "BulletPhysicsData.h"
 #include "BulletDebugRenderer.h"
+#include "XMLPhysicsData.h"
 #include "utils.h"
 
 namespace GameEngine
@@ -8,6 +9,9 @@ namespace GameEngine
 	{
 		bool BulletPhysicsData::VInitializeSystems()
 		{
+			m_physicsMaterialData = new XMLPhysicsData();
+			m_physicsMaterialData->LoadDataFromXML("assets/materials.xml");
+
 			SetupSystems();
 
 			if (!m_pCollisionConfig || !m_pCollisionDispatcher ||
@@ -30,6 +34,7 @@ namespace GameEngine
 		{
 			CleanUpRigidBodies();
 			CleanUpSystems();
+			safe_delete(m_physicsMaterialData);
 		}
 
 		void BulletPhysicsData::SetupSystems()
@@ -76,11 +81,13 @@ namespace GameEngine
 
 		void BulletPhysicsData::RemoveCollisionObject(btCollisionObject *obj)
 		{
+			// TODO
 		}
 
 		void BulletPhysicsData::BulletInternalTickCallback(
 			btDynamicsWorld * const pWorld, const btScalar timeStep)
 		{
+			// TODO
 		}
 	}
 }

@@ -15,6 +15,8 @@ namespace GameEngine
 		class IPhysicsEngine
 		{
 		public:
+			virtual ~IPhysicsEngine() { }
+
 			// Initialization routines.
 			virtual bool VInitEngine() = 0;
 

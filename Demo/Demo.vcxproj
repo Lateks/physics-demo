@@ -89,6 +89,8 @@
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameActor.h" />
     <ClInclude Include="GameImpl.h" />
+    <ClInclude Include="Mat4.h" />
+    <ClInclude Include="Mat4Impl.h" />
     <ClInclude Include="MessagingWindow.h" />
     <ClInclude Include="MessagingWindowImpl.h" />
     <ClInclude Include="Sphere.h" />
@@ -102,6 +104,7 @@
     <ClCompile Include="Demo.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameImpl.cpp" />
+    <ClCompile Include="Mat4.cpp" />
     <ClCompile Include="MessagingWindow.cpp" />
     <ClCompile Include="Sphere.cpp" />
     <ClCompile Include="Vec3.cpp" />

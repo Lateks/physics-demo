@@ -4,6 +4,7 @@
 #include "Vec3.h"
 #include "Mat4.h"
 
+// TODO
 namespace GameEngine
 {
 	using LinearAlgebra::Mat4;
@@ -42,6 +43,10 @@ namespace GameEngine
 		}
 
 		void BulletPhysics::VRenderDiagnostics()
+		{
+		}
+		
+		void BulletPhysics::VRemoveActor(ActorID id)
 		{
 		}
 	}

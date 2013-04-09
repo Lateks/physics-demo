@@ -101,6 +101,7 @@
     <ClInclude Include="Mat4Impl.h" />
     <ClInclude Include="MessagingWindow.h" />
     <ClInclude Include="MessagingWindowImpl.h" />
+    <ClInclude Include="PhysicsEngineFactories.h" />
     <ClInclude Include="Sphere.h" />
     <ClInclude Include="utils.h" />
     <ClInclude Include="Vec3.h" />

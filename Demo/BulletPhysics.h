@@ -22,6 +22,8 @@ namespace GameEngine
 			virtual void VAddSphere(float radius, WeakActorPtr pActor,
 				const LinearAlgebra::Mat4& initialTransform) override;
 
+			virtual void VRemoveActor(ActorID id) override;
+
 			virtual void VRenderDiagnostics() override;
 
 			virtual void VCreateTrigger(WeakActorPtr pActor, const LinearAlgebra::Vec3& pos,

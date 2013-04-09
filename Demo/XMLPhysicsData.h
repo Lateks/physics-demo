@@ -8,6 +8,9 @@ namespace GameEngine
 {
 	namespace PhysicsEngine
 	{
+		// Describes the bounciness (restitution) and friction of
+		// a physics material. Can be combined with material densities
+		// to get differing amounts of gravity.
 		struct MaterialData
 		{
 			MaterialData(float restitution, float friction)
@@ -23,10 +26,12 @@ namespace GameEngine
 
 		struct XMLPhysicsData
 		{
-			std::map<std::string, float> m_materialDensities;
-			std::map<std::string, MaterialData> MaterialTable;
+			std::map<std::string, float> m_densities;
+			std::map<std::string, MaterialData> m_materialTable;
 			
-			void LoadDataFromXML(const std::string fileName);
+			void LoadDataFromXML(const std::string& fileName);
+			MaterialData LookupMaterial(const std::string& materialName);
+			float LookupDensity(const std::string& materialName);
 		};
 	}
 }

@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "GameImpl.h"
 #include "GameActor.h"
 #include "IrrlichtRenderer.h"

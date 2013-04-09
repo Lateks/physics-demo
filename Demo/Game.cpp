@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "Game.h"
 #include "GameImpl.h"
 #include "Sphere.h"

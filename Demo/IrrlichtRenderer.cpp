@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "IrrlichtRenderer.h"
 #include "MessagingWindow.h"
 #include <irrlicht.h>

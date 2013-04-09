@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "Cube.h"
 #include <irrlicht.h>
 

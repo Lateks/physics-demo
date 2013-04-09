@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "GameActor.h"
 #include <irrlicht.h>
 #include <iostream>

@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "Vec3.h"
 #include "Vec3Impl.h"
 #include <Eigen/Dense>

@@ -1,10 +1,13 @@
 #ifndef GAME_ACTOR_H
 #define GAME_ACTOR_H
 
+#include "enginefwd.h"
 #include <irrlicht.h>
+#include <memory>
 
 namespace GameEngine
 {
+	// TODO: make this an interface that is independent of Irrlicht
 	class GameActor
 	{
 	public:
@@ -18,8 +21,9 @@ namespace GameEngine
 		float movementSpeed;
 		// CollisionShape *pCollShape;
 	private:
-		unsigned int actorId;
+		ActorID actorId;
 	};
 }
+
 
 #endif

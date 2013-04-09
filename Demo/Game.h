@@ -1,10 +1,10 @@
 #ifndef GAME_H
 #define GAME_H
 
+#include "enginefwd.h"
+
 namespace GameEngine
 {
-	struct GameImpl;
-
 	class Game
 	{
 	public:

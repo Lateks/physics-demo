@@ -1,6 +1,7 @@
 #ifndef BASIC_IRRLICHT_RENDERER_IMPL_H
 #define BASIC_IRRLICHT_RENDERER_IMPL_H
 
+#include "enginefwd.h"
 #include <irrlicht.h>
 
 // TODO: make an interface for renderers and wrap the Irrlicht functionality?
@@ -8,8 +9,6 @@ namespace GameEngine
 {
 	namespace Display
 	{
-		class MessagingWindow;
-
 		// This struct holds all the components required to render
 		// scenes with Irrlicht as well as some helper methods.
 		struct IrrlichtRenderer

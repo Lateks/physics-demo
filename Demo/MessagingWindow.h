@@ -1,6 +1,7 @@
 #ifndef MESSAGING_WINDOW_H
 #define MESSAGING_WINDOW_H
 
+#include "enginefwd.h"
 #include <string>
 #include <irrlicht.h>
 
@@ -8,8 +9,6 @@ namespace GameEngine
 {
 	namespace Display
 	{
-		struct MessagingWindowImpl;
-
 		class MessagingWindow
 		{
 		public:

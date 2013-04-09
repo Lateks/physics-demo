@@ -1,17 +1,11 @@
 #ifndef GAME_IMPL_H
 #define GAME_IMPL_H
 
+#include "enginefwd.h"
 #include <map>
 
 namespace GameEngine
 {
-	// class ICollisionEngine;
-	namespace Display
-	{
-		struct IrrlichtRenderer;
-	}
-	class GameActor;
-
 	struct GameImpl
 	{
 		GameImpl(Display::IrrlichtRenderer *pRendererNew)

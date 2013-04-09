@@ -82,6 +82,8 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BulletPhysics.h" />
+    <ClInclude Include="BulletPhysicsData.h" />
     <ClInclude Include="Cube.h" />
     <ClInclude Include="enginefwd.h" />
     <ClInclude Include="IPhysicsEngine.h" />
@@ -98,6 +100,7 @@
     <ClInclude Include="Vec3Impl.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="BulletPhysics.cpp" />
     <ClCompile Include="Cube.cpp" />
     <ClCompile Include="GameActor.cpp" />
     <ClCompile Include="IrrlichtRenderer.cpp" />

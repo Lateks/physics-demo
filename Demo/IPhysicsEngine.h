@@ -21,15 +21,16 @@ namespace GameEngine
 			virtual bool VInitEngine() = 0;
 
 			// Updating the simulation.
-			virtual bool VUpdateSimulation() = 0;
+			virtual bool VUpdateSimulation(float deltaSec) = 0;
 			virtual bool VSyncScene() = 0;
 
 			// Initializing different physics world objects.
 			// TODO: extend with additional types. E.g.
 			// boxes, triangle meshes etc.
+			// TODO: add materials etc.
+			// (As an enumeration? Reading from an XML file?)
 			virtual void VAddSphere(float radius, WeakActorPtr actor,
-				const LinearAlgebra::Mat4& initialTransform, const std::string& densityStr,
-				const std::string& physicsMaterial) = 0;
+				const LinearAlgebra::Mat4& initialTransform) = 0;
 
 			virtual void VRemoveActor(ActorID id) = 0;
 

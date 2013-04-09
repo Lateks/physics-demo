@@ -15,6 +15,10 @@ namespace GameEngine
 	namespace PhysicsEngine
 	{
 		class IPhysicsEngine;
+
+		class BulletPhysics;
+		struct BulletPhysicsData;
+		class BulletDebugRenderer;
 	}
 
 	namespace LinearAlgebra

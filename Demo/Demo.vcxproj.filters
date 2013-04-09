@@ -84,6 +84,12 @@
     <ClInclude Include="Mat4Impl.h">
       <Filter>Header Files\LinearAlgebra</Filter>
     </ClInclude>
+    <ClInclude Include="BulletPhysics.h">
+      <Filter>Header Files\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="BulletPhysicsData.h">
+      <Filter>Header Files\Physics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Demo.cpp">
@@ -115,6 +121,9 @@
     </ClCompile>
     <ClCompile Include="Mat4.cpp">
       <Filter>Source Files\LinearAlgebra</Filter>
+    </ClCompile>
+    <ClCompile Include="BulletPhysics.cpp">
+      <Filter>Source Files\Physics</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -41,8 +41,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Users\tuuli\Documents\Irrlicht\irrlicht-1.8\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\tuuli\Documents\Irrlicht\irrlicht-1.8\lib\Win32-visualstudio;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)\include\bullet\;C:\Users\tuuli\Documents\Irrlicht\irrlicht-1.8\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)\lib\bullet;C:\Users\tuuli\Documents\Irrlicht\irrlicht-1.8\lib\Win32-visualstudio;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -58,7 +58,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Irrlicht.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Irrlicht.lib;BulletCollision_vs2010.lib;BulletDynamics_vs2010.lib;LinearMath_vs2010.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

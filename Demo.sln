@@ -3,13 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Demo", "Demo\Demo.vcxproj", "{B88DE5CE-4F8F-4102-AB75-70ED2B483643}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CollisionLib", "CollisionLib\CollisionLib.vcxproj", "{7EAA980B-5609-4FEE-899A-DB1BE013D94E}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CollisionLibTest", "CollisionLibTest\CollisionLibTest.vcxproj", "{D3382680-F4B0-4274-A1C4-1C02FC86C7B9}"
-	ProjectSection(ProjectDependencies) = postProject
-		{7EAA980B-5609-4FEE-899A-DB1BE013D94E} = {7EAA980B-5609-4FEE-899A-DB1BE013D94E}
-	EndProjectSection
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|ARM = Debug|ARM
@@ -28,22 +21,6 @@ Global
 		{B88DE5CE-4F8F-4102-AB75-70ED2B483643}.Release|Win32.ActiveCfg = Release|Win32
 		{B88DE5CE-4F8F-4102-AB75-70ED2B483643}.Release|Win32.Build.0 = Release|Win32
 		{B88DE5CE-4F8F-4102-AB75-70ED2B483643}.Release|x64.ActiveCfg = Release|Win32
-		{7EAA980B-5609-4FEE-899A-DB1BE013D94E}.Debug|ARM.ActiveCfg = Debug|Win32
-		{7EAA980B-5609-4FEE-899A-DB1BE013D94E}.Debug|Win32.ActiveCfg = Debug|Win32
-		{7EAA980B-5609-4FEE-899A-DB1BE013D94E}.Debug|Win32.Build.0 = Debug|Win32
-		{7EAA980B-5609-4FEE-899A-DB1BE013D94E}.Debug|x64.ActiveCfg = Debug|Win32
-		{7EAA980B-5609-4FEE-899A-DB1BE013D94E}.Release|ARM.ActiveCfg = Release|Win32
-		{7EAA980B-5609-4FEE-899A-DB1BE013D94E}.Release|Win32.ActiveCfg = Release|Win32
-		{7EAA980B-5609-4FEE-899A-DB1BE013D94E}.Release|Win32.Build.0 = Release|Win32
-		{7EAA980B-5609-4FEE-899A-DB1BE013D94E}.Release|x64.ActiveCfg = Release|Win32
-		{D3382680-F4B0-4274-A1C4-1C02FC86C7B9}.Debug|ARM.ActiveCfg = Debug|Win32
-		{D3382680-F4B0-4274-A1C4-1C02FC86C7B9}.Debug|Win32.ActiveCfg = Debug|Win32
-		{D3382680-F4B0-4274-A1C4-1C02FC86C7B9}.Debug|Win32.Build.0 = Debug|Win32
-		{D3382680-F4B0-4274-A1C4-1C02FC86C7B9}.Debug|x64.ActiveCfg = Debug|Win32
-		{D3382680-F4B0-4274-A1C4-1C02FC86C7B9}.Release|ARM.ActiveCfg = Release|Win32
-		{D3382680-F4B0-4274-A1C4-1C02FC86C7B9}.Release|Win32.ActiveCfg = Release|Win32
-		{D3382680-F4B0-4274-A1C4-1C02FC86C7B9}.Release|Win32.Build.0 = Release|Win32
-		{D3382680-F4B0-4274-A1C4-1C02FC86C7B9}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

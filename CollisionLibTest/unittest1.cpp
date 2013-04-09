@@ -1,8 +1,10 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
+#include "ToStringSpecializations.h"
 #include <IPositionedObject.h>
 #include <SphereShape.h>
 #include <CollisionMath.h>
+#include <cmath>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
@@ -17,17 +19,41 @@ namespace CollisionLibTest
 		Vector3D GetWorldLocation() { return Position; }
 	};
 
-	TEST_CLASS(UnitTest1)
+	TEST_CLASS(GJKTest)
 	{
 	public:
-		
+
+		TEST_METHOD(SphereShapeTest1)
+		{
+			TestSphereActor sphereobj(3, 3, 0);
+			SphereShape sphere(3.0, &sphereobj);
+
+			Vector3D searchDirection(1, 0, 0);
+			Point3D expected(6, 3, 0);
+			Point3D result = sphere.GetFarthestPointInDirection(searchDirection);
+			Assert::AreEqual(expected, result);
+		}
+
+		TEST_METHOD(SphereShapeTest2)
+		{
+			TestSphereActor sphereobj(5, 0, 0);
+			SphereShape sphere(3.0, &sphereobj);
+
+			Vector3D searchDirection(1, 1, 1);
+			double normVecElem = 1/sqrt(3);
+			double offset = 3*normVecElem;
+			Point3D expected(5 + offset, offset, offset);
+			Point3D result = sphere.GetFarthestPointInDirection(searchDirection);
+			Assert::AreEqual(expected, result);
+		}
+
 		TEST_METHOD(PenetratingSpheres)
 		{
-			auto sphereobj1 = new TestSphereActor(2, 2, 2);
-			SphereShape sphere1(5.0, sphereobj1);
+			TestSphereActor sphereobj1(3, 3, 0);
+			SphereShape sphere1(3.0, &sphereobj1);
 
-			auto sphereobj2 = new TestSphereActor(0, 4, 0);
-			SphereShape sphere2(4.0, sphereobj2);
+			TestSphereActor sphereobj2(0, 0, 0);
+			SphereShape sphere2(3.0, &sphereobj2);
 
 			Assert::IsTrue(GJKCollide(sphere1, sphere2));
 		}

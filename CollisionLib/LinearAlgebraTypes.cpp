@@ -31,6 +31,11 @@ Vector3D::~Vector3D()
 	delete pImpl;
 }
 
+bool Vector3D::operator==(const Vector3D& other) const
+{
+	return pImpl->value == other.pImpl->value;
+}
+
 Vector3D Vector3D::operator=(const Vector3D& other)
 {
 	if (this != &other)
@@ -110,4 +115,13 @@ Vector3D Vector3D::operator-() const
 {
 	Eigen::Vector3d result = -pImpl->value;
 	return Vector3D(result.x(), result.y(), result.z());
+}
+
+std::ostream& operator<<(std::ostream& stream, const Vector3D& vec)
+{
+	stream << "("
+		   << vec.getX() << " "
+		   << vec.getY() << " "
+		   << vec.getZ() << ")";
+	return stream;
 }

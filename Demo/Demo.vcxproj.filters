@@ -78,6 +78,12 @@
     <ClInclude Include="enginefwd.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Vec3.h">
+      <Filter>Header Files\LinearAlgebra</Filter>
+    </ClInclude>
+    <ClInclude Include="Vec3Impl.h">
+      <Filter>Header Files\LinearAlgebra</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -106,6 +112,9 @@
     </ClCompile>
     <ClCompile Include="Sphere.cpp">
       <Filter>Source Files\GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="Vec3.cpp">
+      <Filter>Source Files\LinearAlgebra</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

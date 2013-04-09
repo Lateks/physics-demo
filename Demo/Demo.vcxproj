@@ -41,7 +41,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)\include\bullet\;C:\Users\tuuli\Documents\Irrlicht\irrlicht-1.8\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\include\eigen\;$(SolutionDir)\include\bullet\;C:\Users\tuuli\Documents\Irrlicht\irrlicht-1.8\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)\lib\bullet;C:\Users\tuuli\Documents\Irrlicht\irrlicht-1.8\lib\Win32-visualstudio;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -94,6 +94,8 @@
     <ClInclude Include="Sphere.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="Vec3.h" />
+    <ClInclude Include="Vec3Impl.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Cube.cpp" />
@@ -108,6 +110,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Vec3.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

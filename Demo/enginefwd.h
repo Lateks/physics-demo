@@ -21,6 +21,9 @@ namespace GameEngine
 	{
 		class Mat4;
 		class Vec3;
+
+		struct Vec3Impl;
+		struct Mat4Impl;
 	}
 
 	class GameActor;

@@ -5,16 +5,22 @@
 #include <string>
 #include <vector>
 
-struct MessagingWindowImpl
+namespace GameEngine
 {
-	irr::gui::IGUIFont *font;
-	unsigned int winHeight;
-	unsigned int winWidth;
-	unsigned int posX;
-	unsigned int posY;
-	unsigned int maxMessages;
-	std::vector<irr::core::stringw> messageBuffer;
-	irr::video::SColor color;
-};
+	namespace Display
+	{
+		struct MessagingWindowImpl
+		{
+			irr::gui::IGUIFont *font;
+			unsigned int winHeight;
+			unsigned int winWidth;
+			unsigned int posX;
+			unsigned int posY;
+			unsigned int maxMessages;
+			std::vector<irr::core::stringw> messageBuffer;
+			irr::video::SColor color;
+		};
+	}
+}
 
 #endif

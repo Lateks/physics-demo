@@ -6,53 +6,63 @@
 #include <iostream>
 #include <cassert>
 
-const unsigned int LINE_HEIGHT = 15;
-
-MessagingWindow::MessagingWindow(unsigned int width, unsigned int height)
+namespace 
 {
-	pImpl = new MessagingWindowImpl();
-	pImpl->winHeight = height;
-	pImpl->winWidth = width;
-	pImpl->maxMessages = height/LINE_HEIGHT;
-	pImpl->color = irr::video::SColor(255,255,255,255);
+	const unsigned int LINE_HEIGHT = 15;
 }
 
-MessagingWindow::~MessagingWindow()
+namespace GameEngine
 {
-	delete pImpl;
-}
-
-void MessagingWindow::AddMessage(const irr::core::stringw message)
-{
-	if (pImpl->messageBuffer.size() == pImpl->maxMessages)
+	namespace Display
 	{
-		pImpl->messageBuffer.erase(pImpl->messageBuffer.begin());
-	}
-	pImpl->messageBuffer.push_back(message);
-}
 
-void MessagingWindow::SetPosition(unsigned int minX, unsigned int minY)
-{
-	pImpl->posX = minX;
-	pImpl->posY = minY;
-}
+		MessagingWindow::MessagingWindow(unsigned int width, unsigned int height)
+		{
+			pImpl = new MessagingWindowImpl();
+			pImpl->winHeight = height;
+			pImpl->winWidth = width;
+			pImpl->maxMessages = height/LINE_HEIGHT;
+			pImpl->color = irr::video::SColor(255,255,255,255);
+		}
 
-void MessagingWindow::SetFont(irr::gui::IGUIFont *font)
-{
-	pImpl->font = font;
-}
+		MessagingWindow::~MessagingWindow()
+		{
+			delete pImpl;
+		}
 
-void MessagingWindow::Render()
-{
-	assert(pImpl->font != nullptr);
-	unsigned int x = pImpl->posX;
-	unsigned int y = pImpl->posY;
-	for (std::size_t i = 0; i < pImpl->messageBuffer.size(); i++)
-	{
-		pImpl->font->draw(
-			pImpl->messageBuffer[i],
-			irr::core::rect<irr::s32>(x, y, x + pImpl->winWidth, y + LINE_HEIGHT),
-			pImpl->color);
-		y += LINE_HEIGHT;
+		void MessagingWindow::AddMessage(const irr::core::stringw message)
+		{
+			if (pImpl->messageBuffer.size() == pImpl->maxMessages)
+			{
+				pImpl->messageBuffer.erase(pImpl->messageBuffer.begin());
+			}
+			pImpl->messageBuffer.push_back(message);
+		}
+
+		void MessagingWindow::SetPosition(unsigned int minX, unsigned int minY)
+		{
+			pImpl->posX = minX;
+			pImpl->posY = minY;
+		}
+
+		void MessagingWindow::SetFont(irr::gui::IGUIFont *font)
+		{
+			pImpl->font = font;
+		}
+
+		void MessagingWindow::Render()
+		{
+			assert(pImpl->font != nullptr);
+			unsigned int x = pImpl->posX;
+			unsigned int y = pImpl->posY;
+			for (std::size_t i = 0; i < pImpl->messageBuffer.size(); i++)
+			{
+				pImpl->font->draw(
+					pImpl->messageBuffer[i],
+					irr::core::rect<irr::s32>(x, y, x + pImpl->winWidth, y + LINE_HEIGHT),
+					pImpl->color);
+				y += LINE_HEIGHT;
+			}
+		}
 	}
 }

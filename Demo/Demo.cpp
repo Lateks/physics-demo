@@ -6,7 +6,7 @@
 
 int main()
 {
-	Game game;
+	GameEngine::Game game;
 
 	return game.Run();
 }

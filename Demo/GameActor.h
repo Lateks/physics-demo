@@ -3,20 +3,23 @@
 
 #include <irrlicht.h>
 
-class GameActor
+namespace GameEngine
 {
-public:
-	GameActor(irr::scene::ISceneNode *model);
-	virtual ~GameActor();
-	unsigned int GetID() { return actorId; }
-	void Move(float seconds);
-	void SetPosition(const irr::core::vector3df& newPos);
-	irr::scene::ISceneNode *pModel;
-	irr::core::vector3df movementNormal;
-	float movementSpeed;
-	// CollisionShape *pCollShape;
-private:
-	unsigned int actorId;
-};
+	class GameActor
+	{
+	public:
+		GameActor(irr::scene::ISceneNode *model);
+		virtual ~GameActor();
+		unsigned int GetID() { return actorId; }
+		void Move(float seconds);
+		void SetPosition(const irr::core::vector3df& newPos);
+		irr::scene::ISceneNode *pModel;
+		irr::core::vector3df movementNormal;
+		float movementSpeed;
+		// CollisionShape *pCollShape;
+	private:
+		unsigned int actorId;
+	};
+}
 
 #endif

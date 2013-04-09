@@ -11,14 +11,17 @@ namespace irr
 	}
 }
 
-class Sphere : public GameActor
+namespace GameEngine
 {
-public:
-	Sphere(float radius, irr::scene::ISceneManager *scene);
-	virtual ~Sphere();
-	float GetRadius() { return _radius; }
-private:
-	float _radius;
-};
+	class Sphere : public GameActor
+	{
+	public:
+		Sphere(float radius, irr::scene::ISceneManager *scene);
+		virtual ~Sphere();
+		float GetRadius() { return _radius; }
+	private:
+		float _radius;
+	};
+}
 
 #endif

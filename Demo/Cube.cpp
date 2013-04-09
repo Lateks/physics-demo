@@ -2,7 +2,10 @@
 #include "Cube.h"
 #include <irrlicht.h>
 
-Cube::Cube(float edgeLength, irr::scene::ISceneManager *scene)
-	: GameActor(scene->addCubeSceneNode(edgeLength)), _edgeLength(edgeLength) {}
+namespace GameEngine
+{
+	Cube::Cube(float edgeLength, irr::scene::ISceneManager *scene)
+		: GameActor(scene->addCubeSceneNode(edgeLength)), _edgeLength(edgeLength) {}
 
-Cube::~Cube() {}
+	Cube::~Cube() {}
+}

@@ -11,14 +11,17 @@ namespace irr
 	}
 }
 
-class Cube : public GameActor
+namespace GameEngine
 {
-public:
-	Cube(float edgeLength, irr::scene::ISceneManager *scene);
-	virtual ~Cube();
-	float GetEdgeLength() { return _edgeLength; }
-private:
-	float _edgeLength;
-};
+	class Cube : public GameActor
+	{
+	public:
+		Cube(float edgeLength, irr::scene::ISceneManager *scene);
+		virtual ~Cube();
+		float GetEdgeLength() { return _edgeLength; }
+	private:
+		float _edgeLength;
+	};
+}
 
 #endif

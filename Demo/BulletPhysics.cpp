@@ -18,7 +18,7 @@ namespace GameEngine
 
 		bool BulletPhysics::VInitEngine()
 		{
-			return false;
+			return m_pData->VInitializeSystems();
 		}
 
 		bool BulletPhysics::VSyncScene()

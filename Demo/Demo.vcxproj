@@ -46,6 +46,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(SolutionDir)\include\eigen;$(SolutionDir)\include\bullet;C:\Users\tuuli\Documents\Irrlicht\irrlicht-1.8\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)\lib\bullet;C:\Users\tuuli\Documents\Irrlicht\irrlicht-1.8\lib\Win32-visualstudio;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -54,11 +56,12 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Irrlicht.lib;BulletCollision_vs2010.lib;BulletDynamics_vs2010.lib;LinearMath_vs2010.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Irrlicht.lib;BulletCollision_vs2010_debug.lib;BulletDynamics_vs2010_debug.lib;LinearMath_vs2010_debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -70,18 +73,21 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>BulletCollision_vs2010.lib;BulletDynamics_vs2010.lib;LinearMath_vs2010.lib;Irrlicht.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BulletDebugRenderer.h" />
     <ClInclude Include="BulletPhysics.h" />
     <ClInclude Include="BulletPhysicsData.h" />
     <ClInclude Include="Cube.h" />
@@ -96,11 +102,13 @@
     <ClInclude Include="MessagingWindow.h" />
     <ClInclude Include="MessagingWindowImpl.h" />
     <ClInclude Include="Sphere.h" />
+    <ClInclude Include="utils.h" />
     <ClInclude Include="Vec3.h" />
     <ClInclude Include="Vec3Impl.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BulletPhysics.cpp" />
+    <ClCompile Include="BulletPhysicsData.cpp" />
     <ClCompile Include="Cube.cpp" />
     <ClCompile Include="GameActor.cpp" />
     <ClCompile Include="IrrlichtRenderer.cpp" />

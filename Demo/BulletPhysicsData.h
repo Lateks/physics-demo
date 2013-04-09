@@ -20,6 +20,11 @@ namespace GameEngine
 
 		struct BulletPhysicsData
 		{
+			BulletPhysicsData()
+				: m_pDynamicsWorld(nullptr), m_pCollisionBroadPhase(nullptr),
+				m_pCollisionDispatcher(nullptr), m_pCollisionConfig(nullptr),
+				m_pConstraintSolver(nullptr), m_pDebugRenderer(nullptr) { }
+			virtual bool VInitializeSystems();
 			virtual ~BulletPhysicsData();
 
 			btDynamicsWorld *m_pDynamicsWorld;             // - manages the other required components
@@ -35,21 +40,27 @@ namespace GameEngine
 			// it has nothing to do with Bullet specifically.
 
 			// Store the rigid bodies related to game actors.
-			std::map<ActorID, btRigidBody const*> m_actorToRigidBodyMap;
-			std::map<btRigidBody const*, ActorID> m_RigidBodyToActorMap;
+			std::map<ActorID, const btRigidBody*> m_actorToRigidBodyMap;
+			std::map<const btRigidBody*, ActorID> m_rigidBodyToActorMap;
 			btRigidBody *GetRigidBody(ActorID id) const;
 			ActorID GetActorID(btRigidBody const *pBody) const;
 
 			CollisionPairs m_PreviousTickCollisions;
 
-			void SendNewCollisionEvent(btPersistentManifold const * const manifold,
-				btRigidBody const * const pBody1, btRigidBody const * const pBody2);
-			void SendSeparationEvent(btRigidBody const * pBody1, btRigidBody const * pBody2);
+			void SendNewCollisionEvent(const btPersistentManifold * manifold,
+				const btRigidBody * pBody1, const btRigidBody * pBody2);
+			void SendSeparationEvent(const btRigidBody * pBody1, const btRigidBody * pBody2);
 
 			void AddShape(StrongActorPtr pActor, btCollisionShape *shape,
 				float mass, const std::string& physicsMaterial);
 
-			static void BulletInternalTickCallback(btDynamicsWorld * const pWorld, btScalar const timeStep);
+			void RemoveCollisionObject(btCollisionObject *obj);
+
+			static void BulletInternalTickCallback(btDynamicsWorld * const pWorld, const btScalar timeStep);
+		private:
+			void SetupSystems();
+			void CleanUpRigidBodies();
+			void CleanUpSystems();
 		};
 	}
 }

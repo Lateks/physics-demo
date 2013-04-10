@@ -3,17 +3,20 @@
 
 #include "IPhysicsEngine.h"
 #include "BulletPhysics.h"
+#include <memory>
 
 namespace GameEngine
 {
 	namespace PhysicsEngine
 	{
-		IPhysicsEngine *CreatePhysicsEngine()
+		std::auto_ptr<IPhysicsEngine> CreatePhysicsEngine()
 		{
-			IPhysicsEngine *physics = new BulletPhysics();
-			if (!physics->VInitEngine())
+			std::auto_ptr<IPhysicsEngine> physics;
+			physics.reset(new BulletPhysics());
+			if (!physics.get() || !physics->VInitEngine())
 			{
-				return nullptr;
+				physics.reset();
+				return physics;
 			}
 			return physics;
 		}

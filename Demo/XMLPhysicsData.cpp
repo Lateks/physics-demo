@@ -4,7 +4,6 @@
 #include <fstream>
 #include <string>
 #include <cassert>
-#include <memory>
 #include <functional>
 
 using rapidxml::xml_document;
@@ -19,61 +18,54 @@ using std::make_pair;
 using std::ifstream;
 using std::istreambuf_iterator;
 
-typedef std::shared_ptr<xml_node<>> SharedNodePtr;
-
+/* A note about the used XML library (RapidXML) and pointers:
+ *
+ * Apparently RapidXML frees all associated pointers (even the
+ * char pointers that *I* create and give to it), so any attempt
+ * to use smart pointers results in errors about multiple frees.
+ *
+ * The exception safety of this code, therefore, relies on the
+ * exception safety of the used library...
+ */
 namespace GameEngine
 {
 	namespace PhysicsEngine
 	{
-		float ReadFloatAttribute(SharedNodePtr node, const string& attributeName)
+		float ReadFloatAttribute(xml_node<> *node, const string& attributeName)
 		{
-			std::auto_ptr<xml_attribute<>> attr;
-			std::auto_ptr<const char> value;
-			value.reset(attributeName.c_str());
-
-			attr.reset(node->first_attribute(value.get()));
-			assert(attr.get());
-			value.reset(attr->value());
-			return stof(value.get());
+			xml_attribute<> * attr = node->first_attribute(attributeName.c_str());
+			assert(attr);
+			return stof(attr->value());
 		}
 
-		std::pair<string, MaterialData> ReadMaterialData(SharedNodePtr node)
+		std::pair<string, MaterialData> ReadMaterialData(xml_node<> *node)
 		{
 			float restitution;
 			float friction;
-			std::auto_ptr<xml_attribute<>> attr;
 			
 			restitution = ReadFloatAttribute(node, "restitution");
 			friction = ReadFloatAttribute(node, "friction");
 
-			std::auto_ptr<char> name;
-			name.reset(node->name());
-
-			return make_pair(string(name.get()), MaterialData(restitution, friction));
+			return make_pair(string(node->name()), MaterialData(restitution, friction));
 		}
 
-		std::pair<string, float> ReadDensity(SharedNodePtr node)
+		std::pair<string, float> ReadDensity(xml_node<> *node)
 		{
 			float density;
-			std::auto_ptr<xml_node<>> n;
-			std::auto_ptr<char> value;
+			xml_node<> *n;
 
-			n.reset(node->first_node());
-			assert(n.get());
-			value.reset(n->value());
-			density = stof(value.get());
+			n = node->first_node();
+			assert(n);
+			density = stof(n->value());
 
-			value.reset(node->value());
-			return make_pair(string(value.get()), density);
+			return make_pair(string(node->value()), density);
 		}
 
-		void MapChildNodes(std::shared_ptr<xml_node<>> inputNode,
-			std::function<void(SharedNodePtr)> handleNode)
+		void MapChildNodes(xml_node<> *inputNode,
+			std::function<void(xml_node<>*)> handleNode)
 		{
-			std::shared_ptr<xml_node<>> node;
-			for (node.reset(inputNode->first_node());
-				 node.get();
-				 node.reset(node->next_sibling()))
+			xml_node<> *node;
+			for (node = inputNode->first_node(); node; node = node->next_sibling())
 			{
 				handleNode(node);
 			}
@@ -86,25 +78,21 @@ namespace GameEngine
 				(istreambuf_iterator<char>(matFile)),
 				(istreambuf_iterator<char>()));
 			xml_document<> doc;
-			std::auto_ptr<const char> content;
-			content.reset(matData.c_str());
-			doc.parse<0>(const_cast<char*>(content.get()));
-			std::auto_ptr<xml_node<>> root;
-			root.reset(doc.first_node());
+			doc.parse<0>(const_cast<char*>(matData.c_str()));
+			xml_node<> *root = doc.first_node();
 
-			SharedNodePtr materialNode;
-			materialNode.reset(root->first_node("PhysicsMaterials"));
-			assert(materialNode.get());
+			xml_node<> *materialNode = root->first_node("PhysicsMaterials");
+			assert(materialNode);
 
-			MapChildNodes(materialNode, [this] (SharedNodePtr node)
+			MapChildNodes(materialNode, [this] (xml_node<> *node)
 			{
 				this->m_materialTable.insert(ReadMaterialData(node));
 			});
 
-			materialNode.reset(root->first_node("DensityTable"));
-			assert(materialNode.get());
+			materialNode = root->first_node("DensityTable");
+			assert(materialNode);
 
-			MapChildNodes(materialNode, [this] (SharedNodePtr node)
+			MapChildNodes(materialNode, [this] (xml_node<> *node)
 			{
 				m_densities.insert(ReadDensity(node));
 			});

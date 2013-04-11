@@ -18,15 +18,6 @@ using std::make_pair;
 using std::ifstream;
 using std::istreambuf_iterator;
 
-/* A note about the used XML library (RapidXML) and pointers:
- *
- * Apparently RapidXML frees all associated pointers (even the
- * char pointers that *I* create and give to it), so any attempt
- * to use smart pointers results in errors about multiple frees.
- *
- * The exception safety of this code, therefore, relies on the
- * exception safety of the used library...
- */
 namespace GameEngine
 {
 	namespace PhysicsEngine
@@ -111,11 +102,12 @@ namespace GameEngine
 		float XMLPhysicsData::LookupDensity(const std::string& materialName)
 		{
 			auto it = m_densities.find(materialName);
+			assert(it != m_densities.end());
 			if (it != m_densities.end())
 			{
 				return it->second;
 			}
-			throw std::runtime_error("No density found for material " + materialName + ".");
+			return 0;
 		}
 	}
 }

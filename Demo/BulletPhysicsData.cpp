@@ -2,6 +2,7 @@
 #include "BulletDebugRenderer.h"
 #include "XMLPhysicsData.h"
 #include "utils.h"
+#include <algorithm>
 
 namespace GameEngine
 {
@@ -10,6 +11,7 @@ namespace GameEngine
 		bool BulletPhysicsData::VInitializeSystems()
 		{
 			m_physicsMaterialData = new XMLPhysicsData();
+			// TODO: does this need to be ../assets/materials.xml?
 			m_physicsMaterialData->LoadDataFromXML("assets/materials.xml");
 
 			SetupSystems();
@@ -81,7 +83,37 @@ namespace GameEngine
 
 		void BulletPhysicsData::RemoveCollisionObject(btCollisionObject *obj)
 		{
-			// TODO
+			for (auto it = m_PreviousTickCollisions.begin(); it != m_PreviousTickCollisions.end(); )
+			{
+				if ((*it).first == obj || (*it).second == obj)
+				{
+					m_PreviousTickCollisions.erase(it++);
+				}
+				else
+				{
+					++it;
+				}
+			}
+
+			btRigidBody* body = btRigidBody::upcast(obj);
+			if (body)
+			{
+				delete body->getMotionState();
+				delete body->getCollisionShape();
+				delete body->getUserPointer(); // deletes the scene node that uses this rigid body
+
+				// destroy related constraints
+				for (int i = body->getNumConstraintRefs()-1; i >= 0; i++)
+				{
+					auto constraintRef = body->getConstraintRef(i);
+					m_pDynamicsWorld->removeConstraint(constraintRef);
+					delete constraintRef;
+				}
+			}
+
+			m_pDynamicsWorld->removeCollisionObject(obj);
+
+			delete obj;
 		}
 
 		void BulletPhysicsData::BulletInternalTickCallback(

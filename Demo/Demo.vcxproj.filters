@@ -45,9 +45,6 @@
     <ClInclude Include="Game.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GameImpl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="IrrlichtRenderer.h">
       <Filter>Header Files\Display</Filter>
     </ClInclude>
@@ -102,15 +99,21 @@
     <ClInclude Include="PhysicsEngineFactories.h">
       <Filter>Header Files\Physics</Filter>
     </ClInclude>
+    <ClInclude Include="GameData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IRenderer.h">
+      <Filter>Header Files\Display</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderingEngineFactories.h">
+      <Filter>Header Files\Display</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Demo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Game.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GameImpl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="IrrlichtRenderer.cpp">
@@ -142,6 +145,9 @@
     </ClCompile>
     <ClCompile Include="XMLPhysicsData.cpp">
       <Filter>Source Files\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="GameData.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

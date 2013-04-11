@@ -7,7 +7,8 @@ namespace GameEngine
 {
 	namespace Display
 	{
-		struct IrrlichtRenderer;
+		class IRenderer;
+		class IrrlichtRenderer;
 		class MessagingWindow;
 		struct MessagingWindowImpl;
 	}
@@ -21,7 +22,6 @@ namespace GameEngine
 		class BulletPhysics;
 		struct BulletPhysicsData;
 		class BulletDebugRenderer;
-
 	}
 
 	namespace LinearAlgebra
@@ -42,7 +42,7 @@ namespace GameEngine
 	class Sphere;
 
 	class Game;
-	struct GameImpl;
+	class GameData;
 }
 
 #endif

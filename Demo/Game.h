@@ -13,7 +13,7 @@ namespace GameEngine
 		Game(Game& game);
 		int Run();
 	private:
-		GameImpl *pImpl;
+		GameData *m_pData;
 	};
 }
 

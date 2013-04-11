@@ -1,80 +1,134 @@
 #include "IrrlichtRenderer.h"
 #include "MessagingWindow.h"
+#include "Vec3.h"
+#include "Mat4.h"
 #include <irrlicht.h>
 #include <iostream>
 
 using irr::video::SColor;
 using irr::u32;
 using irr::core::vector3df;
+using irr::core::matrix4;
+using irr::video::E_DRIVER_TYPE;
+
+using GameEngine::LinearAlgebra::Vec3;
+using GameEngine::LinearAlgebra::Mat4;
 
 namespace GameEngine
 {
 	namespace Display
 	{
-		void IrrlichtRenderer::DrawScene(bool debug, bool drawAxes)
+		void IrrlichtRenderer::DrawScene()
 		{
-			pDriver->beginScene(true, true, SColor(0,0,0,0));
+			m_pDriver->beginScene(true, true, SColor(0,0,0,0));
 
-			pSmgr->drawAll();
+			m_pSmgr->drawAll();
 
-			if (debug)
+			m_pDriver->clearZBuffer();
+			m_pDebugSmgr->drawAll();
+
+			m_pGui->drawAll();
+
+			m_pDriver->endScene();
+		}
+
+		E_DRIVER_TYPE GetDriverType(DRIVER_TYPE type)
+		{
+			switch (type)
 			{
-				pDriver->clearZBuffer();
-				pDebugSmgr->drawAll();
+			case DRIVER_TYPE::DIRECT_3D8:
+				return E_DRIVER_TYPE::EDT_DIRECT3D8;
+			case DRIVER_TYPE::DIRECT_3D9:
+				return E_DRIVER_TYPE::EDT_DIRECT3D9;
+			case DRIVER_TYPE::OPEN_GL:
+				return E_DRIVER_TYPE::EDT_OPENGL;
+			case DRIVER_TYPE::SOFTWARE:
+				return E_DRIVER_TYPE::EDT_SOFTWARE;
+			default:
+				return E_DRIVER_TYPE::EDT_SOFTWARE;
 			}
-			if (drawAxes)
-			{
-				pDriver->clearZBuffer();
-				pDriver->setTransform(irr::video::ETS_WORLD, irr::core::IdentityMatrix);
-				SColor red(255,255,0,0);
-				pDriver->draw3DLine(vector3df(-100,0,0),vector3df(100,0,0), red);
-				pDriver->draw3DLine(vector3df(0,-100,0),vector3df(0,100,0), red);
-				pDriver->draw3DLine(vector3df(0,0,-100),vector3df(0,0,100), red);
-			}
-
-			pGui->drawAll();
-
-			pMessages->Render();
-
-			pDriver->endScene();
 		}
 
 		bool IrrlichtRenderer::SetupAndOpenWindow(unsigned int width, unsigned int height,
-												  irr::video::E_DRIVER_TYPE driverType, bool fpsCamera)
+			DRIVER_TYPE driverType, CAMERA_TYPE cameraType)
 		{
-			pDevice = irr::createDevice(driverType, irr::core::dimension2d<u32>(width, height),
+			m_pDevice = irr::createDevice(GetDriverType(driverType),
+				irr::core::dimension2d<u32>(width, height),
 				16, false, false, false, 0);
-			if (pDevice == nullptr)
+			if (!m_pDevice)
 			{
 				return false;
 			}
 
-			pDevice->setWindowCaption(L"3D world demo");
+			m_pDriver = m_pDevice->getVideoDriver();
+			m_pSmgr = m_pDevice->getSceneManager();
+			m_pGui = m_pDevice->getGUIEnvironment();
+			m_pDebugSmgr = m_pSmgr->createNewSceneManager(false);
 
-			pDriver = pDevice->getVideoDriver();
-			pSmgr = pDevice->getSceneManager();
-			pGui = pDevice->getGUIEnvironment();
-			pDebugSmgr = pSmgr->createNewSceneManager(false);
+			irr::gui::IGUIFont *font = m_pGui->getFont("..\\assets\\fontlucida.png");
 
-			irr::gui::IGUIFont *font = pGui->getFont("..\\assets\\fontlucida.png");
-			pMessages = new MessagingWindow(200, 150);
-			pMessages->SetPosition(10, 10);
-			pMessages->SetFont(font);
-
-			if (fpsCamera)
+			switch (cameraType)
 			{
-				pCamera = pSmgr->addCameraSceneNodeFPS();
+			case CAMERA_TYPE::STATIC:
+				m_pCamera = m_pSmgr->addCameraSceneNode();
+				break;
+			default:
+				m_pCamera = m_pSmgr->addCameraSceneNodeFPS();
 			}
-			else
-			{
-				pCamera = pSmgr->addCameraSceneNode();
-			}
-			pDebugSmgr->setActiveCamera(pCamera);
-			pDevice->getCursorControl()->setVisible(false);
+			m_pDebugSmgr->setActiveCamera(m_pCamera);
+			m_pDevice->getCursorControl()->setVisible(false);
 
 			return true;
 		}
 
-		IrrlichtRenderer::~IrrlichtRenderer() { }
+		IrrlichtRenderer::~IrrlichtRenderer()
+		{
+			m_pDevice->drop();
+		}
+
+		vector3df ConvertVector(Vec3& vector)
+		{
+			return vector3df((float) vector.getX(), (float) vector.getY(), (float) vector.getZ());
+		}
+
+		matrix4 ConvertMatrix(Mat4& matrix)
+		{
+			matrix4 newMatrix;
+			for (int i = 0; i < 4; i++)
+				for (int j = 0; j < 4; j++)
+					newMatrix[i*4 + j] = (float) matrix.index(i, j);
+			return newMatrix;
+		}
+
+		void IrrlichtRenderer::SetCameraPosition(Vec3& newPosition)
+		{
+			m_pCamera->setPosition(ConvertVector(newPosition));
+			m_pCamera->updateAbsolutePosition();
+		}
+
+		void IrrlichtRenderer::SetCameraTarget(Vec3& newTarget)
+		{
+			m_pCamera->setTarget(ConvertVector(newTarget));
+		}
+
+		void IrrlichtRenderer::SetCameraProjection(Mat4& newProjection)
+		{
+			m_pCamera->setProjectionMatrix(ConvertMatrix(newProjection));
+		}
+
+		bool IrrlichtRenderer::Running()
+		{
+			return m_pDevice->run();
+		}
+
+		bool IrrlichtRenderer::WindowActive()
+		{
+			return m_pDevice->isWindowActive();
+		}
+
+		void IrrlichtRenderer::YieldDevice()
+		{
+			m_pDevice->yield();
+		}
 	}
 }

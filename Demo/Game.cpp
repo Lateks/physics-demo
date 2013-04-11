@@ -1,25 +1,21 @@
 #include "Game.h"
-#include "GameImpl.h"
+#include "GameData.h"
 #include "Sphere.h"
 #include "Cube.h"
-#include "IrrlichtRenderer.h"
+#include "IRenderer.h"
+#include "RenderingEngineFactories.h"
+#include "Vec3.h"
 #include <irrlicht.h>
 #include <iostream>
 
 namespace GameEngine
 {
-	using irr::core::vector3df;
-	using Display::IrrlichtRenderer;
+	using LinearAlgebra::Vec3;
+	using Display::IRenderer;
 
-	void SetupCamera(irr::scene::ICameraSceneNode *pCamera)
+	void SetupGameActors(GameData *game)
 	{
-		pCamera->setPosition(vector3df(-25, 60, -50));
-		pCamera->setTarget(vector3df(17, 3, 0));
-		pCamera->updateAbsolutePosition();
-	}
-
-	void SetupGameActors(GameImpl *game)
-	{
+		/*
 		auto mudTexture = game->pRenderer->pDriver->getTexture("..\\assets\\cracked_mud.jpg");
 		auto woodBoxTexture = game->pRenderer->pDriver->getTexture("..\\assets\\woodbox2.jpg");
 		auto headCrabTexture = game->pRenderer->pDriver->getTexture("..\\assets\\headcrabsheet.tga");
@@ -48,56 +44,70 @@ namespace GameEngine
 		game->actors[sphere1->GetID()] = sphere1;
 		game->actors[sphere2->GetID()] = sphere2;
 		game->actors[box1->GetID()] = box1;
+		*/
 	}
 
 	Game::Game()
 	{
-		IrrlichtRenderer *renderer = new IrrlichtRenderer();
+		IRenderer *renderer = Display::CreateRenderer().release();
+		if (!renderer)
+		{
+			std::cerr << "Failed to create rendering device." << std::cerr;
+			return;
+		}
 
-		if (!renderer->SetupAndOpenWindow(800, 600, irr::video::EDT_OPENGL))
+		if (!renderer->SetupAndOpenWindow(800, 600,
+			Display::DRIVER_TYPE::OPEN_GL, Display::CAMERA_TYPE::FPS))
 		{
 			std::cerr << "Failed to open OpenGL device." << std::cerr;
 			return;
 		}
 
-		SetupCamera(renderer->pCamera);
-		pImpl = new GameImpl(renderer);
-		SetupGameActors(pImpl);
-		// TODO: setup collisions
+		renderer->SetCameraPosition(Vec3(-25, 60, -50));
+		renderer->SetCameraTarget(Vec3(17, 3, 0));
+		m_pData = GameData::getInstance();
+		m_pData->SetRenderer(renderer);
+		// TODO: set physics engine
+
+		SetupGameActors(m_pData);
 	}
 
 	Game::~Game()
 	{
-		delete pImpl;
+		delete m_pData;
 	}
 
 	Game::Game(Game& game)
 	{
-		delete pImpl;
-		pImpl = game.pImpl;
-		game.pImpl = nullptr;
+		if (this != &game)
+		{
+			delete m_pData;
+			m_pData = game.m_pData;
+			game.m_pData = nullptr;
+		}
 	}
 
 	int Game::Run()
 	{
-		if (pImpl->pRenderer == nullptr)
+		IRenderer *renderer = m_pData->GetRenderer();
+		if (!renderer)
 			return 1;
 
-		unsigned int timeBegin = pImpl->CurrentTime();
+		unsigned int timeBegin = m_pData->CurrentTime();
 		unsigned int timeEnd;
 		float frameDeltaSec = 1.0f/60;
-		while (pImpl->pRenderer->pDevice->run())
+		while (renderer->Running())
 		{
-			if (pImpl->pRenderer->pDevice->isWindowActive())
+			if (renderer->WindowActive())
 			{
 				// physics->VUpdateSimulation(frameDeltaSec)
 				// physics->VSyncScene()
-				pImpl->MoveAllActors(frameDeltaSec);
-				pImpl->pRenderer->DrawScene(false, false);
+				m_pData->MoveAllActors(frameDeltaSec);
+				renderer->DrawScene();
 			}
 			else
-				pImpl->pRenderer->pDevice->yield();
-			timeEnd = pImpl->CurrentTime();
+				renderer->YieldDevice();
+			timeEnd = m_pData->CurrentTime();
 			frameDeltaSec = 1.0f * (timeEnd - timeBegin) / 1000.0f;
 			timeBegin = timeEnd;
 		}

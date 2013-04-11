@@ -16,8 +16,8 @@ namespace GameEngine
 			virtual ~BulletPhysics();
 			
 			virtual bool VInitEngine() override;
-			virtual bool VSyncScene() override;
-			virtual bool VUpdateSimulation(float deltaSec) override;
+			virtual void VSyncScene() override;
+			virtual void VUpdateSimulation(float deltaSec) override;
 
 			virtual void VAddSphere(float radius, WeakActorPtr pActor,
 				const LinearAlgebra::Mat4& initialTransform) override;

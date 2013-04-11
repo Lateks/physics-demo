@@ -3,6 +3,7 @@
 #include "GameActor.h"
 #include "Vec3.h"
 #include "Mat4.h"
+#include <cassert>
 
 // TODO
 namespace GameEngine
@@ -22,14 +23,25 @@ namespace GameEngine
 			return m_pData->VInitializeSystems();
 		}
 
-		bool BulletPhysics::VSyncScene()
+		void BulletPhysics::VSyncScene()
 		{
-			return false;
+			for (auto it = m_pData->m_actorToRigidBodyMap.begin();
+				      it != m_pData->m_actorToRigidBodyMap.end(); it++)
+			{
+				ActorID id = it->first;
+
+				// TODO: conversions needed between this and other matrix
+				// types.
+				const btMotionState *motionState = it->second->getMotionState();
+				assert(motionState);
+
+				// TODO: Get actor by id
+			}
 		}
 
-		bool BulletPhysics::VUpdateSimulation(float deltaSec)
+		void BulletPhysics::VUpdateSimulation(float deltaSec)
 		{
-			return false;
+			m_pData->m_pDynamicsWorld->stepSimulation(deltaSec, 4);
 		}
 
 		void BulletPhysics::VAddSphere(float radius, WeakActorPtr pActor,

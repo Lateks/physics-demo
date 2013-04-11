@@ -90,7 +90,8 @@ namespace GameEngine
 		{
 			if (pImpl->pRenderer->pDevice->isWindowActive())
 			{
-				// TODO: test collisions
+				// physics->VUpdateSimulation(frameDeltaSec)
+				// physics->VSyncScene()
 				pImpl->MoveAllActors(frameDeltaSec);
 				pImpl->pRenderer->DrawScene(false, false);
 			}

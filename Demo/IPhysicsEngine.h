@@ -21,8 +21,8 @@ namespace GameEngine
 			virtual bool VInitEngine() = 0;
 
 			// Updating the simulation.
-			virtual bool VUpdateSimulation(float deltaSec) = 0;
-			virtual bool VSyncScene() = 0;
+			virtual void VUpdateSimulation(float deltaSec) = 0;
+			virtual void VSyncScene() = 0;
 
 			// Initializing different physics world objects.
 			// TODO: extend with additional types. E.g.

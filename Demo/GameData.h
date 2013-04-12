@@ -12,6 +12,7 @@ namespace GameEngine
 		static GameData *instance;
 		GameData() : m_pRenderer(nullptr), m_pPhysicsEngine(nullptr) { }
 		Display::IRenderer *m_pRenderer;
+		ITimer *m_pTimer;
 		PhysicsEngine::IPhysicsEngine *m_pPhysicsEngine;
 		std::map<ActorID, GameActor*> m_actors;
 	public:
@@ -25,7 +26,7 @@ namespace GameEngine
 		}
 		~GameData();
 
-		unsigned int CurrentTime(); // TODO: should there be a separate "timer" object?
+		unsigned int CurrentTime();
 		void MoveAllActors(float scale); // TODO: throw this away?
 
 		void AddActor(GameActor *actor);
@@ -48,6 +49,14 @@ namespace GameEngine
 		Display::IRenderer * const GetRenderer() const
 		{
 			return m_pRenderer;
+		}
+		void setTimer(ITimer *timer)
+		{
+			m_pTimer = timer;
+		}
+		const ITimer * const Timer() const
+		{
+			return m_pTimer;
 		}
 	};
 }

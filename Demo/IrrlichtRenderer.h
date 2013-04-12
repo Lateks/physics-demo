@@ -9,11 +9,11 @@ namespace GameEngine
 {
 	namespace Display
 	{
-		// This struct holds all the components required to render
-		// scenes with Irrlicht as well as some helper methods.
 		class IrrlichtRenderer : public IRenderer
 		{
 		public:
+			friend class IrrlichtTimer;
+
 			IrrlichtRenderer() { }
 			~IrrlichtRenderer();
 

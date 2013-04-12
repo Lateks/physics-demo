@@ -43,6 +43,9 @@ namespace GameEngine
 
 	class Game;
 	class GameData;
+
+	class ITimer;
+	class IrrlichtTimer;
 }
 
 #endif

@@ -3,6 +3,7 @@
 #include "Sphere.h"
 #include "Cube.h"
 #include "IRenderer.h"
+#include "TimerFactories.h"
 #include "RenderingEngineFactories.h"
 #include "Vec3.h"
 #include <irrlicht.h>
@@ -67,6 +68,11 @@ namespace GameEngine
 		renderer->SetCameraTarget(Vec3(17, 3, 0));
 		m_pData = GameData::getInstance();
 		m_pData->SetRenderer(renderer);
+		ITimer *timer = GetTimer().release();
+		if (!timer)
+		{
+			std::cerr << "Failed to create a timer." << std::endl;
+		}
 		// TODO: set physics engine
 
 		SetupGameActors(m_pData);

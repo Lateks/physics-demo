@@ -2,6 +2,7 @@
 #include "GameActor.h"
 #include "IRenderer.h"
 #include "IPhysicsEngine.h"
+#include "ITimer.h"
 #include <algorithm>
 #include <map>
 
@@ -18,11 +19,9 @@ namespace GameEngine
 		GameData::instance = nullptr;
 	}
 
-	// TODO: need some kind of a timer object 
 	unsigned int GameData::CurrentTime()
 	{
-		//return pRenderer->pDevice->getTimer()->getTime();
-		return 0;
+		return m_pTimer->GetTime();
 	}
 
 	void GameData::MoveAllActors(float scale)

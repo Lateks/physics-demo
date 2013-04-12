@@ -85,7 +85,7 @@ namespace GameEngine
 
 			MapChildNodes(materialNode, [this] (xml_node<> *node)
 			{
-				m_densities.insert(ReadDensity(node));
+				this->m_densities.insert(ReadDensity(node));
 			});
 		}
 

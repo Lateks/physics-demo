@@ -37,6 +37,10 @@ namespace GameEngine
 			virtual void SetCameraPosition(LinearAlgebra::Vec3& newPosition) = 0;
 			virtual void SetCameraTarget(LinearAlgebra::Vec3& newTarget) = 0;
 			virtual void SetCameraProjection(LinearAlgebra::Mat4& newProjection) = 0;
+
+			// Returns a unique id that can be used to refer to the texture.
+			// Returns 0 if loading fails.
+			virtual unsigned int LoadTexture(const std::string& filePath) = 0;
 		};
 	}
 }

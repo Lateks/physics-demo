@@ -26,6 +26,8 @@ namespace GameEngine
 			virtual void SetCameraPosition(LinearAlgebra::Vec3& newPosition) override;
 			virtual void SetCameraTarget(LinearAlgebra::Vec3& newTarget) override;
 			virtual void SetCameraProjection(LinearAlgebra::Mat4& newProjection) override;
+
+			virtual unsigned int LoadTexture(const std::string& filePath) override;
 		private:
 			IrrlichtRendererImpl *m_pData;
 		};

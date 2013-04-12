@@ -16,11 +16,12 @@ namespace GameEngine
 
 	void SetupGameActors(GameData *game)
 	{
-		/*
-		auto mudTexture = game->pRenderer->pDriver->getTexture("..\\assets\\cracked_mud.jpg");
-		auto woodBoxTexture = game->pRenderer->pDriver->getTexture("..\\assets\\woodbox2.jpg");
-		auto headCrabTexture = game->pRenderer->pDriver->getTexture("..\\assets\\headcrabsheet.tga");
+		IRenderer *renderer = game->GetRenderer();
+		unsigned int mudTexture = renderer->LoadTexture("..\\assets\\cracked_mud.jpg");
+		unsigned int woodBoxTexture = renderer->LoadTexture("..\\assets\\woodbox2.jpg");
+		unsigned int headCrabTexture = renderer->LoadTexture("..\\assets\\headcrabsheet.tga");
 
+		/*
 		Sphere *sphere1 = new Sphere(7.5f, game->pRenderer->pSmgr);
 		sphere1->SetPosition(vector3df(25, 0, 20));
 		sphere1->pModel->setMaterialTexture(0, mudTexture);

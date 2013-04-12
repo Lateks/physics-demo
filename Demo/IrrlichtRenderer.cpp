@@ -16,6 +16,11 @@ using irr::video::E_DRIVER_TYPE;
 using GameEngine::LinearAlgebra::Vec3;
 using GameEngine::LinearAlgebra::Mat4;
 
+namespace
+{
+	unsigned int TEXTURE_ID = 0;
+}
+
 namespace GameEngine
 {
 	namespace Display
@@ -150,6 +155,16 @@ namespace GameEngine
 		{
 			assert(m_pData->m_pDevice);
 			m_pData->m_pDevice->yield();
+		}
+
+		unsigned int IrrlichtRenderer::LoadTexture(const std::string& filePath)
+		{
+			assert(m_pData->m_pDriver);
+			auto texture = m_pData->m_pDriver->getTexture(filePath.c_str());
+			if (!texture)
+				return 0;
+			m_pData->textures[++TEXTURE_ID] = texture;
+			return TEXTURE_ID;
 		}
 	}
 }

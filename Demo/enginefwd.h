@@ -9,6 +9,7 @@ namespace GameEngine
 	{
 		class IRenderer;
 		class IrrlichtRenderer;
+		struct IrrlichtRendererImpl;
 		class MessagingWindow;
 		struct MessagingWindowImpl;
 	}

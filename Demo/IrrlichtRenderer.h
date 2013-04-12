@@ -3,7 +3,6 @@
 
 #include "enginefwd.h"
 #include "IRenderer.h"
-#include <irrlicht.h>
 
 namespace GameEngine
 {
@@ -14,7 +13,7 @@ namespace GameEngine
 		public:
 			friend class IrrlichtTimer;
 
-			IrrlichtRenderer() { }
+			IrrlichtRenderer();
 			~IrrlichtRenderer();
 
 			virtual void YieldDevice() override;
@@ -28,18 +27,7 @@ namespace GameEngine
 			virtual void SetCameraTarget(LinearAlgebra::Vec3& newTarget) override;
 			virtual void SetCameraProjection(LinearAlgebra::Mat4& newProjection) override;
 		private:
-			// TODO: separate this into a pImpl struct
-			irr::IrrlichtDevice *m_pDevice;
-			irr::video::IVideoDriver *m_pDriver;
-			irr::scene::ISceneManager *m_pSmgr;
-
-			// The second scene manager is used for handling "debug"
-			// objects (e.g. collision meshes, collision normals etc.).
-			// This scene is drawn on top.
-			irr::scene::ISceneManager *m_pDebugSmgr;
-
-			irr::scene::ICameraSceneNode *m_pCamera;
-			irr::gui::IGUIEnvironment *m_pGui;
+			IrrlichtRendererImpl *m_pData;
 		};
 	}
 }

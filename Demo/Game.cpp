@@ -72,6 +72,7 @@ namespace GameEngine
 		if (!timer)
 		{
 			std::cerr << "Failed to create a timer." << std::endl;
+			return;
 		}
 		// TODO: set physics engine
 

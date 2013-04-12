@@ -1,9 +1,11 @@
 #include "IrrlichtRenderer.h"
+#include "IrrlichtRendererImpl.h"
 #include "MessagingWindow.h"
 #include "Vec3.h"
 #include "Mat4.h"
 #include <irrlicht.h>
 #include <iostream>
+#include <cassert>
 
 using irr::video::SColor;
 using irr::u32;
@@ -18,18 +20,25 @@ namespace GameEngine
 {
 	namespace Display
 	{
+		IrrlichtRenderer::IrrlichtRenderer()
+		{
+			m_pData = new IrrlichtRendererImpl();
+		}
+
 		void IrrlichtRenderer::DrawScene()
 		{
-			m_pDriver->beginScene(true, true, SColor(0,0,0,0));
+			assert(m_pData->m_pDriver);
 
-			m_pSmgr->drawAll();
+			m_pData->m_pDriver->beginScene(true, true, SColor(0,0,0,0));
 
-			m_pDriver->clearZBuffer();
-			m_pDebugSmgr->drawAll();
+			m_pData->m_pSmgr->drawAll();
 
-			m_pGui->drawAll();
+			m_pData->m_pDriver->clearZBuffer();
+			m_pData->m_pDebugSmgr->drawAll();
 
-			m_pDriver->endScene();
+			m_pData->m_pGui->drawAll();
+
+			m_pData->m_pDriver->endScene();
 		}
 
 		E_DRIVER_TYPE GetDriverType(DRIVER_TYPE type)
@@ -52,38 +61,42 @@ namespace GameEngine
 		bool IrrlichtRenderer::SetupAndOpenWindow(unsigned int width, unsigned int height,
 			DRIVER_TYPE driverType, CAMERA_TYPE cameraType)
 		{
-			m_pDevice = irr::createDevice(GetDriverType(driverType),
+			m_pData->m_pDevice = irr::createDevice(GetDriverType(driverType),
 				irr::core::dimension2d<u32>(width, height),
 				16, false, false, false, 0);
-			if (!m_pDevice)
+			if (!m_pData->m_pDevice)
 			{
 				return false;
 			}
 
-			m_pDriver = m_pDevice->getVideoDriver();
-			m_pSmgr = m_pDevice->getSceneManager();
-			m_pGui = m_pDevice->getGUIEnvironment();
-			m_pDebugSmgr = m_pSmgr->createNewSceneManager(false);
+			m_pData->m_pDriver = m_pData->m_pDevice->getVideoDriver();
+			m_pData->m_pSmgr = m_pData->m_pDevice->getSceneManager();
+			m_pData->m_pGui = m_pData->m_pDevice->getGUIEnvironment();
+			m_pData->m_pDebugSmgr = m_pData->m_pSmgr->createNewSceneManager(false);
 
-			irr::gui::IGUIFont *font = m_pGui->getFont("..\\assets\\fontlucida.png");
+			irr::gui::IGUIFont *font = m_pData->m_pGui->getFont("..\\assets\\fontlucida.png");
 
 			switch (cameraType)
 			{
 			case CAMERA_TYPE::STATIC:
-				m_pCamera = m_pSmgr->addCameraSceneNode();
+				m_pData->m_pCamera = m_pData->m_pSmgr->addCameraSceneNode();
 				break;
 			default:
-				m_pCamera = m_pSmgr->addCameraSceneNodeFPS();
+				m_pData->m_pCamera = m_pData->m_pSmgr->addCameraSceneNodeFPS();
 			}
-			m_pDebugSmgr->setActiveCamera(m_pCamera);
-			m_pDevice->getCursorControl()->setVisible(false);
+			m_pData->m_pDebugSmgr->setActiveCamera(m_pData->m_pCamera);
+			m_pData->m_pDevice->getCursorControl()->setVisible(false);
 
 			return true;
 		}
 
 		IrrlichtRenderer::~IrrlichtRenderer()
 		{
-			m_pDevice->drop();
+			if (m_pData->m_pDevice)
+			{
+				m_pData->m_pDevice->drop();
+			}
+			delete m_pData;
 		}
 
 		vector3df ConvertVector(Vec3& vector)
@@ -102,33 +115,41 @@ namespace GameEngine
 
 		void IrrlichtRenderer::SetCameraPosition(Vec3& newPosition)
 		{
-			m_pCamera->setPosition(ConvertVector(newPosition));
-			m_pCamera->updateAbsolutePosition();
+			assert(m_pData->m_pCamera);
+			m_pData->m_pCamera->setPosition(ConvertVector(newPosition));
+			m_pData->m_pCamera->updateAbsolutePosition();
 		}
 
 		void IrrlichtRenderer::SetCameraTarget(Vec3& newTarget)
 		{
-			m_pCamera->setTarget(ConvertVector(newTarget));
+			assert(m_pData->m_pCamera);
+			m_pData->m_pCamera->setTarget(ConvertVector(newTarget));
 		}
 
 		void IrrlichtRenderer::SetCameraProjection(Mat4& newProjection)
 		{
-			m_pCamera->setProjectionMatrix(ConvertMatrix(newProjection));
+			assert(m_pData->m_pCamera);
+			m_pData->m_pCamera->setProjectionMatrix(ConvertMatrix(newProjection));
 		}
 
 		bool IrrlichtRenderer::Running()
 		{
-			return m_pDevice->run();
+			if (!m_pData->m_pDevice)
+				return false;
+			return m_pData->m_pDevice->run();
 		}
 
 		bool IrrlichtRenderer::WindowActive()
 		{
-			return m_pDevice->isWindowActive();
+			if (!m_pData->m_pDevice)
+				return false;
+			return m_pData->m_pDevice->isWindowActive();
 		}
 
 		void IrrlichtRenderer::YieldDevice()
 		{
-			m_pDevice->yield();
+			assert(m_pData->m_pDevice);
+			m_pData->m_pDevice->yield();
 		}
 	}
 }

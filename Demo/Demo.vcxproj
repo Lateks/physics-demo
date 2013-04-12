@@ -98,6 +98,7 @@
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameActor.h" />
     <ClInclude Include="GameData.h" />
+    <ClInclude Include="IrrlichtRendererImpl.h" />
     <ClInclude Include="IrrlichtTimer.h" />
     <ClInclude Include="ITimer.h" />
     <ClInclude Include="Mat4.h" />

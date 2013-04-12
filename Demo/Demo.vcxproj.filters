@@ -123,6 +123,9 @@
     <ClInclude Include="TimerFactories.h">
       <Filter>Header Files\TimeKeeping</Filter>
     </ClInclude>
+    <ClInclude Include="IrrlichtRendererImpl.h">
+      <Filter>Header Files\Display</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Demo.cpp">

@@ -138,6 +138,9 @@
     <ClInclude Include="Events.h">
       <Filter>Header Files\Events</Filter>
     </ClInclude>
+    <ClInclude Include="BulletConversions.h">
+      <Filter>Header Files\Physics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Demo.cpp">
@@ -181,6 +184,9 @@
     </ClCompile>
     <ClCompile Include="EventManager.cpp">
       <Filter>Source Files\Events</Filter>
+    </ClCompile>
+    <ClCompile Include="BulletConversions.cpp">
+      <Filter>Source Files\Physics</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

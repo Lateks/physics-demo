@@ -30,7 +30,7 @@ namespace GameEngine
 			// TODO: add materials etc.
 			// (As an enumeration? Reading from an XML file?)
 			virtual void VAddSphere(float radius, WeakActorPtr actor,
-				const LinearAlgebra::Mat4& initialTransform) = 0;
+				const std::string& density, const std::string& material) = 0;
 
 			virtual void VRemoveActor(ActorID id) = 0;
 

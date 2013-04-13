@@ -2,8 +2,6 @@
 #define BULLET_PHYSICS_DATA_H
 
 #include "enginefwd.h"
-#include "Mat4.h"
-#include "Vec3.h"
 #include <btBulletCollisionCommon.h>
 #include <btBulletDynamicsCommon.h>
 #include <map>

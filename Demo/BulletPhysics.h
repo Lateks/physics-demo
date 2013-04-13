@@ -20,7 +20,7 @@ namespace GameEngine
 			virtual void VUpdateSimulation(float deltaSec) override;
 
 			virtual void VAddSphere(float radius, WeakActorPtr pActor,
-				const LinearAlgebra::Mat4& initialTransform) override;
+				const std::string& density, const std::string& material) override;
 
 			virtual void VRemoveActor(ActorID id) override;
 

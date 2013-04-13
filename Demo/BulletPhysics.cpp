@@ -4,9 +4,9 @@
 #include "WorldTransformComponent.h"
 #include "GameData.h"
 #include "IEventManager.h"
+#include "XMLPhysicsData.h"
 #include "Events.h"
-#include "Vec3.h"
-#include "Mat4.h"
+#include "BulletConversions.h"
 #include <cassert>
 #include <memory>
 
@@ -30,16 +30,6 @@ namespace GameEngine
 		bool BulletPhysics::VInitEngine()
 		{
 			return m_pData->VInitializeSystems();
-		}
-
-		Vec3 btVector3_to_Vec3(const btVector3& vec)
-		{
-			return Vec3(vec.x(), vec.y(), vec.z());
-		}
-
-		Quaternion btQuaternion_to_Quaternion(const btQuaternion& quat)
-		{
-			return Quaternion(quat.x(), quat.y(), quat.z(), quat.w());
 		}
 
 		// Update the locations of all actors involved in the physics
@@ -91,8 +81,19 @@ namespace GameEngine
 		}
 
 		void BulletPhysics::VAddSphere(float radius, WeakActorPtr pActor,
-			const Mat4& initialTransform)
+			const std::string& density, const std::string& material)
 		{
+			if (pActor.expired())
+				return;
+			StrongActorPtr pStrongActor(pActor);
+
+			btSphereShape * const collisionShape = new btSphereShape(radius);
+
+			float matDensity = m_pData->m_physicsMaterialData->LookupDensity(density);
+			const float sphereVolume = (4.f/3.f) * 3.14159f * radius * radius * radius;
+			const btScalar mass = sphereVolume * matDensity;
+
+			m_pData->AddShape(pStrongActor, collisionShape, mass, material);
 		}
 
 		void BulletPhysics::VCreateTrigger(WeakActorPtr pActor,

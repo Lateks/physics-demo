@@ -1,11 +1,18 @@
 #include "BulletPhysicsData.h"
 #include "BulletDebugRenderer.h"
+#include "GameActor.h"
+#include "WorldTransformComponent.h"
 #include "XMLPhysicsData.h"
+#include "BulletConversions.h"
 #include "utils.h"
 #include <algorithm>
+#include <memory>
+#include <cassert>
 
 namespace GameEngine
 {
+	using LinearAlgebra::Mat4;
+
 	namespace PhysicsEngine
 	{
 		bool BulletPhysicsData::VInitializeSystems()
@@ -120,6 +127,44 @@ namespace GameEngine
 			btDynamicsWorld * const pWorld, const btScalar timeStep)
 		{
 			// TODO
+		}
+
+		void BulletPhysicsData::AddShape(StrongActorPtr pActor, btCollisionShape *shape,
+			float mass, const std::string& material)
+		{
+			assert(pActor.get());
+			// There can be only one rigid body per actor.
+			ActorID id = pActor->GetID();
+			assert(m_actorToRigidBodyMap.find(id) == m_actorToRigidBodyMap.end());
+
+			MaterialData matData(m_physicsMaterialData->LookupMaterial(material));
+
+			btVector3 localInertia;
+			if (mass > 0.f)
+				shape->calculateLocalInertia(mass, localInertia);
+
+			std::weak_ptr<WorldTransformComponent> pWeakWorldTransform
+				= pActor->GetWorldTransform();
+			if (!pWeakWorldTransform.expired())
+			{
+				std::shared_ptr<WorldTransformComponent> pWorldTransform(pWeakWorldTransform);
+				btQuaternion rotation(Quaternion_to_btQuaternion(pWorldTransform->GetRotation()));
+				btVector3 translation(Vec3_to_btVector3(pWorldTransform->GetPosition()));
+				btTransform transform(rotation, translation);
+				btMotionState *motionState = new btDefaultMotionState(transform);
+
+				btRigidBody::btRigidBodyConstructionInfo rbInfo(
+					btScalar(mass), motionState, shape, localInertia);
+
+				rbInfo.m_restitution = matData.m_restitution;
+				rbInfo.m_friction = matData.m_friction;
+
+				btRigidBody * const body = new btRigidBody(rbInfo);
+				m_pDynamicsWorld->addRigidBody(body);
+
+				m_actorToRigidBodyMap[id] = body;
+				m_rigidBodyToActorMap[body] = id;
+			}
 		}
 	}
 }

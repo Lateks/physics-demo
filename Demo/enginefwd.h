@@ -33,6 +33,17 @@ namespace GameEngine
 		struct Mat4Impl;
 	}
 
+	namespace Events
+	{
+		class IEventManager;
+		class EventManager;
+		class IEventData;
+		class BaseEventData;
+		class CollisionEvent;
+		class SeparationEvent;
+		class ActorMoveEvent;
+	}
+
 	class GameActor;
 	typedef std::shared_ptr<GameActor> StrongActorPtr;
 	typedef std::weak_ptr<GameActor> WeakActorPtr;

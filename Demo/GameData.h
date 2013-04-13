@@ -13,6 +13,7 @@ namespace GameEngine
 		GameData() : m_pRenderer(nullptr), m_pPhysicsEngine(nullptr) { }
 		Display::IRenderer *m_pRenderer;
 		ITimer *m_pTimer;
+		Events::IEventManager *m_pEvents;
 		PhysicsEngine::IPhysicsEngine *m_pPhysicsEngine;
 		std::map<ActorID, GameActor*> m_actors;
 	public:
@@ -56,6 +57,14 @@ namespace GameEngine
 		const ITimer * const Timer() const
 		{
 			return m_pTimer;
+		}
+		void SetEventManager(Events::IEventManager *manager)
+		{
+			m_pEvents = manager;
+		}
+		Events::IEventManager *GetEventManager()
+		{
+			return m_pEvents;
 		}
 	};
 }

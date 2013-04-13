@@ -3,6 +3,8 @@
 #include "GameActor.h"
 #include "WorldTransformComponent.h"
 #include "GameData.h"
+#include "IEventManager.h"
+#include "Events.h"
 #include "Vec3.h"
 #include "Mat4.h"
 #include <cassert>
@@ -62,7 +64,6 @@ namespace GameEngine
 					{
 						bool changed = false;
 						shared_ptr<WorldTransformComponent> pWorldTrans(pWeakWorldTrans);
-						// TODO: send an event about this movement!
 						if (pWorldTrans->GetRotation() != rot)
 						{
 							pWorldTrans->SetRotation(rot);
@@ -72,6 +73,12 @@ namespace GameEngine
 						{
 							pWorldTrans->SetPosition(pos);
 							changed = true;
+						}
+						if (changed)
+						{
+							Events::EventPtr event;
+							event.reset(new Events::ActorMoveEvent(game->CurrentTime() / 1000.0f, id));
+							game->GetEventManager()->QueueEvent(event);
 						}
 					}
 				}

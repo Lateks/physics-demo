@@ -1,9 +1,15 @@
 #include "BulletPhysics.h"
 #include "BulletPhysicsData.h"
 #include "GameActor.h"
+#include "WorldTransformComponent.h"
+#include "GameData.h"
 #include "Vec3.h"
 #include "Mat4.h"
 #include <cassert>
+#include <memory>
+
+using std::shared_ptr;
+using std::weak_ptr;
 
 // TODO
 namespace GameEngine
@@ -23,19 +29,35 @@ namespace GameEngine
 			return m_pData->VInitializeSystems();
 		}
 
+		// Update the locations of all actors involved in the physics
+		// simulation and signal changes in location with events.
 		void BulletPhysics::VSyncScene()
 		{
+			GameData *game = GameData::getInstance();
 			for (auto it = m_pData->m_actorToRigidBodyMap.begin();
 				      it != m_pData->m_actorToRigidBodyMap.end(); it++)
 			{
 				ActorID id = it->first;
 
-				// TODO: conversions needed between this and other matrix
-				// types.
-				const btMotionState *motionState = it->second->getMotionState();
+				const WorldTransformConversion * const motionState =
+					static_cast<const WorldTransformConversion * const>(
+					it->second->getMotionState());
 				assert(motionState);
 
-				// TODO: Get actor by id
+				GameActor *pActor = game->GetActor(id);
+				if (pActor && motionState)
+				{
+					weak_ptr<WorldTransformComponent> pWeakWorldTrans = pActor->GetWorldTransform();
+					if (!pWeakWorldTrans.expired())
+					{
+						shared_ptr<WorldTransformComponent> pWorldTrans(pWeakWorldTrans);
+						if (pWorldTrans->GetTransform() != motionState->m_transform)
+						{
+							pWorldTrans->SetTransform(motionState->m_transform);
+							// TODO: send an event about this movement!
+						}
+					}
+				}
 			}
 		}
 

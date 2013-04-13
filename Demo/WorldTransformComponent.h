@@ -22,9 +22,9 @@ namespace GameEngine
 		}
 		void SetPosition(const LinearAlgebra::Vec3& newPosition)
 		{
-			m_transform.index(0, 3) = newPosition.getX();
-			m_transform.index(1, 3) = newPosition.getY();
-			m_transform.index(2, 3) = newPosition.getZ();
+			m_transform.index(0, 3) = newPosition.x();
+			m_transform.index(1, 3) = newPosition.y();
+			m_transform.index(2, 3) = newPosition.z();
 		}
 		LinearAlgebra::Vec3 GetPosition() const
 		{

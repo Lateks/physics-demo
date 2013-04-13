@@ -72,13 +72,7 @@
     <ClInclude Include="Vec3.h">
       <Filter>Header Files\LinearAlgebra</Filter>
     </ClInclude>
-    <ClInclude Include="Vec3Impl.h">
-      <Filter>Header Files\LinearAlgebra</Filter>
-    </ClInclude>
     <ClInclude Include="Mat4.h">
-      <Filter>Header Files\LinearAlgebra</Filter>
-    </ClInclude>
-    <ClInclude Include="Mat4Impl.h">
       <Filter>Header Files\LinearAlgebra</Filter>
     </ClInclude>
     <ClInclude Include="BulletPhysics.h">
@@ -122,6 +116,9 @@
     </ClInclude>
     <ClInclude Include="WorldTransformComponent.h">
       <Filter>Header Files\GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Mat4Impl.h">
+      <Filter>Header Files\LinearAlgebra</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

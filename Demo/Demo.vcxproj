@@ -91,6 +91,7 @@
     <ClInclude Include="BulletPhysics.h" />
     <ClInclude Include="BulletPhysicsData.h" />
     <ClInclude Include="enginefwd.h" />
+    <ClInclude Include="Mat4Impl.h" />
     <ClInclude Include="WorldTransformComponent.h" />
     <ClInclude Include="IPhysicsEngine.h" />
     <ClInclude Include="IRenderer.h" />
@@ -102,7 +103,6 @@
     <ClInclude Include="IrrlichtTimer.h" />
     <ClInclude Include="ITimer.h" />
     <ClInclude Include="Mat4.h" />
-    <ClInclude Include="Mat4Impl.h" />
     <ClInclude Include="MessagingWindow.h" />
     <ClInclude Include="MessagingWindowImpl.h" />
     <ClInclude Include="PhysicsEngineFactories.h" />
@@ -110,7 +110,6 @@
     <ClInclude Include="TimerFactories.h" />
     <ClInclude Include="utils.h" />
     <ClInclude Include="Vec3.h" />
-    <ClInclude Include="Vec3Impl.h" />
     <ClInclude Include="XMLPhysicsData.h" />
   </ItemGroup>
   <ItemGroup>

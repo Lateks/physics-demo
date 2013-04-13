@@ -11,29 +11,24 @@ namespace GameEngine
 		class Vec3
 		{
 		public:
-			Vec3();
-			Vec3(double x, double y, double z);
+			Vec3()
+				: m_x(0), m_y(0), m_z(0) { }
+			Vec3(float x, float y, float z)
+				: m_x(x), m_y(y), m_z(z) { }
 			Vec3(const Vec3& other);
-			Vec3(Vec3&& other);
-			~Vec3();
+			~Vec3() { };
 			Vec3 operator=(const Vec3& other);
-			Vec3 operator=(Vec3&& other);
 			bool operator==(const Vec3& other) const;
-			Vec3 operator+(const Vec3& other) const;
-			Vec3 operator-(const Vec3& other) const;
-			Vec3 operator*(double scalar) const;
-			Vec3 operator-() const;
-			Vec3 cross(const Vec3& other) const;
-			double dot(const Vec3& other) const;
-			Vec3 normalize() const;
-			double getX() const;
-			double getY() const;
-			double getZ() const;
+			bool operator!=(const Vec3& other) const;
+			float x() const;
+			float y() const;
+			float z() const;
 		private:
-			Vec3Impl *pImpl;
+			float m_x;
+			float m_y;
+			float m_z;
 		};
 
-		Vec3 operator*(double scalar, const Vec3& vec);
 		std::ostream& operator<<(std::ostream& stream, const Vec3& vec);
 	}
 }

@@ -108,7 +108,7 @@ namespace GameEngine
 
 		vector3df ConvertVector(Vec3& vector)
 		{
-			return vector3df((float) vector.getX(), (float) vector.getY(), (float) vector.getZ());
+			return vector3df(vector.x(), vector.y(), vector.z());
 		}
 
 		matrix4 ConvertMatrix(Mat4& matrix)

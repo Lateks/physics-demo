@@ -2,6 +2,8 @@
 #define BULLET_PHYSICS_DATA_H
 
 #include "enginefwd.h"
+#include "Mat4.h"
+#include "Vec3.h"
 #include <btBulletCollisionCommon.h>
 #include <btBulletDynamicsCommon.h>
 #include <map>
@@ -59,6 +61,29 @@ namespace GameEngine
 			void SetupSystems();
 			void CleanUpRigidBodies();
 			void CleanUpSystems();
+		};
+
+		btTransform Mat4_to_btTransform(const LinearAlgebra::Mat4& transform);
+		LinearAlgebra::Mat4 btTransform_to_Mat4(const btTransform& transform);
+
+		// A struct used to convert between Bullet's transform
+		// matrices and the transform matrix used by the game engine.
+		// (Like ActorMotionState in McShaffry page 597.)
+		struct WorldTransformConversion : public btMotionState
+		{
+			LinearAlgebra::Mat4 m_transform;
+			WorldTransformConversion(LinearAlgebra::Mat4& transform)
+				: m_transform(transform) { }
+
+			virtual void getWorldTransform(btTransform& trans) const
+			{
+				trans = Mat4_to_btTransform(m_transform);
+			}
+
+			virtual void setWorldTransform(btTransform& trans)
+			{
+				m_transform = btTransform_to_Mat4(trans);
+			}
 		};
 	}
 }

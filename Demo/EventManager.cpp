@@ -10,11 +10,15 @@ namespace GameEngine
 	{
 		void EventManager::DispatchEvents()
 		{
-			while (!m_eventQueue.empty())
+			auto processingQueue = m_eventQueues[m_activeQueue];
+			m_activeQueue = (m_activeQueue + 1) % EventManager::NUM_QUEUES;
+			m_eventQueues[m_activeQueue].clear();
+
+			while (!processingQueue.empty())
 			{
-				EventPtr event = m_eventQueue.front();
+				EventPtr event = processingQueue.front();
 				DispatchEvent(event);
-				m_eventQueue.pop_front();
+				processingQueue.pop_front();
 			}
 		}
 
@@ -37,16 +41,17 @@ namespace GameEngine
 
 		void EventManager::QueueEvent(EventPtr event)
 		{
-			m_eventQueue.push_back(event);
+			m_eventQueues[m_activeQueue].push_back(event);
 		}
 
 		void EventManager::DequeueFirst(EventType type)
 		{
-			auto it = std::find_if(m_eventQueue.begin(), m_eventQueue.end(),
+			auto activeQueue = m_eventQueues[m_activeQueue];
+			auto it = std::find_if(activeQueue.begin(), activeQueue.end(),
 				[&type] (EventPtr event) { return event->GetEventType() == type; });
-			if (it != m_eventQueue.end())
+			if (it != activeQueue.end())
 			{
-				m_eventQueue.erase(it);
+				activeQueue.erase(it);
 			}
 		}
 

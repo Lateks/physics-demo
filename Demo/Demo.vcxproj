@@ -92,6 +92,7 @@
     <ClInclude Include="BulletPhysicsData.h" />
     <ClInclude Include="enginefwd.h" />
     <ClInclude Include="EventManager.h" />
+    <ClInclude Include="Events.h" />
     <ClInclude Include="IEventManager.h" />
     <ClInclude Include="Mat4Impl.h" />
     <ClInclude Include="Vec4.h" />

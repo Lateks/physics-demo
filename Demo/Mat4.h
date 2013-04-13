@@ -5,6 +5,7 @@
 
 namespace GameEngine
 {
+	// This matrix should be right-handed and is stored in row-major order.
 	namespace LinearAlgebra
 	{
 		class Mat4

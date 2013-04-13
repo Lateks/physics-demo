@@ -1,22 +1,33 @@
 #include "IrrlichtRenderer.h"
 #include "IrrlichtRendererImpl.h"
+#include "GameActor.h"
+#include "WorldTransformComponent.h"
+#include "GameData.h"
 #include "MessagingWindow.h"
 #include "Vec3.h"
 #include "Mat4.h"
+#include "Vec4.h"
 #include <irrlicht.h>
 #include <iostream>
 #include <cassert>
+#include <memory>
 
 using irr::video::SColor;
 using irr::u32;
 using irr::core::vector3df;
 using irr::core::matrix4;
+using irr::core::quaternion;
 using irr::video::E_DRIVER_TYPE;
 using irr::video::ITexture;
 using irr::scene::ISceneManager;
+using irr::scene::ISceneNode;
 
 using GameEngine::LinearAlgebra::Vec3;
 using GameEngine::LinearAlgebra::Mat4;
+using GameEngine::LinearAlgebra::Quaternion;
+
+using std::weak_ptr;
+using std::shared_ptr;
 
 namespace
 {
@@ -27,6 +38,28 @@ namespace GameEngine
 {
 	namespace Display
 	{
+		vector3df ConvertVector(Vec3& vector)
+		{
+			return vector3df(vector.x(), vector.y(), vector.z());
+		}
+
+		quaternion ConvertQuaternion(Quaternion& quat)
+		{
+			return quaternion(quat.x(), quat.y(), quat.z(), quat.w());
+		}
+
+		matrix4 ConvertProjectionMatrix(Mat4& matrix)
+		{
+			matrix4 newMatrix;
+			for (int i = 0; i < 4; i++)
+				for (int j = 0; j < 4; j++)
+				{
+					float value = matrix.index(i, j);
+					newMatrix[i*4 + j] = (float) matrix.index(i, j);
+				}
+			return newMatrix;
+		}
+
 		IrrlichtRenderer::IrrlichtRenderer()
 		{
 			m_pData = new IrrlichtRendererImpl();
@@ -34,6 +67,7 @@ namespace GameEngine
 
 		void IrrlichtRenderer::DrawScene()
 		{
+			UpdateActorPositions();
 			assert(m_pData->m_pDriver);
 
 			m_pData->m_pDriver->beginScene(true, true, SColor(0,0,0,0));
@@ -46,6 +80,38 @@ namespace GameEngine
 			m_pData->m_pGui->drawAll();
 
 			m_pData->m_pDriver->endScene();
+		}
+
+		// Updates all actor positions. TODO: make this event based
+		// and only update the scene nodes that have actually changed
+		// position, orientation etc.
+		void IrrlichtRenderer::UpdateActorPositions()
+		{
+			GameData *game = GameData::getInstance();
+			for (auto it = m_pData->sceneNodes.begin();
+				it != m_pData->sceneNodes.end(); it++)
+			{
+				GameActor *pActor = game->GetActor(it->first);
+				ISceneNode *pNode = it->second;
+				
+				if (pActor && pNode)
+				{
+					weak_ptr<WorldTransformComponent> pWeakTransform = pActor->GetWorldTransform();
+					if (!pWeakTransform.expired())
+					{
+						shared_ptr<WorldTransformComponent> pWorldTransform(pWeakTransform);
+
+						quaternion rot = ConvertQuaternion(pWorldTransform->GetRotation());
+						vector3df eulerRot;
+						rot.toEuler(eulerRot);
+						eulerRot *= irr::core::RADTODEG;
+						pNode->setRotation(eulerRot);
+
+						pNode->setPosition(ConvertVector(pWorldTransform->GetPosition()));
+						pNode->setScale(ConvertVector(pWorldTransform->GetScale()));
+					}
+				}
+			}
 		}
 
 		E_DRIVER_TYPE GetDriverType(DRIVER_TYPE type)
@@ -106,20 +172,6 @@ namespace GameEngine
 			delete m_pData;
 		}
 
-		vector3df ConvertVector(Vec3& vector)
-		{
-			return vector3df(vector.x(), vector.y(), vector.z());
-		}
-
-		matrix4 ConvertMatrix(Mat4& matrix)
-		{
-			matrix4 newMatrix;
-			for (int i = 0; i < 4; i++)
-				for (int j = 0; j < 4; j++)
-					newMatrix[i*4 + j] = (float) matrix.index(i, j);
-			return newMatrix;
-		}
-
 		void IrrlichtRenderer::SetCameraPosition(Vec3& newPosition)
 		{
 			assert(m_pData->m_pCamera);
@@ -136,7 +188,7 @@ namespace GameEngine
 		void IrrlichtRenderer::SetCameraProjection(Mat4& newProjection)
 		{
 			assert(m_pData->m_pCamera);
-			m_pData->m_pCamera->setProjectionMatrix(ConvertMatrix(newProjection));
+			m_pData->m_pCamera->setProjectionMatrix(ConvertProjectionMatrix(newProjection));
 		}
 
 		bool IrrlichtRenderer::Running()

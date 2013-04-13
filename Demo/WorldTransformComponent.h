@@ -4,32 +4,45 @@
 #include "enginefwd.h"
 #include "Mat4.h"
 #include "Vec3.h"
+#include "Vec4.h"
 
 namespace GameEngine
 {
 	class WorldTransformComponent
 	{
 	private:
-		LinearAlgebra::Mat4 m_transform;
+		LinearAlgebra::Vec3 m_scale;
+		LinearAlgebra::Quaternion m_rotation;
+		LinearAlgebra::Vec3 m_position;
 	public:
-		void SetTransform(const LinearAlgebra::Mat4& newTransform)
+		WorldTransformComponent()
+			: m_scale(1, 1, 1), m_rotation(0, 0, 0, 0), m_position(0, 0, 0) { }
+
+		void SetRotation(const LinearAlgebra::Quaternion& newRotation)
 		{
-			m_transform = newTransform;
+			m_rotation = newRotation;
 		}
-		LinearAlgebra::Mat4 GetTransform() const
+		LinearAlgebra::Quaternion GetRotation() const
 		{
-			return m_transform;
+			return m_rotation;
 		}
+
+		void SetScale(const LinearAlgebra::Vec3& newScale)
+		{
+			m_scale = newScale;
+		}
+		LinearAlgebra::Vec3 GetScale() const
+		{
+			return m_scale;
+		}
+
 		void SetPosition(const LinearAlgebra::Vec3& newPosition)
 		{
-			m_transform.index(0, 3) = newPosition.x();
-			m_transform.index(1, 3) = newPosition.y();
-			m_transform.index(2, 3) = newPosition.z();
+			m_position = newPosition;
 		}
 		LinearAlgebra::Vec3 GetPosition() const
 		{
-			return LinearAlgebra::Vec3(m_transform.index(0, 3),
-				m_transform.index(1, 3), m_transform.index(2, 3));
+			return m_position;
 		}
 	};
 }

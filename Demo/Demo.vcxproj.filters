@@ -120,6 +120,9 @@
     <ClInclude Include="Mat4Impl.h">
       <Filter>Header Files\LinearAlgebra</Filter>
     </ClInclude>
+    <ClInclude Include="Vec4.h">
+      <Filter>Header Files\LinearAlgebra</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Demo.cpp">
@@ -157,6 +160,9 @@
     </ClCompile>
     <ClCompile Include="IrrlichtTimer.cpp">
       <Filter>Source Files\TimeKeeping</Filter>
+    </ClCompile>
+    <ClCompile Include="Vec4.cpp">
+      <Filter>Source Files\LinearAlgebra</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

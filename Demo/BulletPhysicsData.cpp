@@ -121,36 +121,5 @@ namespace GameEngine
 		{
 			// TODO
 		}
-
-		btTransform Mat4_to_btTransform(const LinearAlgebra::Mat4& transform)
-		{
-			btMatrix3x3 rot;
-			btVector3 pos;
-
-			for (size_t row = 0; row < 3; row++)
-				for (size_t col = 0; col < 3; col++)
-					rot[row][col] = transform.index(row, col);
-
-			for (size_t i = 0; i < 4; i++)
-				pos[i] = transform.index(i, 3);
-
-			return btTransform(rot, pos);
-		}
-
-		LinearAlgebra::Mat4 btTransform_to_Mat4(const btTransform& transform)
-		{
-			LinearAlgebra::Mat4 conversion;
-			btVector3 pos = transform.getOrigin();
-			btMatrix3x3 rot = transform.getBasis();
-
-			for (size_t row = 0; row < 3; row++)
-				for (size_t col = 0; col < 3; col++)
-					conversion.index(row, col) = rot[row][col];
-
-			for (size_t i = 0; i < 4; i++)
-				conversion.index(i, 3) = pos[i];
-
-			return conversion;
-		}
 	}
 }

@@ -4,6 +4,7 @@
 #include "enginefwd.h"
 #include <irrlicht.h>
 #include <map>
+#include <vector>
 
 namespace GameEngine
 {

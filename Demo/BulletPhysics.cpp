@@ -16,6 +16,7 @@ namespace GameEngine
 {
 	using LinearAlgebra::Mat4;
 	using LinearAlgebra::Vec3;
+	using LinearAlgebra::Quaternion;
 
 	namespace PhysicsEngine
 	{
@@ -29,6 +30,16 @@ namespace GameEngine
 			return m_pData->VInitializeSystems();
 		}
 
+		Vec3 btVector3_to_Vec3(const btVector3& vec)
+		{
+			return Vec3(vec.x(), vec.y(), vec.z());
+		}
+
+		Quaternion btQuaternion_to_Quaternion(const btQuaternion& quat)
+		{
+			return Quaternion(quat.x(), quat.y(), quat.z(), quat.w());
+		}
+
 		// Update the locations of all actors involved in the physics
 		// simulation and signal changes in location with events.
 		void BulletPhysics::VSyncScene()
@@ -38,23 +49,29 @@ namespace GameEngine
 				      it != m_pData->m_actorToRigidBodyMap.end(); it++)
 			{
 				ActorID id = it->first;
-
-				const WorldTransformConversion * const motionState =
-					static_cast<const WorldTransformConversion * const>(
-					it->second->getMotionState());
-				assert(motionState);
+				const btRigidBody *body = it->second;
+				const Quaternion rot = btQuaternion_to_Quaternion(body->getOrientation());
+				const Vec3 pos = btVector3_to_Vec3(body->getCenterOfMassPosition());
 
 				GameActor *pActor = game->GetActor(id);
-				if (pActor && motionState)
+				if (pActor)
 				{
-					weak_ptr<WorldTransformComponent> pWeakWorldTrans = pActor->GetWorldTransform();
+					weak_ptr<WorldTransformComponent> pWeakWorldTrans =
+						pActor->GetWorldTransform();
 					if (!pWeakWorldTrans.expired())
 					{
+						bool changed = false;
 						shared_ptr<WorldTransformComponent> pWorldTrans(pWeakWorldTrans);
-						if (pWorldTrans->GetTransform() != motionState->m_transform)
+						// TODO: send an event about this movement!
+						if (pWorldTrans->GetRotation() != rot)
 						{
-							pWorldTrans->SetTransform(motionState->m_transform);
-							// TODO: send an event about this movement!
+							pWorldTrans->SetRotation(rot);
+							changed = true;
+						}
+						if (pWorldTrans->GetPosition() != pos)
+						{
+							pWorldTrans->SetPosition(pos);
+							changed = true;
 						}
 					}
 				}

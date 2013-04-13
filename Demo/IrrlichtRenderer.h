@@ -35,6 +35,7 @@ namespace GameEngine
 			virtual void RemoveSceneNode(ActorID actorId, bool debug = false) override;
 		private:
 			IrrlichtRendererImpl *m_pData;
+			void UpdateActorPositions();
 		};
 	}
 }

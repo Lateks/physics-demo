@@ -28,6 +28,11 @@ namespace GameEngine
 			virtual void SetCameraProjection(LinearAlgebra::Mat4& newProjection) override;
 
 			virtual unsigned int LoadTexture(const std::string& filePath) override;
+
+			virtual void AddSphereSceneNode(float radius, ActorID actorId, unsigned int texture, bool debug = false) override;
+			virtual void AddCubeSceneNode(float dim, ActorID actorId, unsigned int texture, bool debug = false) override;
+			virtual void AddMeshSceneNode(const std::string& meshFilePath, ActorID actorId, unsigned int texture = 0, bool debug = false) override;
+			virtual void RemoveSceneNode(ActorID actorId, bool debug = false) override;
 		private:
 			IrrlichtRendererImpl *m_pData;
 		};

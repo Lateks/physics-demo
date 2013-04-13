@@ -41,6 +41,11 @@ namespace GameEngine
 			// Returns a unique id that can be used to refer to the texture.
 			// Returns 0 if loading fails.
 			virtual unsigned int LoadTexture(const std::string& filePath) = 0;
+
+			virtual void AddSphereSceneNode(float radius, ActorID actorId, unsigned int texture, bool debug = false) = 0;
+			virtual void AddCubeSceneNode(float dim, ActorID actorId, unsigned int texture, bool debug = false) = 0;
+			virtual void AddMeshSceneNode(const std::string& meshFilePath, ActorID actorId, unsigned int texture = 0, bool debug = false) = 0;
+			virtual void RemoveSceneNode(ActorID actorId, bool debug = false) = 0;
 		};
 	}
 }

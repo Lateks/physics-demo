@@ -1,6 +1,7 @@
 #ifndef IRRLICHT_RENDERER_IMPL_H
 #define IRRLICHT_RENDERER_IMPL_H
 
+#include "enginefwd.h"
 #include <irrlicht.h>
 #include <map>
 
@@ -11,6 +12,7 @@ namespace GameEngine
 		struct IrrlichtRendererImpl
 		{
 			std::map<unsigned int, irr::video::ITexture*> textures;
+			std::map<ActorID, irr::scene::ISceneNode*> sceneNodes;
 
 			irr::IrrlichtDevice *m_pDevice;
 			irr::video::IVideoDriver *m_pDriver;

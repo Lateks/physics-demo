@@ -12,6 +12,8 @@ using irr::u32;
 using irr::core::vector3df;
 using irr::core::matrix4;
 using irr::video::E_DRIVER_TYPE;
+using irr::video::ITexture;
+using irr::scene::ISceneManager;
 
 using GameEngine::LinearAlgebra::Vec3;
 using GameEngine::LinearAlgebra::Mat4;
@@ -165,6 +167,59 @@ namespace GameEngine
 				return 0;
 			m_pData->textures[++TEXTURE_ID] = texture;
 			return TEXTURE_ID;
+		}
+
+		// TODO: refactor this and handle the mapping better
+		void IrrlichtRenderer::AddSphereSceneNode(float radius, ActorID actorId, unsigned int texture, bool debug)
+		{
+			ISceneManager *manager = debug ? m_pData->m_pDebugSmgr : m_pData->m_pSmgr;
+			auto node = manager->addSphereSceneNode(radius);
+			ITexture *txt = m_pData->textures[texture]; // TODO: check that this key is in the map
+			if (txt)
+			{
+				node->setMaterialTexture(0, txt);
+			}
+			node->setMaterialFlag(irr::video::EMF_LIGHTING, false);
+			m_pData->sceneNodes[actorId] = node;
+		}
+
+		void IrrlichtRenderer::AddCubeSceneNode(float dim, ActorID actorId, unsigned int texture, bool debug)
+		{
+			ISceneManager *manager = debug ? m_pData->m_pDebugSmgr : m_pData->m_pSmgr;
+			auto node = manager->addSphereSceneNode(dim);
+			ITexture *txt = m_pData->textures[texture]; // TODO: check that this key is in the map
+			if (txt)
+			{
+				node->setMaterialTexture(0, txt);
+			}
+			node->setMaterialFlag(irr::video::EMF_LIGHTING, false);
+			m_pData->sceneNodes[actorId] = node;
+		}
+
+		void IrrlichtRenderer::AddMeshSceneNode(const std::string& meshFilePath, ActorID actorId, unsigned int texture, bool debug)
+		{
+			ISceneManager *manager = debug ? m_pData->m_pDebugSmgr : m_pData->m_pSmgr;
+			auto mesh = manager->getMesh(meshFilePath.c_str());
+			if (mesh)
+			{
+				auto node = manager->addAnimatedMeshSceneNode(mesh);
+				ITexture *txt = m_pData->textures[texture]; // TODO: check that this key is in the map
+				if (txt)
+				{
+					node->setMaterialTexture(0, txt);
+				}
+				node->setMaterialFlag(irr::video::EMF_LIGHTING, false);
+				m_pData->sceneNodes[actorId] = node;
+			}
+		}
+
+		void IrrlichtRenderer::RemoveSceneNode(ActorID actorId, bool debug)
+		{
+			auto node = m_pData->sceneNodes[actorId];
+			if (node)
+			{
+				node->remove();
+			}
 		}
 	}
 }

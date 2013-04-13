@@ -1,5 +1,5 @@
 #include "Vec3.h"
-#include <Eigen/Dense>
+#include <iostream>
 
 namespace GameEngine
 {

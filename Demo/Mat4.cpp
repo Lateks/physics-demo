@@ -1,6 +1,5 @@
 #include "Mat4.h"
 #include "Mat4Impl.h"
-#include <Eigen/Dense>
 
 namespace GameEngine
 {

@@ -1,7 +1,5 @@
 #include "Game.h"
 #include "GameData.h"
-#include "Sphere.h"
-#include "Cube.h"
 #include "IRenderer.h"
 #include "TimerFactories.h"
 #include "RenderingEngineFactories.h"
@@ -110,7 +108,7 @@ namespace GameEngine
 			{
 				// physics->VUpdateSimulation(frameDeltaSec)
 				// physics->VSyncScene()
-				m_pData->MoveAllActors(frameDeltaSec);
+				// TODO: handle inputs
 				renderer->DrawScene();
 			}
 			else

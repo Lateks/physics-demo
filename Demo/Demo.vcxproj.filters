@@ -63,12 +63,6 @@
     <ClInclude Include="GameActor.h">
       <Filter>Header Files\GameObject</Filter>
     </ClInclude>
-    <ClInclude Include="Sphere.h">
-      <Filter>Header Files\GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="Cube.h">
-      <Filter>Header Files\GameObject</Filter>
-    </ClInclude>
     <ClInclude Include="IPhysicsEngine.h">
       <Filter>Header Files\Physics</Filter>
     </ClInclude>
@@ -126,6 +120,9 @@
     <ClInclude Include="IrrlichtRendererImpl.h">
       <Filter>Header Files\Display</Filter>
     </ClInclude>
+    <ClInclude Include="WorldTransformComponent.h">
+      <Filter>Header Files\GameObject</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Demo.cpp">
@@ -140,13 +137,7 @@
     <ClCompile Include="MessagingWindow.cpp">
       <Filter>Source Files\Display</Filter>
     </ClCompile>
-    <ClCompile Include="Cube.cpp">
-      <Filter>Source Files\GameObject</Filter>
-    </ClCompile>
     <ClCompile Include="GameActor.cpp">
-      <Filter>Source Files\GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="Sphere.cpp">
       <Filter>Source Files\GameObject</Filter>
     </ClCompile>
     <ClCompile Include="Vec3.cpp">

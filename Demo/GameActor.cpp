@@ -1,8 +1,6 @@
 #include "GameActor.h"
-#include <irrlicht.h>
+#include "WorldTransformComponent.h"
 #include <iostream>
-
-using irr::core::vector3df;
 
 namespace
 {
@@ -11,29 +9,17 @@ namespace
 
 namespace GameEngine
 {
-	GameActor::GameActor(irr::scene::ISceneNode *model)
-		: pModel(model), movementNormal(0)
+	GameActor::GameActor()
 	{
-		pModel->setMaterialFlag(irr::video::EMF_LIGHTING, false);
 		actorId = ID++;
 	}
 
-	GameActor::~GameActor()
+	void GameActor::SetWorldTransform(WorldTransformComponent *trans)
 	{
-		pModel->drop();
+		m_pTransform.reset(trans);
 	}
-
-	void GameActor::SetPosition(const vector3df& newPos)
+	std::weak_ptr<WorldTransformComponent> GameActor::GetWorldTransform()
 	{
-		pModel->setPosition(newPos);
-		pModel->updateAbsolutePosition();
-	}
-
-	void GameActor::Move(float seconds)
-	{
-		// For simplicity, GameActor ISceneNodes never have parent nodes,
-		// so their relative position is also their absolute position.
-		vector3df newPosition = pModel->getAbsolutePosition() + movementNormal *  seconds * movementSpeed;
-		pModel->setPosition(newPosition);
+		return std::weak_ptr<WorldTransformComponent>(m_pTransform);
 	}
 }

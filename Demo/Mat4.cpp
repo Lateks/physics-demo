@@ -106,6 +106,11 @@ namespace GameEngine
 			return pImpl->value(i, j);
 		}
 
+		double Mat4::index(const size_t i, const size_t j) const
+		{
+			return pImpl->value(i, j);
+		}
+
 		Mat4 operator*(double scalar, const Mat4& mat)
 		{
 			return mat * scalar;

@@ -38,9 +38,7 @@ namespace GameEngine
 	typedef std::shared_ptr<GameActor> StrongActorPtr;
 	typedef std::weak_ptr<GameActor> WeakActorPtr;
 	typedef unsigned int ActorID;
-
-	class Cube;
-	class Sphere;
+	class WorldTransformComponent;
 
 	class Game;
 	class GameData;

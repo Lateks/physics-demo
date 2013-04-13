@@ -27,7 +27,6 @@ namespace GameEngine
 		~GameData();
 
 		unsigned int CurrentTime();
-		void MoveAllActors(float scale); // TODO: throw this away?
 
 		void AddActor(GameActor *actor);
 		GameActor *GetActor(ActorID id)

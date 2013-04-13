@@ -24,6 +24,7 @@ namespace GameEngine
 			Mat4 operator*(const Mat4& other) const;
 			Mat4 operator-() const;
 			double& index(const size_t row, const size_t col);
+			double index(const size_t row, const size_t col) const;
 		private:
 			Mat4Impl *pImpl;
 		};

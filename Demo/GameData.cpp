@@ -24,19 +24,6 @@ namespace GameEngine
 		return m_pTimer->GetTime();
 	}
 
-	void GameData::MoveAllActors(float scale)
-	{
-		std::for_each(m_actors.begin(), m_actors.end(),
-			[scale] (std::pair<unsigned int, GameActor*> actor)
-		{
-			if (actor.second != nullptr)
-			{
-				actor.second->Move(scale);
-			}
-		}
-		);
-	}
-
 	void GameData::AddActor(GameActor *actor)
 	{
 		m_actors[actor->GetID()] = actor; 

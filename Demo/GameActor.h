@@ -2,26 +2,24 @@
 #define GAME_ACTOR_H
 
 #include "enginefwd.h"
-#include <irrlicht.h>
 #include <memory>
 
 namespace GameEngine
 {
-	// TODO: make this an interface that is independent of Irrlicht
 	class GameActor
 	{
 	public:
-		GameActor(irr::scene::ISceneNode *model);
-		virtual ~GameActor();
+		GameActor();
+		virtual ~GameActor() { };
 		unsigned int GetID() { return actorId; }
-		void Move(float seconds);
-		void SetPosition(const irr::core::vector3df& newPos);
-		irr::scene::ISceneNode *pModel;
-		irr::core::vector3df movementNormal;
-		float movementSpeed;
-		// CollisionShape *pCollShape;
+		void SetWorldTransform(WorldTransformComponent *trans);
+		std::weak_ptr<WorldTransformComponent> GetWorldTransform();
 	private:
 		ActorID actorId;
+		// The transform component is stored separately from the
+		// 3D model because it can be used by several engine components
+		// (such as the physics engine and AI engine).
+		std::shared_ptr<WorldTransformComponent> m_pTransform;
 	};
 }
 

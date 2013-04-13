@@ -90,8 +90,8 @@
     <ClInclude Include="BulletDebugRenderer.h" />
     <ClInclude Include="BulletPhysics.h" />
     <ClInclude Include="BulletPhysicsData.h" />
-    <ClInclude Include="Cube.h" />
     <ClInclude Include="enginefwd.h" />
+    <ClInclude Include="WorldTransformComponent.h" />
     <ClInclude Include="IPhysicsEngine.h" />
     <ClInclude Include="IRenderer.h" />
     <ClInclude Include="IrrlichtRenderer.h" />
@@ -107,7 +107,6 @@
     <ClInclude Include="MessagingWindowImpl.h" />
     <ClInclude Include="PhysicsEngineFactories.h" />
     <ClInclude Include="RenderingEngineFactories.h" />
-    <ClInclude Include="Sphere.h" />
     <ClInclude Include="TimerFactories.h" />
     <ClInclude Include="utils.h" />
     <ClInclude Include="Vec3.h" />
@@ -117,7 +116,6 @@
   <ItemGroup>
     <ClCompile Include="BulletPhysics.cpp" />
     <ClCompile Include="BulletPhysicsData.cpp" />
-    <ClCompile Include="Cube.cpp" />
     <ClCompile Include="GameActor.cpp" />
     <ClCompile Include="IrrlichtRenderer.cpp" />
     <ClCompile Include="Demo.cpp" />
@@ -126,7 +124,6 @@
     <ClCompile Include="IrrlichtTimer.cpp" />
     <ClCompile Include="Mat4.cpp" />
     <ClCompile Include="MessagingWindow.cpp" />
-    <ClCompile Include="Sphere.cpp" />
     <ClCompile Include="Vec3.cpp" />
     <ClCompile Include="XMLPhysicsData.cpp" />
   </ItemGroup>

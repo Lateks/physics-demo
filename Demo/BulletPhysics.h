@@ -8,7 +8,6 @@ namespace GameEngine
 {
 	namespace PhysicsEngine
 	{
-		// TODO: make noncopyable (boost?)
 		class BulletPhysics : public IPhysicsEngine
 		{
 		public:
@@ -21,6 +20,8 @@ namespace GameEngine
 
 			virtual void VAddSphere(float radius, WeakActorPtr pActor,
 				const std::string& density, const std::string& material) override;
+			virtual void VAddBox(const LinearAlgebra::Vec3& dimensions, WeakActorPtr pActor,
+				const std::string& density, const std::string& material) override;
 
 			virtual void VRemoveActor(ActorID id) override;
 
@@ -29,6 +30,11 @@ namespace GameEngine
 			virtual void VCreateTrigger(WeakActorPtr pActor, const LinearAlgebra::Vec3& pos,
 				const float dim) override;
 		private:
+			// The VS11 C++ compiler does not yet support deleting
+			// constructors, so make these private to make the class
+			// "non-copyable".
+			BulletPhysics(const BulletPhysics& other);
+			BulletPhysics& operator=(const BulletPhysics& other);
 			BulletPhysicsData *m_pData;
 		};
 	}

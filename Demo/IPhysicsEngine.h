@@ -27,9 +27,9 @@ namespace GameEngine
 			// Initializing different physics world objects.
 			// TODO: extend with additional types. E.g.
 			// boxes, triangle meshes etc.
-			// TODO: add materials etc.
-			// (As an enumeration? Reading from an XML file?)
 			virtual void VAddSphere(float radius, WeakActorPtr actor,
+				const std::string& density, const std::string& material) = 0;
+			virtual void VAddBox(const LinearAlgebra::Vec3& dimensions, WeakActorPtr actor,
 				const std::string& density, const std::string& material) = 0;
 
 			virtual void VRemoveActor(ActorID id) = 0;

@@ -91,9 +91,25 @@ namespace GameEngine
 
 			float matDensity = m_pData->m_physicsMaterialData->LookupDensity(density);
 			const float sphereVolume = (4.f/3.f) * 3.14159f * radius * radius * radius;
-			const btScalar mass = sphereVolume * matDensity;
+			const float mass = sphereVolume * matDensity;
 
 			m_pData->AddShape(pStrongActor, collisionShape, mass, material);
+		}
+
+		void BulletPhysics::VAddBox(const Vec3& dimensions, WeakActorPtr pActor,
+			const std::string& density, const std::string& material)
+		{
+			if (pActor.expired())
+				return;
+			StrongActorPtr pStrongActor(pActor);
+
+			btBoxShape * const boxShape = new btBoxShape(Vec3_to_btVector3(dimensions));
+
+			float matDensity = m_pData->m_physicsMaterialData->LookupDensity(density);
+			const float boxVolume = dimensions.x() * dimensions.y() * dimensions.z();
+			const float mass = boxVolume * matDensity;
+
+			m_pData->AddShape(pStrongActor, boxShape, mass, material);
 		}
 
 		void BulletPhysics::VCreateTrigger(WeakActorPtr pActor,

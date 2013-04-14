@@ -133,7 +133,7 @@ namespace GameEngine
 			float mass, const std::string& material)
 		{
 			assert(pActor.get());
-			// There can be only one rigid body per actor.
+			// There can be only one rigid body per actor in this implementation.
 			ActorID id = pActor->GetID();
 			assert(m_actorToRigidBodyMap.find(id) == m_actorToRigidBodyMap.end());
 
@@ -154,7 +154,7 @@ namespace GameEngine
 				btMotionState *motionState = new btDefaultMotionState(transform);
 
 				btRigidBody::btRigidBodyConstructionInfo rbInfo(
-					btScalar(mass), motionState, shape, localInertia);
+					mass, motionState, shape, localInertia);
 
 				rbInfo.m_restitution = matData.m_restitution;
 				rbInfo.m_friction = matData.m_friction;

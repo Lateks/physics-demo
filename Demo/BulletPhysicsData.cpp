@@ -294,17 +294,9 @@ namespace GameEngine
 			// to distinguish them from other actors.
 			if (pBody1->getUserPointer() || pBody2->getUserPointer())
 			{
-				ActorID triggerId, actorId;
-				if (pBody1->getUserPointer())
-				{
-					triggerId = GetActorID(pBody1);
-					actorId = GetActorID(pBody2);
-				}
-				else
-				{
-					triggerId = GetActorID(pBody2);
-					actorId = GetActorID(pBody1);
-				}
+				bool firstIsTrigger = pBody1->getUserPointer();
+				ActorID triggerId = firstIsTrigger ? GetActorID(pBody1) : GetActorID(pBody2);
+				ActorID actorId = firstIsTrigger ? GetActorID(pBody2) : GetActorID(pBody1);
 				event.reset(new Events::TriggerEntryEvent(pGameData->CurrentTime() / 1000.0f,
 					triggerId, actorId));
 				pEventManager->QueueEvent(event);
@@ -337,7 +329,31 @@ namespace GameEngine
 
 		void BulletPhysicsData::SendSeparationEvent(const btRigidBody * pBody1, const btRigidBody * pBody2)
 		{
-			// TODO
+			auto pGameData = GameData::getInstance();
+			auto pEventManager = pGameData->GetEventManager();
+			assert(pEventManager);
+
+			std::shared_ptr<Events::IEventData> event;
+			if (pBody1->getUserPointer() || pBody2->getUserPointer())
+			{
+				bool firstIsTrigger = pBody1->getUserPointer();
+				ActorID triggerId = firstIsTrigger ? GetActorID(pBody1) : GetActorID(pBody2);
+				ActorID actorId = firstIsTrigger ? GetActorID(pBody2) : GetActorID(pBody1);
+				event.reset(new Events::TriggerExitEvent(pGameData->CurrentTime() / 1000.0f,
+					triggerId, actorId));
+				pEventManager->QueueEvent(event);
+			}
+			else // not a trigger event
+			{
+				ActorID id1 = GetActorID(pBody1);
+				ActorID id2 = GetActorID(pBody2);
+				if (id1 == 0 || id2 == 0)
+					return;
+
+				event.reset(new Events::ActorSeparationEvent(
+					pGameData->CurrentTime() / 1000.0f, id1, id2));
+				pEventManager->QueueEvent(event);
+			}
 		}
 	}
 }

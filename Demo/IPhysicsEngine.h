@@ -3,6 +3,7 @@
 
 #include "enginefwd.h"
 #include <string>
+#include <vector>
 
 /* This header file defines an interface for Physics engines
  * similar to the one presented by McShaffry in Game Coding
@@ -25,12 +26,12 @@ namespace GameEngine
 			virtual void VSyncScene() = 0;
 
 			// Initializing different physics world objects.
-			// TODO: extend with additional types. E.g.
-			// boxes, triangle meshes etc.
-			virtual void VAddSphere(float radius, WeakActorPtr actor,
+			virtual void VAddSphere(float radius, WeakActorPtr pActor,
 				const std::string& density, const std::string& material) = 0;
-			virtual void VAddBox(const LinearAlgebra::Vec3& dimensions, WeakActorPtr actor,
+			virtual void VAddBox(const LinearAlgebra::Vec3& dimensions, WeakActorPtr pActor,
 				const std::string& density, const std::string& material) = 0;
+			virtual void VAddConvexMesh(std::vector<LinearAlgebra::Vec3>& vertices,
+				WeakActorPtr pActor, const std::string& density, const std::string& material) = 0;
 
 			virtual void VRemoveActor(ActorID id) = 0;
 

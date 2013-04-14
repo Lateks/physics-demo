@@ -22,6 +22,8 @@ namespace GameEngine
 				const std::string& density, const std::string& material) override;
 			virtual void VAddBox(const LinearAlgebra::Vec3& dimensions, WeakActorPtr pActor,
 				const std::string& density, const std::string& material) override;
+			virtual void VAddConvexMesh(std::vector<LinearAlgebra::Vec3>& vertices,
+				WeakActorPtr pActor, const std::string& density, const std::string& material) override;
 
 			virtual void VRemoveActor(ActorID id) override;
 

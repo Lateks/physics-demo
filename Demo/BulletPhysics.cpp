@@ -9,6 +9,7 @@
 #include "BulletConversions.h"
 #include <cassert>
 #include <memory>
+#include <algorithm>
 
 using std::shared_ptr;
 using std::weak_ptr;
@@ -110,6 +111,30 @@ namespace GameEngine
 			const float mass = boxVolume * matDensity;
 
 			m_pData->AddShape(pStrongActor, boxShape, mass, material);
+		}
+
+		void BulletPhysics::VAddConvexMesh(std::vector<LinearAlgebra::Vec3>& vertices,
+				WeakActorPtr pActor, const std::string& density, const std::string& material)
+		{
+			if (pActor.expired())
+				return;
+			StrongActorPtr pStrongActor(pActor);
+
+			btConvexHullShape * const convexShape = new btConvexHullShape();
+
+			std::for_each(vertices.begin(), vertices.end(),
+				[&convexShape] (Vec3& vertex) { convexShape->addPoint(Vec3_to_btVector3(vertex)); });
+
+			// Approximate mass using an axis-aligned bounding box.
+			btVector3 aabbMin, aabbMax;
+			convexShape->getAabb(btTransform::getIdentity(), aabbMin, aabbMax);
+
+			const btVector3 dimensions = aabbMax - aabbMin;
+			const float matDensity = m_pData->m_physicsMaterialData->LookupDensity(density);
+			const float aabbVolume = dimensions.x() * dimensions.y() * dimensions.z();
+			const float mass = aabbVolume * matDensity;
+
+			m_pData->AddShape(pStrongActor, convexShape, mass, material);
 		}
 
 		void BulletPhysics::VCreateTrigger(WeakActorPtr pActor,

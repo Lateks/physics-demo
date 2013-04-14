@@ -2,6 +2,9 @@
 #include "BulletPhysics.h"
 #include "BulletDebugRenderer.h"
 #include "GameActor.h"
+#include "GameData.h"
+#include "IEventManager.h"
+#include "Events.h"
 #include "WorldTransformComponent.h"
 #include "XMLPhysicsData.h"
 #include "BulletConversions.h"
@@ -20,6 +23,15 @@ namespace GameEngine
 			if (it != m_actorToRigidBodyMap.end())
 				return it->second;
 			return nullptr;
+		}
+
+		ActorID BulletPhysicsData::GetActorID(const btRigidBody *pBody) const
+		{
+			auto it = m_rigidBodyToActorMap.find(pBody);
+			assert(it != m_rigidBodyToActorMap.end());
+			if (it != m_rigidBodyToActorMap.end())
+				return it->second;
+			return 0;
 		}
 
 		bool BulletPhysicsData::VInitializeSystems()
@@ -250,6 +262,8 @@ namespace GameEngine
 				btRigidBody * const body = new btRigidBody(rbInfo);
 
 				m_pDynamicsWorld->addRigidBody(body);
+				// TODO: should I do this?
+				// body->setUserPointer(pActor.get());
 
 				// Triggers should not be taken into account in collision detection.
 				body->setCollisionFlags(
@@ -271,7 +285,31 @@ namespace GameEngine
 		void BulletPhysicsData::SendNewCollisionEvent(const btPersistentManifold * manifold,
 			const btRigidBody * pBody1, const btRigidBody * pBody2)
 		{
-			// TODO
+			auto pGameData = GameData::getInstance();
+			auto pEventManager = pGameData->GetEventManager();
+			assert(pEventManager);
+
+			if (pBody1->getUserPointer() || pBody2->getUserPointer())
+			{
+				ActorID triggerId, actorId;
+				if (pBody1->getUserPointer())
+				{
+					triggerId = GetActorID(pBody1);
+					actorId = GetActorID(pBody2);
+				}
+				else
+				{
+					triggerId = GetActorID(pBody2);
+					actorId = GetActorID(pBody1);
+				}
+				std::shared_ptr<Events::TriggerEntryEvent> event;
+				event.reset(new Events::TriggerEntryEvent(pGameData->CurrentTime() / 1000.0f,
+					triggerId, actorId));
+				pEventManager->QueueEvent(event);
+			}
+			else // not a trigger event
+			{
+			}
 		}
 
 		void BulletPhysicsData::SendSeparationEvent(const btRigidBody * pBody1, const btRigidBody * pBody2)

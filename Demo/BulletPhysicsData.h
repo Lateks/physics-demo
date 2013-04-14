@@ -41,7 +41,7 @@ namespace GameEngine
 			std::map<ActorID, btRigidBody*> m_actorToRigidBodyMap;
 			std::map<const btRigidBody*, ActorID> m_rigidBodyToActorMap;
 			btRigidBody *GetRigidBody(ActorID id) const;
-			ActorID GetActorID(btRigidBody const *pBody) const;
+			ActorID GetActorID(const btRigidBody *pBody) const;
 
 			CollisionPairs m_PreviousTickCollisions;
 

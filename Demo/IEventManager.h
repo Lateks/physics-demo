@@ -16,7 +16,9 @@ namespace GameEngine
 		{
 			COLLISION_EVENT,
 			SEPARATION_EVENT,
-			ACTOR_MOVED
+			ACTOR_MOVED,
+			ENTER_TRIGGER,
+			EXIT_TRIGGER
 		};
 
 		class IEventData

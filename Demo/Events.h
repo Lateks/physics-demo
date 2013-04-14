@@ -53,6 +53,47 @@ namespace GameEngine
 			const static EventType eventType = EventType::SEPARATION_EVENT;
 		};
 
+		class TriggerEvent : public BaseEventData
+		{
+		public:
+			TriggerEvent(const float timeStamp, ActorID trigger, ActorID actorId)
+				: BaseEventData(timeStamp), m_triggerId(trigger), m_actorId(actorId) { }
+			virtual ~TriggerEvent() { };
+			ActorID GetTriggerId() { return m_triggerId; }
+			ActorID GetActorId() { return m_actorId; }
+		private:
+			ActorID m_triggerId;
+			ActorID m_actorId;
+		};
+
+		class TriggerEntryEvent : public TriggerEvent
+		{
+		public:
+			TriggerEntryEvent(const float timeStamp, ActorID trigger, ActorID actorId)
+				: TriggerEvent(timeStamp, trigger, actorId) { }
+			virtual ~TriggerEntryEvent() { };
+			virtual EventType GetEventType() const override
+			{
+				return eventType;
+			}
+		private:
+			const static EventType eventType = EventType::ENTER_TRIGGER;
+		};
+
+		class TriggerExitEvent : public TriggerEvent
+		{
+		public:
+			TriggerExitEvent(const float timeStamp, ActorID trigger, ActorID actorId)
+				: TriggerEvent(timeStamp, trigger, actorId) { }
+			virtual ~TriggerExitEvent() { };
+			virtual EventType GetEventType() const override
+			{
+				return eventType;
+			}
+		private:
+			const static EventType eventType = EventType::EXIT_TRIGGER;
+		};
+
 		class ActorMoveEvent : public BaseEventData
 		{
 		public:

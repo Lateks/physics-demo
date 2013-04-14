@@ -11,36 +11,36 @@ namespace GameEngine
 	class WorldTransformComponent
 	{
 	private:
-		LinearAlgebra::Vec3 m_scale;
-		LinearAlgebra::Quaternion m_rotation;
-		LinearAlgebra::Vec3 m_position;
+		Vec3 m_scale;
+		Quaternion m_rotation;
+		Vec3 m_position;
 	public:
 		WorldTransformComponent()
 			: m_scale(1, 1, 1), m_rotation(0, 0, 0, 0), m_position(0, 0, 0) { }
 
-		void SetRotation(const LinearAlgebra::Quaternion& newRotation)
+		void SetRotation(const Quaternion& newRotation)
 		{
 			m_rotation = newRotation;
 		}
-		LinearAlgebra::Quaternion GetRotation() const
+		Quaternion GetRotation() const
 		{
 			return m_rotation;
 		}
 
-		void SetScale(const LinearAlgebra::Vec3& newScale)
+		void SetScale(const Vec3& newScale)
 		{
 			m_scale = newScale;
 		}
-		LinearAlgebra::Vec3 GetScale() const
+		Vec3 GetScale() const
 		{
 			return m_scale;
 		}
 
-		void SetPosition(const LinearAlgebra::Vec3& newPosition)
+		void SetPosition(const Vec3& newPosition)
 		{
 			m_position = newPosition;
 		}
-		LinearAlgebra::Vec3 GetPosition() const
+		Vec3 GetPosition() const
 		{
 			return m_position;
 		}

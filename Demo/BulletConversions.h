@@ -9,11 +9,11 @@ namespace GameEngine
 {
 	namespace PhysicsEngine
 	{
-		LinearAlgebra::Vec3 btVector3_to_Vec3(const btVector3& vec);
-		btVector3 Vec3_to_btVector3(const LinearAlgebra::Vec3& vec);
+		Vec3 btVector3_to_Vec3(const btVector3& vec);
+		btVector3 Vec3_to_btVector3(const Vec3& vec);
 
-		LinearAlgebra::Quaternion btQuaternion_to_Quaternion(const btQuaternion& quat);
-		btQuaternion Quaternion_to_btQuaternion(const LinearAlgebra::Quaternion& quat);
+		Quaternion btQuaternion_to_Quaternion(const btQuaternion& quat);
+		btQuaternion Quaternion_to_btQuaternion(const Quaternion& quat);
 	}
 }
 

@@ -34,9 +34,9 @@ namespace GameEngine
 				DRIVER_TYPE driverType, CAMERA_TYPE cameraType) = 0;
 			virtual void DrawScene() = 0;
 
-			virtual void SetCameraPosition(LinearAlgebra::Vec3& newPosition) = 0;
-			virtual void SetCameraTarget(LinearAlgebra::Vec3& newTarget) = 0;
-			virtual void SetCameraProjection(LinearAlgebra::Mat4& newProjection) = 0;
+			virtual void SetCameraPosition(Vec3& newPosition) = 0;
+			virtual void SetCameraTarget(Vec3& newTarget) = 0;
+			virtual void SetCameraProjection(Mat4& newProjection) = 0;
 
 			// Returns a unique id that can be used to refer to the texture.
 			// Returns 0 if loading fails.

@@ -25,14 +25,6 @@ namespace GameEngine
 		class BulletDebugRenderer;
 	}
 
-	namespace LinearAlgebra
-	{
-		class Mat4;
-		class Vec3;
-
-		struct Mat4Impl;
-	}
-
 	namespace Events
 	{
 		class IEventManager;
@@ -49,6 +41,9 @@ namespace GameEngine
 	typedef std::weak_ptr<GameActor> WeakActorPtr;
 	typedef unsigned int ActorID;
 	class WorldTransformComponent;
+
+	class Mat4;
+	class Vec3;
 
 	class Game;
 	class GameData;

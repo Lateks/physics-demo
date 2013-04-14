@@ -9,7 +9,6 @@
 
 namespace GameEngine
 {
-	using LinearAlgebra::Vec3;
 	using Display::IRenderer;
 
 	void SetupGameActors(GameData *game)

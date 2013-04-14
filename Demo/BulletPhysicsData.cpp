@@ -11,8 +11,6 @@
 
 namespace GameEngine
 {
-	using LinearAlgebra::Mat4;
-
 	namespace PhysicsEngine
 	{
 		btRigidBody *BulletPhysicsData::GetRigidBody(ActorID id) const
@@ -26,8 +24,7 @@ namespace GameEngine
 		bool BulletPhysicsData::VInitializeSystems()
 		{
 			m_physicsMaterialData = new XMLPhysicsData();
-			// TODO: does this need to be ../assets/materials.xml?
-			m_physicsMaterialData->LoadDataFromXML("assets/materials.xml");
+			m_physicsMaterialData->LoadDataFromXML("..\assets\materials.xml");
 
 			SetupSystems();
 

@@ -14,12 +14,8 @@
 using std::shared_ptr;
 using std::weak_ptr;
 
-// TODO
 namespace GameEngine
 {
-	using LinearAlgebra::Mat4;
-	using LinearAlgebra::Vec3;
-	using LinearAlgebra::Quaternion;
 
 	namespace PhysicsEngine
 	{
@@ -113,7 +109,7 @@ namespace GameEngine
 			m_pData->AddShape(pStrongActor, boxShape, mass, material);
 		}
 
-		void BulletPhysics::VAddConvexMesh(std::vector<LinearAlgebra::Vec3>& vertices,
+		void BulletPhysics::VAddConvexMesh(std::vector<Vec3>& vertices,
 				WeakActorPtr pActor, const std::string& density, const std::string& material)
 		{
 			if (pActor.expired())

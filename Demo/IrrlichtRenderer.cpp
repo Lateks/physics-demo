@@ -22,10 +22,6 @@ using irr::video::ITexture;
 using irr::scene::ISceneManager;
 using irr::scene::ISceneNode;
 
-using GameEngine::LinearAlgebra::Vec3;
-using GameEngine::LinearAlgebra::Mat4;
-using GameEngine::LinearAlgebra::Quaternion;
-
 using std::weak_ptr;
 using std::shared_ptr;
 

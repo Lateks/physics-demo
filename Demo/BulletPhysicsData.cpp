@@ -289,6 +289,9 @@ namespace GameEngine
 			auto pEventManager = pGameData->GetEventManager();
 			assert(pEventManager);
 
+			std::shared_ptr<Events::IEventData> event;
+			// Only triggers have a user pointer, so we use this
+			// to distinguish them from other actors.
 			if (pBody1->getUserPointer() || pBody2->getUserPointer())
 			{
 				ActorID triggerId, actorId;
@@ -302,13 +305,33 @@ namespace GameEngine
 					triggerId = GetActorID(pBody2);
 					actorId = GetActorID(pBody1);
 				}
-				std::shared_ptr<Events::TriggerEntryEvent> event;
 				event.reset(new Events::TriggerEntryEvent(pGameData->CurrentTime() / 1000.0f,
 					triggerId, actorId));
 				pEventManager->QueueEvent(event);
 			}
 			else // not a trigger event
 			{
+				ActorID id1 = GetActorID(pBody1);
+				ActorID id2 = GetActorID(pBody2);
+				if (id1 == 0 || id2 == 0)
+					return;
+
+				std::vector<Vec3> collisionPoints;
+				btVector3 sumNormalForce;
+				btVector3 sumFrictionForce;
+
+				for (int i = 1; i < manifold->getNumContacts(); ++i)
+				{
+					const btManifoldPoint &point = manifold->getContactPoint(i);
+					collisionPoints.push_back(btVector3_to_Vec3(point.getPositionWorldOnB()));
+
+					sumNormalForce += point.m_combinedRestitution * point.m_normalWorldOnB;
+					sumFrictionForce += point.m_combinedFriction * point.m_lateralFrictionDir1;
+				}
+				event.reset(new Events::ActorCollideEvent(pGameData->CurrentTime() / 1000.0f,
+					id1, id2, collisionPoints, btVector3_to_Vec3(sumNormalForce),
+					btVector3_to_Vec3(sumFrictionForce)));
+				pEventManager->QueueEvent(event);
 			}
 		}
 

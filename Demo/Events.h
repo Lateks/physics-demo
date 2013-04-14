@@ -2,6 +2,7 @@
 #define EVENTS_H
 
 #include "enginefwd.h"
+#include "Vec3.h"
 #include "IEventManager.h"
 
 namespace GameEngine
@@ -26,25 +27,52 @@ namespace GameEngine
 			CollisionEvent(const float timeStamp, ActorID first, ActorID second)
 				: BaseEventData(timeStamp), m_collisionPair(first, second) { }
 			virtual ~CollisionEvent() { };
-			virtual EventType GetEventType() const override
-			{
-				return eventType;
-			}
 			std::pair<ActorID, ActorID> GetCollisionPair()
 			{
 				return m_collisionPair;
 			}
 		private:
-			const static EventType eventType = EventType::COLLISION_EVENT;
 			const std::pair<ActorID, ActorID> m_collisionPair;
 		};
 
-		class SeparationEvent : public CollisionEvent
+		class ActorCollideEvent : public CollisionEvent
 		{
 		public:
-			SeparationEvent(const float timeStamp, ActorID first, ActorID second)
+			ActorCollideEvent(const float timeStamp, ActorID first, ActorID second,
+				std::vector<Vec3> collisionManifold, Vec3 sumNormalForce, Vec3 sumFrictionForce)
+				: CollisionEvent(timeStamp, first, second), m_collisionManifold(collisionManifold),
+				m_sumNormalForce(sumNormalForce), m_sumFrictionForce(sumFrictionForce)
+			{ }
+			virtual ~ActorCollideEvent() { };
+			virtual EventType GetEventType() const override
+			{
+				return eventType;
+			}
+			const std::vector<Vec3>& GetCollisionPoints()
+			{
+				return m_collisionManifold;
+			}
+			const Vec3 GetSumNormalForce()
+			{
+				return m_sumNormalForce;
+			}
+			const Vec3 GetSumFrictionForce()
+			{
+				return m_sumFrictionForce;
+			}
+		private:
+			const static EventType eventType = EventType::COLLISION_EVENT;
+			std::vector<Vec3> m_collisionManifold;
+			Vec3 m_sumNormalForce;
+			Vec3 m_sumFrictionForce;
+		};
+
+		class ActorSeparationEvent : public CollisionEvent
+		{
+		public:
+			ActorSeparationEvent(const float timeStamp, ActorID first, ActorID second)
 				: CollisionEvent(timeStamp, first, second) { }
-			virtual ~SeparationEvent() { };
+			virtual ~ActorSeparationEvent() { };
 			virtual EventType GetEventType() const override
 			{
 				return eventType;

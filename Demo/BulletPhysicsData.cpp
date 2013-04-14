@@ -1,4 +1,5 @@
 #include "BulletPhysicsData.h"
+#include "BulletPhysics.h"
 #include "BulletDebugRenderer.h"
 #include "GameActor.h"
 #include "WorldTransformComponent.h"
@@ -132,7 +133,66 @@ namespace GameEngine
 		void BulletPhysicsData::BulletInternalTickCallback(
 			btDynamicsWorld * const pWorld, const btScalar timeStep)
 		{
-			// TODO
+			assert(pWorld);
+			assert(pWorld->getWorldUserInfo());
+			BulletPhysics * const pBulletPhysics =
+				static_cast<BulletPhysics*>(pWorld->getWorldUserInfo());
+			BulletPhysicsData * const pData = pBulletPhysics->m_pData;
+
+			btDispatcher *const pDispatcher = pWorld->getDispatcher();
+			CollisionPairs currentTickCollisions;
+			HandleNewCollisions(pData, pDispatcher, currentTickCollisions);
+
+			// Get collisions that existed on the last tick but not on this tick.
+			CollisionPairs removedCollisions;
+			std::set_difference(pData->m_PreviousTickCollisions.begin(),
+								pData->m_PreviousTickCollisions.end(),
+								currentTickCollisions.begin(), currentTickCollisions.end(),
+								std::inserter(removedCollisions, removedCollisions.begin()));
+
+			std::for_each(removedCollisions.begin(), removedCollisions.end(),
+				[&pData] (const CollisionPair& pair)
+			{
+				const btRigidBody * const body1 = pair.first;
+				const btRigidBody * const body2 = pair.second;
+
+				pData->SendSeparationEvent(body1, body2);
+			});
+
+			pData->m_PreviousTickCollisions = currentTickCollisions;
+		}
+
+		void BulletPhysicsData::HandleNewCollisions(BulletPhysicsData *pData,
+			btDispatcher *pDispatcher, CollisionPairs& currentTickCollisions)
+		{
+			for (int manifoldIdx = 0; manifoldIdx<pDispatcher->getNumManifolds(); ++manifoldIdx)
+			{
+				const btPersistentManifold * const pContactPoint =
+					pDispatcher->getManifoldByIndexInternal(manifoldIdx);
+				assert(pContactPoint);
+				if (!pContactPoint)
+					continue;
+
+				const btRigidBody * body1 =
+					static_cast<btRigidBody const *>(pContactPoint->getBody0());
+				const btRigidBody * body2 =
+					static_cast<btRigidBody const *>(pContactPoint->getBody1());
+
+				if (body1 > body2)
+				{
+					// TODO: does this work right? (swaps the pointers, not their contents)
+					std::swap(body1, body2);
+				}
+
+				const CollisionPair newPair = std::make_pair(body1, body2);
+				currentTickCollisions.insert(newPair);
+
+				if (pData->m_PreviousTickCollisions.find(newPair)
+					== pData->m_PreviousTickCollisions.end())
+				{
+					pData->SendNewCollisionEvent(pContactPoint, body1, body2);
+				}
+			}
 		}
 
 		void BulletPhysicsData::AddShape(StrongActorPtr pActor, btCollisionShape *shape,
@@ -206,6 +266,17 @@ namespace GameEngine
 			btVector3 translation(Vec3_to_btVector3(pWorldTransform->GetPosition()));
 			btTransform transform(rotation, translation);
 			return new btDefaultMotionState(transform);
+		}
+
+		void BulletPhysicsData::SendNewCollisionEvent(const btPersistentManifold * manifold,
+			const btRigidBody * pBody1, const btRigidBody * pBody2)
+		{
+			// TODO
+		}
+
+		void BulletPhysicsData::SendSeparationEvent(const btRigidBody * pBody1, const btRigidBody * pBody2)
+		{
+			// TODO
 		}
 	}
 }

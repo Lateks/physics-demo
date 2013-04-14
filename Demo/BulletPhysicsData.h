@@ -60,6 +60,8 @@ namespace GameEngine
 			void SetupSystems();
 			void CleanUpRigidBodies();
 			void CleanUpSystems();
+			static void HandleNewCollisions(BulletPhysicsData *pData, btDispatcher *pDispatcher,
+				CollisionPairs& currentTickCollisions);
 			btMotionState *GetMotionStateFrom(std::shared_ptr<WorldTransformComponent> transform);
 		};
 	}

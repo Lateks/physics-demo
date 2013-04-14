@@ -188,5 +188,8 @@
     <ClCompile Include="BulletConversions.cpp">
       <Filter>Source Files\Physics</Filter>
     </ClCompile>
+    <ClCompile Include="BulletDebugRenderer.cpp">
+      <Filter>Source Files\Physics</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

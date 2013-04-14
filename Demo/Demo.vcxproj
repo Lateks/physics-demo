@@ -119,6 +119,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BulletConversions.cpp" />
+    <ClCompile Include="BulletDebugRenderer.cpp" />
     <ClCompile Include="BulletPhysics.cpp" />
     <ClCompile Include="BulletPhysicsData.cpp" />
     <ClCompile Include="EventManager.cpp" />

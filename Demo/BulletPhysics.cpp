@@ -149,6 +149,7 @@ namespace GameEngine
 
 		void BulletPhysics::VRenderDiagnostics()
 		{
+			//m_pData->m_pDynamicsWorld->debugDrawWorld();
 		}
 		
 		void BulletPhysics::VRemoveActor(ActorID id)

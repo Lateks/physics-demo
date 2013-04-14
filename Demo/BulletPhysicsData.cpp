@@ -15,6 +15,14 @@ namespace GameEngine
 
 	namespace PhysicsEngine
 	{
+		btRigidBody *BulletPhysicsData::GetRigidBody(ActorID id) const
+		{
+			auto it = m_actorToRigidBodyMap.find(id);
+			if (it != m_actorToRigidBodyMap.end())
+				return it->second;
+			return nullptr;
+		}
+
 		bool BulletPhysicsData::VInitializeSystems()
 		{
 			m_physicsMaterialData = new XMLPhysicsData();
@@ -88,6 +96,7 @@ namespace GameEngine
 			m_rigidBodyToActorMap.clear();
 		}
 
+		// Removes the collision pairs that contain the given collision object.
 		void BulletPhysicsData::RemoveCollisionObject(btCollisionObject *obj)
 		{
 			for (auto it = m_PreviousTickCollisions.begin(); it != m_PreviousTickCollisions.end(); )

@@ -38,7 +38,7 @@ namespace GameEngine
 			XMLPhysicsData *m_physicsMaterialData;
 
 			// Store the rigid bodies related to game actors.
-			std::map<ActorID, const btRigidBody*> m_actorToRigidBodyMap;
+			std::map<ActorID, btRigidBody*> m_actorToRigidBodyMap;
 			std::map<const btRigidBody*, ActorID> m_rigidBodyToActorMap;
 			btRigidBody *GetRigidBody(ActorID id) const;
 			ActorID GetActorID(btRigidBody const *pBody) const;

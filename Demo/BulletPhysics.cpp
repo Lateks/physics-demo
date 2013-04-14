@@ -157,6 +157,13 @@ namespace GameEngine
 		
 		void BulletPhysics::VRemoveActor(ActorID id)
 		{
+			btRigidBody *body = m_pData->GetRigidBody(id);
+			if (body)
+			{
+				m_pData->RemoveCollisionObject(body);
+				m_pData->m_actorToRigidBodyMap.erase(id);
+				m_pData->m_rigidBodyToActorMap.erase(body);
+			}
 		}
 	}
 }

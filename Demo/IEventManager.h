@@ -12,7 +12,7 @@ namespace GameEngine
 		// the physics system and other parts of the game engine.
 		// Would need to be extended in an actual, more fleshed
 		// out game engine.
-		enum EventType
+		enum class EventType
 		{
 			COLLISION_EVENT,
 			SEPARATION_EVENT,

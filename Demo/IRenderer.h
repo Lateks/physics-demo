@@ -8,7 +8,7 @@ namespace GameEngine
 {
 	namespace Display
 	{
-		enum DRIVER_TYPE
+		enum class DRIVER_TYPE
 		{
 			OPEN_GL,
 			DIRECT_3D8,
@@ -16,7 +16,7 @@ namespace GameEngine
 			SOFTWARE
 		};
 
-		enum CAMERA_TYPE
+		enum class CAMERA_TYPE
 		{
 			FPS,
 			STATIC

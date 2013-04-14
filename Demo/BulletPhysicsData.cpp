@@ -137,21 +137,18 @@ namespace GameEngine
 			ActorID id = pActor->GetID();
 			assert(m_actorToRigidBodyMap.find(id) == m_actorToRigidBodyMap.end());
 
-			MaterialData matData(m_physicsMaterialData->LookupMaterial(material));
-
-			btVector3 localInertia;
-			if (mass > 0.f)
-				shape->calculateLocalInertia(mass, localInertia);
-
 			std::weak_ptr<WorldTransformComponent> pWeakWorldTransform
 				= pActor->GetWorldTransform();
 			if (!pWeakWorldTransform.expired())
 			{
 				std::shared_ptr<WorldTransformComponent> pWorldTransform(pWeakWorldTransform);
-				btQuaternion rotation(Quaternion_to_btQuaternion(pWorldTransform->GetRotation()));
-				btVector3 translation(Vec3_to_btVector3(pWorldTransform->GetPosition()));
-				btTransform transform(rotation, translation);
-				btMotionState *motionState = new btDefaultMotionState(transform);
+				btMotionState *motionState = GetMotionStateFrom(pWorldTransform);
+
+				MaterialData matData(m_physicsMaterialData->LookupMaterial(material));
+
+				btVector3 localInertia;
+				if (mass > 0.f)
+					shape->calculateLocalInertia(mass, localInertia);
 
 				btRigidBody::btRigidBodyConstructionInfo rbInfo(
 					mass, motionState, shape, localInertia);
@@ -165,6 +162,44 @@ namespace GameEngine
 				m_actorToRigidBodyMap[id] = body;
 				m_rigidBodyToActorMap[body] = id;
 			}
+		}
+
+		void BulletPhysicsData::AddTriggerShape(StrongActorPtr pActor, btCollisionShape *shape)
+		{
+			assert(pActor.get());
+			ActorID id = pActor->GetID();
+			assert(m_actorToRigidBodyMap.find(id) == m_actorToRigidBodyMap.end());
+
+			std::weak_ptr<WorldTransformComponent> pWeakWorldTransform
+				= pActor->GetWorldTransform();
+			if (!pWeakWorldTransform.expired())
+			{
+				std::shared_ptr<WorldTransformComponent> pWorldTransform(pWeakWorldTransform);
+				btMotionState *motionState = GetMotionStateFrom(pWorldTransform);
+
+				// Objects that have 0 mass are regarded as immovable by Bullet.
+				btScalar const mass = 0;
+				btRigidBody::btRigidBodyConstructionInfo rbInfo(
+					mass, motionState, shape, btVector3(0, 0, 0));
+				btRigidBody * const body = new btRigidBody(rbInfo);
+
+				m_pDynamicsWorld->addRigidBody(body);
+
+				// Triggers should not be taken into account in collision detection.
+				body->setCollisionFlags(
+					body->getCollisionFlags() | btRigidBody::CF_NO_CONTACT_RESPONSE);
+
+				m_actorToRigidBodyMap[id] = body;
+				m_rigidBodyToActorMap[body] = id;
+			}
+		}
+
+		btMotionState *BulletPhysicsData::GetMotionStateFrom(std::shared_ptr<WorldTransformComponent> pWorldTransform)
+		{
+			btQuaternion rotation(Quaternion_to_btQuaternion(pWorldTransform->GetRotation()));
+			btVector3 translation(Vec3_to_btVector3(pWorldTransform->GetPosition()));
+			btTransform transform(rotation, translation);
+			return new btDefaultMotionState(transform);
 		}
 	}
 }

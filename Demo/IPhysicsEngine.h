@@ -38,7 +38,7 @@ namespace GameEngine
 			virtual void VRenderDiagnostics() = 0;
 
 			// TODO: physics world modifiers here (see book, page 589)
-			virtual void VCreateTrigger(WeakActorPtr gameActor, const LinearAlgebra::Vec3& pos, const float dim) = 0;
+			virtual void VCreateTrigger(WeakActorPtr gameActor, const float dim) = 0;
 		};
 	}
 }

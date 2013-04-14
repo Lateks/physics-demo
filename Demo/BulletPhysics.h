@@ -29,8 +29,7 @@ namespace GameEngine
 
 			virtual void VRenderDiagnostics() override;
 
-			virtual void VCreateTrigger(WeakActorPtr pActor, const LinearAlgebra::Vec3& pos,
-				const float dim) override;
+			virtual void VCreateTrigger(WeakActorPtr pActor, const float dim) override;
 		private:
 			// The VS11 C++ compiler does not yet support deleting
 			// constructors, so make these private to make the class

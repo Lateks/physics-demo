@@ -137,9 +137,18 @@ namespace GameEngine
 			m_pData->AddShape(pStrongActor, convexShape, mass, material);
 		}
 
-		void BulletPhysics::VCreateTrigger(WeakActorPtr pActor,
-			const Vec3& pos, const float dim)
+		void BulletPhysics::VCreateTrigger(WeakActorPtr pActor, const float dim)
 		{
+			if (pActor.expired())
+				return;
+			StrongActorPtr pStrongActor(pActor);
+
+			// Create a cube-shaped trigger area. Of course, this could really
+			// be any convex shape. The common functionality associated with
+			// adding triggers of any shape is in BulletPhysicsData::AddTriggerShape.
+			btBoxShape * const boxShape =
+				new btBoxShape(Vec3_to_btVector3(Vec3(dim, dim, dim)));
+			m_pData->AddTriggerShape(pStrongActor, boxShape);
 		}
 
 		void BulletPhysics::VRenderDiagnostics()

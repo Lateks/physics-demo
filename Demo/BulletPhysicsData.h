@@ -51,6 +51,7 @@ namespace GameEngine
 
 			void AddShape(StrongActorPtr pActor, btCollisionShape *shape,
 				float mass, const std::string& physicsMaterial);
+			void AddTriggerShape(StrongActorPtr pActor, btCollisionShape *shape);
 
 			void RemoveCollisionObject(btCollisionObject *obj);
 
@@ -59,6 +60,7 @@ namespace GameEngine
 			void SetupSystems();
 			void CleanUpRigidBodies();
 			void CleanUpSystems();
+			btMotionState *GetMotionStateFrom(std::shared_ptr<WorldTransformComponent> transform);
 		};
 	}
 }

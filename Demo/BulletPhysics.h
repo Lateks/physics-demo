@@ -30,6 +30,10 @@ namespace GameEngine
 			virtual void VRenderDiagnostics() override;
 
 			virtual void VCreateTrigger(WeakActorPtr pActor, const float dim) override;
+			virtual void VApplyForce(const LinearAlgebra::Vec3& direction, float newtons, ActorID id) override;
+			virtual void VApplyTorque(const LinearAlgebra::Vec3& direction, float magnitude, ActorID id) override;
+			virtual void VStopActor(ActorID id) override;
+			virtual void VSetVelocity(ActorID id, const LinearAlgebra::Vec3& newVelocity) override;
 		private:
 			// The VS11 C++ compiler does not yet support deleting
 			// constructors, so make these private to make the class

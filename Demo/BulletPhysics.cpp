@@ -165,5 +165,43 @@ namespace GameEngine
 				m_pData->m_rigidBodyToActorMap.erase(body);
 			}
 		}
+
+		void BulletPhysics::VApplyForce(const Vec3& direction, float newtons, ActorID id)
+		{
+			btRigidBody *body = m_pData->GetRigidBody(id);
+			// Could e.g. log an error if the body is not found.
+			if (body)
+			{
+				const btVector3 force(direction.x() * newtons,
+					direction.y() * newtons, direction.z() * newtons);
+				body->applyCentralImpulse(force);
+			}
+		}
+
+		void BulletPhysics::VApplyTorque(const Vec3& direction, float magnitude, ActorID id)
+		{
+			btRigidBody *body = m_pData->GetRigidBody(id);
+			if (body)
+			{
+				const btVector3 torque(direction.x() * magnitude,
+					direction.y() * magnitude, direction.z() * magnitude);
+				body->applyTorqueImpulse(torque);
+			}
+		}
+
+		void BulletPhysics::VStopActor(ActorID id)
+		{
+			VSetVelocity(id, Vec3(0, 0, 0));
+		}
+
+		void BulletPhysics::VSetVelocity(ActorID id, const Vec3& newVelocity)
+		{
+			btRigidBody *body = m_pData->GetRigidBody(id);
+			if (body)
+			{
+				const btVector3 velocity(newVelocity.x(), newVelocity.y(), newVelocity.z());
+				body->setLinearVelocity(velocity);
+			}
+		}
 	}
 }

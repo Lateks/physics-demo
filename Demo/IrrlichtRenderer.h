@@ -33,6 +33,8 @@ namespace GameEngine
 			virtual void AddCubeSceneNode(float dim, ActorID actorId, unsigned int texture, bool debug = false) override;
 			virtual void AddMeshSceneNode(const std::string& meshFilePath, ActorID actorId, unsigned int texture = 0, bool debug = false) override;
 			virtual void RemoveSceneNode(ActorID actorId, bool debug = false) override;
+
+			virtual void LoadMap(const std::string& mapFilePath, const std::string& meshName, Vec3& position) override;
 		private:
 			IrrlichtRendererImpl *m_pData;
 			void UpdateActorPositions();

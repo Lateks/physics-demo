@@ -12,15 +12,19 @@
 #include <cassert>
 #include <memory>
 
-using irr::video::SColor;
 using irr::u32;
+
+using irr::video::SColor;
+using irr::video::E_DRIVER_TYPE;
+using irr::video::ITexture;
+
 using irr::core::vector3df;
 using irr::core::matrix4;
 using irr::core::quaternion;
-using irr::video::E_DRIVER_TYPE;
-using irr::video::ITexture;
+
 using irr::scene::ISceneManager;
 using irr::scene::ISceneNode;
+using irr::scene::IAnimatedMesh;
 
 using std::weak_ptr;
 using std::shared_ptr;
@@ -267,6 +271,27 @@ namespace GameEngine
 			if (node)
 			{
 				node->remove();
+			}
+		}
+
+		void IrrlichtRenderer::LoadMap(const std::string& mapFilePath,
+			const std::string& meshName, Vec3& position)
+		{
+			if (!m_pData->m_pDevice || !m_pData->m_pSmgr)
+				return;
+			m_pData->m_pDevice->getFileSystem()->addFileArchive(mapFilePath.c_str());
+
+			ISceneManager *pSmgr = m_pData->m_pSmgr;
+			IAnimatedMesh *mesh = pSmgr->getMesh(meshName.c_str());
+			ISceneNode *node = nullptr;
+
+			if (mesh)
+			{
+				node = pSmgr->addOctreeSceneNode(mesh->getMesh(0), 0, -1, 1024);
+			}
+			if (node)
+			{
+				node->setPosition(ConvertVector(position));
 			}
 		}
 	}

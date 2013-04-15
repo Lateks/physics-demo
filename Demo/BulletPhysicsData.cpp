@@ -37,7 +37,7 @@ namespace GameEngine
 		bool BulletPhysicsData::VInitializeSystems()
 		{
 			m_physicsMaterialData = new XMLPhysicsData();
-			m_physicsMaterialData->LoadDataFromXML("..\assets\materials.xml");
+			m_physicsMaterialData->LoadDataFromXML("..\\assets\\materials.xml");
 
 			SetupSystems();
 
@@ -294,7 +294,7 @@ namespace GameEngine
 			// to distinguish them from other actors.
 			if (pBody1->getUserPointer() || pBody2->getUserPointer())
 			{
-				bool firstIsTrigger = pBody1->getUserPointer();
+				bool firstIsTrigger = pBody1->getUserPointer() != nullptr;
 				ActorID triggerId = firstIsTrigger ? GetActorID(pBody1) : GetActorID(pBody2);
 				ActorID actorId = firstIsTrigger ? GetActorID(pBody2) : GetActorID(pBody1);
 				event.reset(new Events::TriggerEntryEvent(pGameData->CurrentTimeSec(),
@@ -336,7 +336,7 @@ namespace GameEngine
 			std::shared_ptr<Events::IEventData> event;
 			if (pBody1->getUserPointer() || pBody2->getUserPointer())
 			{
-				bool firstIsTrigger = pBody1->getUserPointer();
+				bool firstIsTrigger = pBody1->getUserPointer() != nullptr;
 				ActorID triggerId = firstIsTrigger ? GetActorID(pBody1) : GetActorID(pBody2);
 				ActorID actorId = firstIsTrigger ? GetActorID(pBody2) : GetActorID(pBody1);
 				event.reset(new Events::TriggerExitEvent(pGameData->CurrentTimeSec(),

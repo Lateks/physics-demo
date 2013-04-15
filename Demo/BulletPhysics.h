@@ -11,8 +11,6 @@ namespace GameEngine
 		class BulletPhysics : public IPhysicsEngine
 		{
 		public:
-			friend BulletPhysicsData;
-
 			BulletPhysics();
 			virtual ~BulletPhysics();
 			

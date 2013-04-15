@@ -20,6 +20,7 @@ namespace GameEngine
 
 		struct BulletPhysicsData
 		{
+		public:
 			BulletPhysicsData()
 				: m_pDynamicsWorld(nullptr), m_pCollisionBroadPhase(nullptr),
 				m_pCollisionDispatcher(nullptr), m_pCollisionConfig(nullptr),
@@ -43,7 +44,7 @@ namespace GameEngine
 			btRigidBody *GetRigidBody(ActorID id) const;
 			ActorID GetActorID(const btRigidBody *pBody) const;
 
-			CollisionPairs m_PreviousTickCollisions;
+			CollisionPairs m_previousTickCollisions;
 
 			void SendNewCollisionEvent(const btPersistentManifold * manifold,
 				const btRigidBody * pBody1, const btRigidBody * pBody2);
@@ -57,11 +58,11 @@ namespace GameEngine
 
 			static void BulletInternalTickCallback(btDynamicsWorld * const pWorld, const btScalar timeStep);
 		private:
+			void HandleCallback();
 			void SetupSystems();
 			void CleanUpRigidBodies();
 			void CleanUpSystems();
-			static void HandleNewCollisions(BulletPhysicsData *pData, btDispatcher *pDispatcher,
-				CollisionPairs& currentTickCollisions);
+			void HandleNewCollisions(CollisionPairs& currentTickCollisions);
 			btMotionState *GetMotionStateFrom(std::shared_ptr<WorldTransformComponent> transform);
 		};
 	}

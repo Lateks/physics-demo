@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <memory>
 #include <cassert>
+#include <iostream>
 
 namespace GameEngine
 {
@@ -79,7 +80,7 @@ namespace GameEngine
 				m_pCollisionDispatcher, m_pCollisionBroadPhase,
 				m_pConstraintSolver, m_pCollisionConfig);
 
-			m_pDebugRenderer = new BulletDebugRenderer();
+			//m_pDebugRenderer = new BulletDebugRenderer();
 		}
 
 		void BulletPhysicsData::CleanUpSystems()
@@ -109,11 +110,11 @@ namespace GameEngine
 		// Removes the collision pairs that contain the given collision object.
 		void BulletPhysicsData::RemoveCollisionObject(btCollisionObject *obj)
 		{
-			for (auto it = m_PreviousTickCollisions.begin(); it != m_PreviousTickCollisions.end(); )
+			for (auto it = m_previousTickCollisions.begin(); it != m_previousTickCollisions.end(); )
 			{
 				if ((*it).first == obj || (*it).second == obj)
 				{
-					m_PreviousTickCollisions.erase(it++);
+					m_previousTickCollisions.erase(it++);
 				}
 				else
 				{
@@ -147,40 +148,41 @@ namespace GameEngine
 		{
 			assert(pWorld);
 			assert(pWorld->getWorldUserInfo());
-			BulletPhysics * const pBulletPhysics =
-				static_cast<BulletPhysics*>(pWorld->getWorldUserInfo());
-			BulletPhysicsData * const pData = pBulletPhysics->m_pData;
+			BulletPhysicsData * const pBulletPhysics =
+				static_cast<BulletPhysicsData*>(pWorld->getWorldUserInfo());
+			pBulletPhysics->HandleCallback();
+		}
 
-			btDispatcher *const pDispatcher = pWorld->getDispatcher();
+		void BulletPhysicsData::HandleCallback()
+		{
 			CollisionPairs currentTickCollisions;
-			HandleNewCollisions(pData, pDispatcher, currentTickCollisions);
+			HandleNewCollisions(currentTickCollisions);
 
 			// Get collisions that existed on the last tick but not on this tick.
 			CollisionPairs removedCollisions;
-			std::set_difference(pData->m_PreviousTickCollisions.begin(),
-								pData->m_PreviousTickCollisions.end(),
+			std::set_difference(m_previousTickCollisions.begin(),
+								m_previousTickCollisions.end(),
 								currentTickCollisions.begin(), currentTickCollisions.end(),
-								std::inserter(removedCollisions, removedCollisions.begin()));
+								std::inserter(removedCollisions, removedCollisions.end()));
 
 			std::for_each(removedCollisions.begin(), removedCollisions.end(),
-				[&pData] (const CollisionPair& pair)
+				[this] (const CollisionPair& pair)
 			{
 				const btRigidBody * const body1 = pair.first;
 				const btRigidBody * const body2 = pair.second;
 
-				pData->SendSeparationEvent(body1, body2);
+				this->SendSeparationEvent(body1, body2);
 			});
 
-			pData->m_PreviousTickCollisions = currentTickCollisions;
+			m_previousTickCollisions = currentTickCollisions;
 		}
 
-		void BulletPhysicsData::HandleNewCollisions(BulletPhysicsData *pData,
-			btDispatcher *pDispatcher, CollisionPairs& currentTickCollisions)
+		void BulletPhysicsData::HandleNewCollisions(CollisionPairs& currentTickCollisions)
 		{
-			for (int manifoldIdx = 0; manifoldIdx<pDispatcher->getNumManifolds(); ++manifoldIdx)
+			for (int manifoldIdx = 0; manifoldIdx < m_pCollisionDispatcher->getNumManifolds(); ++manifoldIdx)
 			{
 				const btPersistentManifold * const pContactPoint =
-					pDispatcher->getManifoldByIndexInternal(manifoldIdx);
+					m_pCollisionDispatcher->getManifoldByIndexInternal(manifoldIdx);
 				assert(pContactPoint);
 				if (!pContactPoint)
 					continue;
@@ -199,10 +201,9 @@ namespace GameEngine
 				const CollisionPair newPair = std::make_pair(body1, body2);
 				currentTickCollisions.insert(newPair);
 
-				if (pData->m_PreviousTickCollisions.find(newPair)
-					== pData->m_PreviousTickCollisions.end())
+				if (m_previousTickCollisions.find(newPair) == m_previousTickCollisions.end())
 				{
-					pData->SendNewCollisionEvent(pContactPoint, body1, body2);
+					SendNewCollisionEvent(pContactPoint, body1, body2);
 				}
 			}
 		}

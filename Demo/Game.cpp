@@ -139,7 +139,7 @@ namespace GameEngine
 		{
 			if (renderer->WindowActive())
 			{
-				//physics->VUpdateSimulation(frameDeltaSec);
+				physics->VUpdateSimulation(frameDeltaSec);
 				//physics->VSyncScene();
 				// TODO: handle inputs
 				renderer->DrawScene();

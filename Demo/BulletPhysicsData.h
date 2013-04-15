@@ -6,6 +6,7 @@
 #include <btBulletDynamicsCommon.h>
 #include <map>
 #include <set>
+#include <vector>
 
 /* This is mostly from the McShaffry chapter on integrating
  * the Bullet SDK (the private parts of the BulletPhysics class
@@ -38,10 +39,15 @@ namespace GameEngine
 
 			XMLPhysicsData *m_physicsMaterialData;
 
-			// Store the rigid bodies related to game actors.
-			std::map<ActorID, btRigidBody*> m_actorToRigidBodyMap;
+			/* Store the rigid bodies related to game actors.
+			 * Several rigid bodies can be related to a single actor, but only
+			 * a single actor may be related to any rigid body. At the moment
+			 * only "static" actors (basically map elements) can own several
+			 * rigid bodies.
+			 */
+			std::map<ActorID, std::vector<btRigidBody*>> m_actorToRigidBodyListMap;
 			std::map<const btRigidBody*, ActorID> m_rigidBodyToActorMap;
-			btRigidBody *GetRigidBody(ActorID id) const;
+			std::vector<btRigidBody*> GetRigidBodies(ActorID id) const;
 			ActorID GetActorID(const btRigidBody *pBody) const;
 
 			CollisionPairs m_previousTickCollisions;
@@ -52,7 +58,7 @@ namespace GameEngine
 
 			void AddShape(StrongActorPtr pActor, btCollisionShape *shape,
 				float mass, const std::string& physicsMaterial);
-			void AddTriggerShape(StrongActorPtr pActor, btCollisionShape *shape);
+			void AddStaticColliderShape(StrongActorPtr pActor, btCollisionShape *shape, bool trigger = false);
 
 			void RemoveCollisionObject(btCollisionObject *obj);
 

@@ -8,6 +8,7 @@
 #include "Events.h"
 #include "BulletConversions.h"
 #include <cassert>
+#include <vector>
 #include <memory>
 #include <algorithm>
 
@@ -35,11 +36,15 @@ namespace GameEngine
 		void BulletPhysics::VSyncScene()
 		{
 			GameData *game = GameData::getInstance();
-			for (auto it = m_pData->m_actorToRigidBodyMap.begin();
-				      it != m_pData->m_actorToRigidBodyMap.end(); it++)
+			for (auto it = m_pData->m_actorToRigidBodyListMap.begin();
+				      it != m_pData->m_actorToRigidBodyListMap.end(); it++)
 			{
 				ActorID id = it->first;
-				const btRigidBody *body = it->second;
+				std::vector<btRigidBody*> bodies = it->second;
+				if (bodies.size() > 1)
+					continue; // do not update static actors
+
+				const btRigidBody *body = bodies[0];
 				const Quaternion rot = btQuaternion_to_Quaternion(body->getOrientation());
 				const Vec3 pos = btVector3_to_Vec3(body->getCenterOfMassPosition());
 
@@ -136,6 +141,18 @@ namespace GameEngine
 			m_pData->AddShape(pStrongActor, convexShape, mass, material);
 		}
 
+		void BulletPhysics::VAddConvexStaticColliderMesh(std::vector<Vec3>& vertices, WeakActorPtr pActor)
+		{
+			if (pActor.expired())
+				return;
+			StrongActorPtr pStrongActor(pActor);
+
+			btConvexHullShape* convexShape = new btConvexHullShape();
+			std::for_each(vertices.begin(), vertices.end(),
+				[&convexShape] (Vec3& vertex) { convexShape->addPoint(Vec3_to_btVector3(vertex)); });
+			m_pData->AddStaticColliderShape(pStrongActor, convexShape);
+		}
+
 		void BulletPhysics::VCreateTrigger(WeakActorPtr pActor, const float dim)
 		{
 			if (pActor.expired())
@@ -144,10 +161,11 @@ namespace GameEngine
 
 			// Create a cube-shaped trigger area. Of course, this could really
 			// be any convex shape. The common functionality associated with
-			// adding triggers of any shape is in BulletPhysicsData::AddTriggerShape.
+			// adding immovable colliders or triggers of any shape is in
+			// BulletPhysicsData::AddStaticColliderShape.
 			btBoxShape * const boxShape =
 				new btBoxShape(Vec3_to_btVector3(Vec3(dim, dim, dim)));
-			m_pData->AddTriggerShape(pStrongActor, boxShape);
+			m_pData->AddStaticColliderShape(pStrongActor, boxShape, true);
 		}
 
 		void BulletPhysics::VRenderDiagnostics()
@@ -157,35 +175,41 @@ namespace GameEngine
 		
 		void BulletPhysics::VRemoveActor(ActorID id)
 		{
-			btRigidBody *body = m_pData->GetRigidBody(id);
-			if (body)
+			std::vector<btRigidBody*> bodies = m_pData->GetRigidBodies(id);
+			if (bodies.size() > 0)
 			{
-				m_pData->RemoveCollisionObject(body);
-				m_pData->m_actorToRigidBodyMap.erase(id);
-				m_pData->m_rigidBodyToActorMap.erase(body);
+				std::for_each(bodies.begin(), bodies.end(),
+					[this] (btRigidBody *body)
+				{
+					this->m_pData->RemoveCollisionObject(body);
+					this->m_pData->m_rigidBodyToActorMap.erase(body);
+				});
+				m_pData->m_actorToRigidBodyListMap.erase(id);
 			}
 		}
 
 		void BulletPhysics::VApplyForce(const Vec3& direction, float newtons, ActorID id)
 		{
-			btRigidBody *body = m_pData->GetRigidBody(id);
+			std::vector<btRigidBody*> bodies = m_pData->GetRigidBodies(id);
 			// Could e.g. log an error if the body is not found.
-			if (body)
+			if (bodies.size() > 0)
 			{
+				assert(bodies.size() == 1); // only static actors can have many bodies
 				const btVector3 force(direction.x() * newtons,
 					direction.y() * newtons, direction.z() * newtons);
-				body->applyCentralImpulse(force);
+				bodies[0]->applyCentralImpulse(force);
 			}
 		}
 
 		void BulletPhysics::VApplyTorque(const Vec3& direction, float magnitude, ActorID id)
 		{
-			btRigidBody *body = m_pData->GetRigidBody(id);
-			if (body)
+			std::vector<btRigidBody*> bodies = m_pData->GetRigidBodies(id);
+			if (bodies.size() > 0)
 			{
+				assert(bodies.size() == 1);
 				const btVector3 torque(direction.x() * magnitude,
 					direction.y() * magnitude, direction.z() * magnitude);
-				body->applyTorqueImpulse(torque);
+				bodies[0]->applyTorqueImpulse(torque);
 			}
 		}
 
@@ -196,11 +220,12 @@ namespace GameEngine
 
 		void BulletPhysics::VSetVelocity(ActorID id, const Vec3& newVelocity)
 		{
-			btRigidBody *body = m_pData->GetRigidBody(id);
-			if (body)
+			std::vector<btRigidBody*> bodies = m_pData->GetRigidBodies(id);
+			if (bodies.size() > 0)
 			{
+				assert(bodies.size() == 1);
 				const btVector3 velocity(newVelocity.x(), newVelocity.y(), newVelocity.z());
-				body->setLinearVelocity(velocity);
+				bodies[0]->setLinearVelocity(velocity);
 			}
 		}
 	}

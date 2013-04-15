@@ -49,6 +49,12 @@
     <Filter Include="Source Files\Events">
       <UniqueIdentifier>{1ba4b2c2-70bd-4e59-b9fd-0b33697f5d9e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\3rdParty_BSPTools">
+      <UniqueIdentifier>{f209e22f-dc3e-4fd6-9b36-7d2b573033ba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\3rdParty_BSPTools">
+      <UniqueIdentifier>{3a6d4dd1-d549-40f3-a483-7746f65fff59}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -141,6 +147,12 @@
     <ClInclude Include="BulletConversions.h">
       <Filter>Header Files\Physics</Filter>
     </ClInclude>
+    <ClInclude Include="BSPLoader.h">
+      <Filter>Header Files\3rdParty_BSPTools</Filter>
+    </ClInclude>
+    <ClInclude Include="BSPConverter.h">
+      <Filter>Header Files\3rdParty_BSPTools</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Demo.cpp">
@@ -193,6 +205,12 @@
     </ClCompile>
     <ClCompile Include="IrrlichtRendererImpl.cpp">
       <Filter>Source Files\Display</Filter>
+    </ClCompile>
+    <ClCompile Include="BSPLoader.cpp">
+      <Filter>Source Files\3rdParty_BSPTools</Filter>
+    </ClCompile>
+    <ClCompile Include="BSPConverter.cpp">
+      <Filter>Source Files\3rdParty_BSPTools</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

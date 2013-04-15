@@ -18,12 +18,12 @@ namespace GameEngine
 {
 	namespace PhysicsEngine
 	{
-		btRigidBody *BulletPhysicsData::GetRigidBody(ActorID id) const
+		std::vector<btRigidBody*> BulletPhysicsData::GetRigidBodies(ActorID id) const
 		{
-			auto it = m_actorToRigidBodyMap.find(id);
-			if (it != m_actorToRigidBodyMap.end())
+			auto it = m_actorToRigidBodyListMap.find(id);
+			if (it != m_actorToRigidBodyListMap.end())
 				return it->second;
-			return nullptr;
+			return std::vector<btRigidBody*>();
 		}
 
 		ActorID BulletPhysicsData::GetActorID(const btRigidBody *pBody) const
@@ -103,7 +103,7 @@ namespace GameEngine
 				RemoveCollisionObject(collisionObjects[idx]);
 				--idx;
 			}
-			m_actorToRigidBodyMap.clear();
+			m_actorToRigidBodyListMap.clear();
 			m_rigidBodyToActorMap.clear();
 		}
 
@@ -212,9 +212,9 @@ namespace GameEngine
 			float mass, const std::string& material)
 		{
 			assert(pActor.get());
-			// There can be only one rigid body per actor in this implementation.
+			// There can be only one rigid body per (non-static) actor in this implementation.
 			ActorID id = pActor->GetID();
-			assert(m_actorToRigidBodyMap.find(id) == m_actorToRigidBodyMap.end());
+			assert(m_actorToRigidBodyListMap.find(id) == m_actorToRigidBodyListMap.end());
 
 			std::weak_ptr<WorldTransformComponent> pWeakWorldTransform
 				= pActor->GetWorldTransform();
@@ -238,16 +238,17 @@ namespace GameEngine
 				btRigidBody * const body = new btRigidBody(rbInfo);
 				m_pDynamicsWorld->addRigidBody(body);
 
-				m_actorToRigidBodyMap[id] = body;
+				m_actorToRigidBodyListMap[id].push_back(body);
 				m_rigidBodyToActorMap[body] = id;
 			}
 		}
 
-		void BulletPhysicsData::AddTriggerShape(StrongActorPtr pActor, btCollisionShape *shape)
+		void BulletPhysicsData::AddStaticColliderShape(StrongActorPtr pActor, btCollisionShape *shape, bool isTrigger)
 		{
 			assert(pActor.get());
 			ActorID id = pActor->GetID();
-			assert(m_actorToRigidBodyMap.find(id) == m_actorToRigidBodyMap.end());
+			// Triggers may have only one rigid body but other static actors may have several.
+			assert(!isTrigger || m_actorToRigidBodyListMap.find(id) == m_actorToRigidBodyListMap.end());
 
 			std::weak_ptr<WorldTransformComponent> pWeakWorldTransform
 				= pActor->GetWorldTransform();
@@ -263,14 +264,17 @@ namespace GameEngine
 				btRigidBody * const body = new btRigidBody(rbInfo);
 
 				m_pDynamicsWorld->addRigidBody(body);
-				// TODO: should I do this?
-				// body->setUserPointer(pActor.get());
 
 				// Triggers should not be taken into account in collision detection.
-				body->setCollisionFlags(
-					body->getCollisionFlags() | btRigidBody::CF_NO_CONTACT_RESPONSE);
+				if (isTrigger)
+				{
+					// TODO: should I do this?
+					// body->setUserPointer(pActor.get());
+					body->setCollisionFlags(
+						body->getCollisionFlags() | btRigidBody::CF_NO_CONTACT_RESPONSE);
+				}
 
-				m_actorToRigidBodyMap[id] = body;
+				m_actorToRigidBodyListMap[id].push_back(body);
 				m_rigidBodyToActorMap[body] = id;
 			}
 		}

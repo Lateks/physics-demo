@@ -96,11 +96,11 @@ namespace GameEngine
 		{
 			// Iterate backwards to avoid linear-time deletes.
 			auto collisionObjects = m_pDynamicsWorld->getCollisionObjectArray();
-			int i = m_pDynamicsWorld->getNumCollisionObjects();
-			while (i >= 0)
+			int idx = m_pDynamicsWorld->getNumCollisionObjects() - 1;
+			while (idx >= 0)
 			{
-				RemoveCollisionObject(collisionObjects[i]);
-				--i;
+				RemoveCollisionObject(collisionObjects[idx]);
+				--idx;
 			}
 			m_actorToRigidBodyMap.clear();
 			m_rigidBodyToActorMap.clear();

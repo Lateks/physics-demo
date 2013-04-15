@@ -13,7 +13,7 @@ namespace GameEngine
 		public:
 			friend BulletPhysicsData;
 
-			BulletPhysics() { }
+			BulletPhysics();
 			virtual ~BulletPhysics();
 			
 			virtual bool VInitEngine() override;

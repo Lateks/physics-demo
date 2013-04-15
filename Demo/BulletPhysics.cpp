@@ -16,9 +16,10 @@ using std::weak_ptr;
 
 namespace GameEngine
 {
-
 	namespace PhysicsEngine
 	{
+		BulletPhysics::BulletPhysics() : m_pData(new BulletPhysicsData()) { }
+
 		BulletPhysics::~BulletPhysics()
 		{
 			delete m_pData;

@@ -83,7 +83,7 @@ namespace GameEngine
 		m_pData->setTimer(timer.release());
 
 		// Setup physics.
-		/*
+
 		std::unique_ptr<PhysicsEngine::IPhysicsEngine> physics(
 			PhysicsEngine::CreatePhysicsEngine());
 		if (!physics.get())
@@ -92,7 +92,6 @@ namespace GameEngine
 			return;
 		}
 		m_pData->SetPhysicsEngine(physics.release());
-		*/
 	}
 
 	Game::~Game()

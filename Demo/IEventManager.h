@@ -36,6 +36,7 @@ namespace GameEngine
 		class IEventManager
 		{
 		public:
+			IEventManager() { }
 			virtual ~IEventManager() { }
 			virtual void DispatchEvents() = 0;
 			virtual void DispatchEvent(IEventData& event) = 0;

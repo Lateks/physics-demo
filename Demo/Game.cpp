@@ -3,6 +3,8 @@
 #include "GameData.h"
 #include "IRenderer.h"
 #include "TimerFactories.h"
+#include "IEventManager.h"
+#include "EventManager.h" // TODO: make a factory method for these.
 #include "RenderingEngineFactories.h"
 #include "IPhysicsEngine.h"
 #include "PhysicsEngineFactories.h"
@@ -15,6 +17,8 @@ namespace GameEngine
 {
 	using Display::IRenderer;
 	using PhysicsEngine::IPhysicsEngine;
+	using Events::IEventManager;
+	using Events::EventManager;
 
 	/* Note: the coordinates given here are all given in a right-handed
 	 * coordinate system. The IrrlichtRenderer component converts them to
@@ -96,8 +100,16 @@ namespace GameEngine
 		}
 		m_pData->setTimer(timer.release());
 
-		// Setup physics.
+		// Setup event manager.
+		std::unique_ptr<IEventManager> pEventManager(new EventManager());
+		if (!pEventManager.get())
+		{
+			std::cerr << "Failed to create an event manager." << std::endl;
+			return;
+		}
+		m_pData->SetEventManager(pEventManager.release());
 
+		// Setup physics.
 		std::unique_ptr<PhysicsEngine::IPhysicsEngine> physics(
 			PhysicsEngine::CreatePhysicsEngine());
 		if (!physics.get())
@@ -140,7 +152,7 @@ namespace GameEngine
 			if (renderer->WindowActive())
 			{
 				physics->VUpdateSimulation(frameDeltaSec);
-				//physics->VSyncScene();
+				physics->VSyncScene();
 				// TODO: handle inputs
 				renderer->DrawScene();
 			}

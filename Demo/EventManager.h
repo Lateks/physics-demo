@@ -11,7 +11,7 @@ namespace GameEngine
 {
 	namespace Events
 	{
-		class EventManager : IEventManager
+		class EventManager : public IEventManager
 		{
 		public:
 			typedef std::vector<EventHandlerPtr> EventHandlerList;

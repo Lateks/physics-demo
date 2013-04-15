@@ -141,7 +141,8 @@ namespace GameEngine
 
 		IRenderer *renderer = m_pData->GetRenderer();
 		IPhysicsEngine *physics = m_pData->GetPhysicsEngine();
-		if (!renderer || !physics)
+		IEventManager *events = m_pData->GetEventManager();
+		if (!renderer || !physics || !events)
 			return 1;
 
 		float timeBegin = m_pData->CurrentTimeSec();
@@ -153,6 +154,7 @@ namespace GameEngine
 			{
 				physics->VUpdateSimulation(frameDeltaSec);
 				physics->VSyncScene();
+				events->DispatchEvents();
 				// TODO: handle inputs
 				renderer->DrawScene();
 			}

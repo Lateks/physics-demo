@@ -3,6 +3,8 @@
 #include "GameActor.h"
 #include "WorldTransformComponent.h"
 #include "GameData.h"
+#include "EventManager.h"
+#include "Events.h"
 #include "MessagingWindow.h"
 #include "Vec3.h"
 #include "Mat4.h"
@@ -28,6 +30,11 @@ using irr::scene::IAnimatedMesh;
 
 using std::weak_ptr;
 using std::shared_ptr;
+
+using GameEngine::Events::IEventData;
+using GameEngine::Events::EventType;
+using GameEngine::Events::EventPtr;
+using GameEngine::Events::ActorMoveEvent;
 
 namespace
 {
@@ -66,11 +73,13 @@ namespace GameEngine
 		IrrlichtRenderer::IrrlichtRenderer()
 		{
 			m_pData = new IrrlichtRendererImpl();
+			m_pData->m_pMoveEventHandler =
+				Events::EventHandlerPtr(new std::function<void(EventPtr)>(
+				[this] (EventPtr event) { this->UpdateActorPosition(event); }));
 		}
 
 		void IrrlichtRenderer::DrawScene()
 		{
-			UpdateActorPositions();
 			assert(m_pData->m_pDriver);
 
 			m_pData->m_pDriver->beginScene(true, true, SColor(0,0,0,0));
@@ -85,38 +94,35 @@ namespace GameEngine
 			m_pData->m_pDriver->endScene();
 		}
 
-		// Updates all actor positions. TODO: make this event based
-		// and only update the scene nodes that have actually changed
-		// position, orientation etc.
-		void IrrlichtRenderer::UpdateActorPositions()
+		void IrrlichtRenderer::UpdateActorPosition(EventPtr pEvent)
 		{
+			assert(pEvent->GetEventType() == EventType::ACTOR_MOVED);
+			ActorMoveEvent *pMoveEvent =
+				dynamic_cast<ActorMoveEvent*>(pEvent.get());
+
 			GameData *game = GameData::getInstance();
-			for (auto it = m_pData->sceneNodes.begin();
-				it != m_pData->sceneNodes.end(); it++)
+			WeakActorPtr pWeakActor = game->GetActor(pMoveEvent->GetActorId());
+			if (pWeakActor.expired())
+				return;
+
+			StrongActorPtr pActor(pWeakActor);
+			ISceneNode *pNode = m_pData->GetSceneNode(pActor->GetID());
+
+			if (pActor.get() && pNode)
 			{
-				WeakActorPtr pWeakActor = game->GetActor(it->first);
-				if (pWeakActor.expired())
-					continue;
-
-				StrongActorPtr pActor(pWeakActor);
-				ISceneNode *pNode = it->second;
-				
-				if (pActor && pNode)
+				weak_ptr<WorldTransformComponent> pWeakTransform = pActor->GetWorldTransform();
+				if (!pWeakTransform.expired())
 				{
-					weak_ptr<WorldTransformComponent> pWeakTransform = pActor->GetWorldTransform();
-					if (!pWeakTransform.expired())
-					{
-						shared_ptr<WorldTransformComponent> pWorldTransform(pWeakTransform);
+					shared_ptr<WorldTransformComponent> pWorldTransform(pWeakTransform);
 
-						quaternion rot = ConvertQuaternion(pWorldTransform->GetRotation());
-						vector3df eulerRot;
-						rot.toEuler(eulerRot);
-						eulerRot *= irr::core::RADTODEG;
-						pNode->setRotation(eulerRot);
+					quaternion rot = ConvertQuaternion(pWorldTransform->GetRotation());
+					vector3df eulerRot;
+					rot.toEuler(eulerRot);
+					eulerRot *= irr::core::RADTODEG;
+					pNode->setRotation(eulerRot);
 
-						pNode->setPosition(ConvertVector(pWorldTransform->GetPosition()));
-						pNode->setScale(ConvertVector(pWorldTransform->GetScale()));
-					}
+					pNode->setPosition(ConvertVector(pWorldTransform->GetPosition()));
+					pNode->setScale(ConvertVector(pWorldTransform->GetScale()));
 				}
 			}
 		}
@@ -229,6 +235,7 @@ namespace GameEngine
 		}
 
 		// TODO: refactor this and handle the mapping better
+		// TODO: set initial position here as well
 		void IrrlichtRenderer::AddSphereSceneNode(float radius, ActorID actorId, unsigned int texture, bool debug)
 		{
 			ISceneManager *manager = debug ? m_pData->m_pDebugSmgr : m_pData->m_pSmgr;
@@ -240,6 +247,9 @@ namespace GameEngine
 			}
 			node->setMaterialFlag(irr::video::EMF_LIGHTING, false);
 			m_pData->sceneNodes[actorId] = node;
+			auto game = GameData::getInstance();
+			game->GetEventManager()->RegisterHandler(EventType::ACTOR_MOVED,
+				m_pData->m_pMoveEventHandler);
 		}
 
 		void IrrlichtRenderer::AddCubeSceneNode(float dim, ActorID actorId, unsigned int texture, bool debug)
@@ -253,6 +263,9 @@ namespace GameEngine
 			}
 			node->setMaterialFlag(irr::video::EMF_LIGHTING, false);
 			m_pData->sceneNodes[actorId] = node;
+			auto game = GameData::getInstance();
+			game->GetEventManager()->RegisterHandler(EventType::ACTOR_MOVED,
+				m_pData->m_pMoveEventHandler);
 		}
 
 		void IrrlichtRenderer::AddMeshSceneNode(const std::string& meshFilePath, ActorID actorId, unsigned int texture, bool debug)
@@ -270,6 +283,9 @@ namespace GameEngine
 				node->setMaterialFlag(irr::video::EMF_LIGHTING, false);
 				m_pData->sceneNodes[actorId] = node;
 			}
+			auto game = GameData::getInstance();
+			game->GetEventManager()->RegisterHandler(EventType::ACTOR_MOVED,
+				m_pData->m_pMoveEventHandler);
 		}
 
 		void IrrlichtRenderer::RemoveSceneNode(ActorID actorId, bool debug)

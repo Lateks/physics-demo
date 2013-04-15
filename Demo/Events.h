@@ -19,8 +19,6 @@ namespace GameEngine
 			const float m_timeStamp;
 		};
 
-		// TODO: what other data does this require?
-		// Collision normals or something?
 		class CollisionEvent : public BaseEventData
 		{
 		public:

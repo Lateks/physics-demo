@@ -3,6 +3,7 @@
 
 #include "enginefwd.h"
 #include "IRenderer.h"
+#include "IEventManager.h"
 
 namespace GameEngine
 {
@@ -37,7 +38,7 @@ namespace GameEngine
 			virtual void LoadMap(const std::string& mapFilePath, const std::string& meshName, Vec3& position) override;
 		private:
 			IrrlichtRendererImpl *m_pData;
-			void UpdateActorPositions();
+			void UpdateActorPosition(Events::EventPtr pEvent);
 		};
 	}
 }

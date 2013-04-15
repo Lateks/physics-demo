@@ -18,7 +18,7 @@ namespace GameEngine
 			typedef std::map<EventType, EventHandlerList> EventTypeToHandlerMap;
 			typedef std::deque<EventPtr> EventQueue;
 
-			EventManager() : m_activeQueue(0) { }
+			EventManager();
 			virtual ~EventManager() { }
 			virtual void DispatchEvents() override;
 			virtual void DispatchEvent(IEventData& event) override;

@@ -191,5 +191,8 @@
     <ClCompile Include="BulletDebugRenderer.cpp">
       <Filter>Source Files\Physics</Filter>
     </ClCompile>
+    <ClCompile Include="IrrlichtRendererImpl.cpp">
+      <Filter>Source Files\Display</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

@@ -8,17 +8,19 @@ namespace GameEngine
 {
 	namespace Events
 	{
+		EventManager::EventManager() : m_activeQueue(0) { }
+
 		void EventManager::DispatchEvents()
 		{
-			auto processingQueue = m_eventQueues[m_activeQueue];
+			auto processingQueue = &m_eventQueues[m_activeQueue];
 			m_activeQueue = (m_activeQueue + 1) % EventManager::NUM_QUEUES;
 			m_eventQueues[m_activeQueue].clear();
 
-			while (!processingQueue.empty())
+			while (!processingQueue->empty())
 			{
-				EventPtr event = processingQueue.front();
+				EventPtr event = processingQueue->front();
 				DispatchEvent(event);
-				processingQueue.pop_front();
+				processingQueue->pop_front();
 			}
 		}
 
@@ -29,8 +31,8 @@ namespace GameEngine
 
 		void EventManager::DispatchEvent(EventPtr event)
 		{
-			EventHandlerList handlerList = m_eventHandlers[event->GetEventType()];
-			std::for_each(handlerList.begin(), handlerList.end(),
+			EventHandlerList *handlerList = &m_eventHandlers[event->GetEventType()];
+			std::for_each(handlerList->begin(), handlerList->end(),
 				[&event] (EventHandlerPtr handler) { (*handler.get())(event); });
 		}
 
@@ -57,12 +59,12 @@ namespace GameEngine
 
 		void EventManager::RegisterHandler(EventType type, EventHandlerPtr handler)
 		{
-			auto handlers = m_eventHandlers[type];
-			auto it = std::find_if(handlers.begin(), handlers.end(),
+			auto handlers = &m_eventHandlers[type];
+			auto it = std::find_if(handlers->begin(), handlers->end(),
 				[&handler] (EventHandlerPtr storedHandler) { return handler == storedHandler; });
-			if (it != handlers.end())
+			if (it == handlers->end()) // only add the handler if it's not already in the list
 			{
-				handlers.push_back(handler);
+				handlers->push_back(handler);
 			}
 		}
 

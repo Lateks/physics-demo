@@ -2,9 +2,11 @@
 #define IRRLICHT_RENDERER_IMPL_H
 
 #include "enginefwd.h"
+#include "IEventManager.h"
 #include <irrlicht.h>
 #include <map>
 #include <vector>
+#include <memory>
 
 namespace GameEngine
 {
@@ -14,6 +16,8 @@ namespace GameEngine
 		{
 			std::map<unsigned int, irr::video::ITexture*> textures;
 			std::map<ActorID, irr::scene::ISceneNode*> sceneNodes;
+
+			irr::scene::ISceneNode *GetSceneNode(ActorID actorId);
 
 			irr::IrrlichtDevice *m_pDevice;
 			irr::video::IVideoDriver *m_pDriver;
@@ -26,6 +30,7 @@ namespace GameEngine
 
 			irr::scene::ICameraSceneNode *m_pCamera;
 			irr::gui::IGUIEnvironment *m_pGui;
+			Events::EventHandlerPtr m_pMoveEventHandler;
 		};
 	}
 }

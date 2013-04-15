@@ -128,6 +128,7 @@
     <ClCompile Include="Demo.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameData.cpp" />
+    <ClCompile Include="IrrlichtRendererImpl.cpp" />
     <ClCompile Include="IrrlichtTimer.cpp" />
     <ClCompile Include="Mat4.cpp" />
     <ClCompile Include="MessagingWindow.cpp" />

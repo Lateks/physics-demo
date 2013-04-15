@@ -16,6 +16,10 @@ namespace GameEngine
 
 	void SetupInitialScene(GameData *game)
 	{
+		IRenderer *renderer = game->GetRenderer();
+		renderer->LoadMap("..\\assets\\map-20kdm2.pk3", "20kdm2.bsp", Vec3(-1350,-130,-1400));
+		renderer->SetCameraPosition(Vec3(50,50,-60));
+		renderer->SetCameraTarget(Vec3(-70,30,-60));
 		/*
 		IRenderer *renderer = game->GetRenderer();
 		unsigned int mudTexture = renderer->LoadTexture("..\\assets\\cracked_mud.jpg");
@@ -51,7 +55,7 @@ namespace GameEngine
 
 	Game::Game()
 	{
-		// Setup rendering component and camera.
+		// Setup rendering component.
 		std::unique_ptr<IRenderer> renderer(Display::CreateRenderer());
 		if (!renderer.get())
 		{
@@ -66,8 +70,6 @@ namespace GameEngine
 			return;
 		}
 
-		renderer->SetCameraPosition(Vec3(-25, 60, -50));
-		renderer->SetCameraTarget(Vec3(17, 3, 0));
 		m_pData = GameData::getInstance();
 		m_pData->SetRenderer(renderer.release());
 
@@ -81,6 +83,7 @@ namespace GameEngine
 		m_pData->setTimer(timer.release());
 
 		// Setup physics.
+		/*
 		std::unique_ptr<PhysicsEngine::IPhysicsEngine> physics(
 			PhysicsEngine::CreatePhysicsEngine());
 		if (!physics.get())
@@ -89,6 +92,7 @@ namespace GameEngine
 			return;
 		}
 		m_pData->SetPhysicsEngine(physics.release());
+		*/
 	}
 
 	Game::~Game()
@@ -108,6 +112,7 @@ namespace GameEngine
 
 	int Game::Run()
 	{
+		SetupInitialScene(m_pData);
 		IRenderer *renderer = m_pData->GetRenderer();
 		if (!renderer)
 			return 1;

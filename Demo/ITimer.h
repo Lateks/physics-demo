@@ -7,7 +7,7 @@ namespace GameEngine
 	{
 	public:
 		virtual ~ITimer() { }
-		virtual unsigned int GetTime() = 0;
+		virtual unsigned int GetTimeMs() = 0;
 	};
 }
 

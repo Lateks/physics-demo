@@ -27,7 +27,7 @@ namespace GameEngine
 		}
 		~GameData();
 
-		unsigned int CurrentTime();
+		float CurrentTimeSec();
 
 		void AddActor(GameActor *actor);
 		GameActor *GetActor(ActorID id)

@@ -3,22 +3,25 @@
 #include "IRenderer.h"
 #include "TimerFactories.h"
 #include "RenderingEngineFactories.h"
+#include "IPhysicsEngine.h"
+#include "PhysicsEngineFactories.h"
 #include "Vec3.h"
 #include <irrlicht.h>
 #include <iostream>
+#include <memory>
 
 namespace GameEngine
 {
 	using Display::IRenderer;
 
-	void SetupGameActors(GameData *game)
+	void SetupInitialScene(GameData *game)
 	{
+		/*
 		IRenderer *renderer = game->GetRenderer();
 		unsigned int mudTexture = renderer->LoadTexture("..\\assets\\cracked_mud.jpg");
 		unsigned int woodBoxTexture = renderer->LoadTexture("..\\assets\\woodbox2.jpg");
 		unsigned int headCrabTexture = renderer->LoadTexture("..\\assets\\headcrabsheet.tga");
 
-		/*
 		Sphere *sphere1 = new Sphere(7.5f, game->pRenderer->pSmgr);
 		sphere1->SetPosition(vector3df(25, 0, 20));
 		sphere1->pModel->setMaterialTexture(0, mudTexture);
@@ -48,8 +51,9 @@ namespace GameEngine
 
 	Game::Game()
 	{
-		IRenderer *renderer = Display::CreateRenderer().release();
-		if (!renderer)
+		// Setup rendering component and camera.
+		std::unique_ptr<IRenderer> renderer(Display::CreateRenderer());
+		if (!renderer.get())
 		{
 			std::cerr << "Failed to create rendering device." << std::cerr;
 			return;
@@ -65,16 +69,26 @@ namespace GameEngine
 		renderer->SetCameraPosition(Vec3(-25, 60, -50));
 		renderer->SetCameraTarget(Vec3(17, 3, 0));
 		m_pData = GameData::getInstance();
-		m_pData->SetRenderer(renderer);
-		ITimer *timer = GetTimer().release();
-		if (!timer)
+		m_pData->SetRenderer(renderer.release());
+
+		// Setup timer.
+		std::unique_ptr<ITimer> timer(GetTimer());
+		if (!timer.get())
 		{
 			std::cerr << "Failed to create a timer." << std::endl;
 			return;
 		}
-		// TODO: set physics engine
+		m_pData->setTimer(timer.release());
 
-		SetupGameActors(m_pData);
+		// Setup physics.
+		std::unique_ptr<PhysicsEngine::IPhysicsEngine> physics(
+			PhysicsEngine::CreatePhysicsEngine());
+		if (!physics.get())
+		{
+			std::cerr << "Failed to initialize physics engine." << std::endl;
+			return;
+		}
+		m_pData->SetPhysicsEngine(physics.release());
 	}
 
 	Game::~Game()
@@ -98,8 +112,8 @@ namespace GameEngine
 		if (!renderer)
 			return 1;
 
-		unsigned int timeBegin = m_pData->CurrentTime();
-		unsigned int timeEnd;
+		float timeBegin = m_pData->CurrentTimeSec();
+		float timeEnd;
 		float frameDeltaSec = 1.0f/60;
 		while (renderer->Running())
 		{
@@ -112,8 +126,8 @@ namespace GameEngine
 			}
 			else
 				renderer->YieldDevice();
-			timeEnd = m_pData->CurrentTime();
-			frameDeltaSec = 1.0f * (timeEnd - timeBegin) / 1000.0f;
+			timeEnd = m_pData->CurrentTimeSec();
+			frameDeltaSec = timeEnd - timeBegin;
 			timeBegin = timeEnd;
 		}
 

@@ -19,9 +19,9 @@ namespace GameEngine
 		GameData::instance = nullptr;
 	}
 
-	unsigned int GameData::CurrentTime()
+	float GameData::CurrentTimeSec()
 	{
-		return m_pTimer->GetTime();
+		return m_pTimer->GetTimeMs() / 1000.0f;
 	}
 
 	void GameData::AddActor(GameActor *actor)

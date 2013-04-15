@@ -12,7 +12,7 @@ namespace GameEngine
 		IrrlichtTimer(Display::IrrlichtRenderer *renderer)
 			: m_pRenderer(renderer) { }
 		~IrrlichtTimer();
-		virtual unsigned int GetTime() override;
+		virtual unsigned int GetTimeMs() override;
 	private:
 		Display::IrrlichtRenderer *m_pRenderer;
 	};

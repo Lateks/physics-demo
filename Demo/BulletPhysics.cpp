@@ -64,7 +64,7 @@ namespace GameEngine
 						if (changed)
 						{
 							Events::EventPtr event;
-							event.reset(new Events::ActorMoveEvent(game->CurrentTime() / 1000.0f, id));
+							event.reset(new Events::ActorMoveEvent(game->CurrentTimeSec(), id));
 							game->GetEventManager()->QueueEvent(event);
 						}
 					}

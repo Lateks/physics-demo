@@ -15,7 +15,7 @@ namespace GameEngine
 		ITimer *m_pTimer;
 		Events::IEventManager *m_pEvents;
 		PhysicsEngine::IPhysicsEngine *m_pPhysicsEngine;
-		std::map<ActorID, GameActor*> m_actors;
+		std::map<ActorID, std::shared_ptr<GameActor>> m_actors;
 	public:
 		static GameData *getInstance()
 		{
@@ -29,8 +29,8 @@ namespace GameEngine
 
 		float CurrentTimeSec();
 
-		void AddActor(GameActor *actor);
-		GameActor *GetActor(ActorID id)
+		void AddActor(std::weak_ptr<GameActor> pActor);
+		std::weak_ptr<GameActor> GetActor(ActorID id)
 		{
 			return m_actors[id];
 		}

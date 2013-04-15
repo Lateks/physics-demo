@@ -1,23 +1,33 @@
 #include "GameActor.h"
 #include "WorldTransformComponent.h"
+#include "Vec3.h"
 #include <iostream>
 
 namespace
 {
-	unsigned int ID = 1;
+	unsigned int ID = 0;
 }
 
 namespace GameEngine
 {
 	GameActor::GameActor()
+		: m_pTransform(new WorldTransformComponent())
 	{
-		actorId = ID++;
+		actorId = ++ID; // Note: numbering starts from 1.
+	}
+
+	GameActor::GameActor(Vec3& startPosition)
+		: m_pTransform(new WorldTransformComponent())
+	{
+		actorId = ++ID;
+		m_pTransform->SetPosition(startPosition);
 	}
 
 	void GameActor::SetWorldTransform(WorldTransformComponent *trans)
 	{
 		m_pTransform.reset(trans);
 	}
+
 	std::weak_ptr<WorldTransformComponent> GameActor::GetWorldTransform()
 	{
 		return std::weak_ptr<WorldTransformComponent>(m_pTransform);

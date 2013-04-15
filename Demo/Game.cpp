@@ -1,4 +1,5 @@
 #include "Game.h"
+#include "GameActor.h"
 #include "GameData.h"
 #include "IRenderer.h"
 #include "TimerFactories.h"
@@ -13,17 +14,30 @@
 namespace GameEngine
 {
 	using Display::IRenderer;
+	using PhysicsEngine::IPhysicsEngine;
 
+	/* Note: the coordinates given here are all given in a right-handed
+	 * coordinate system. The IrrlichtRenderer component converts them to
+	 * the left-handed system used by Irrlicht by negating the z component.
+	 * (Also note that the concept of handedness does not affect quaternions
+	 * used for handling rotations.)
+	 */
 	void SetupInitialScene(GameData *game)
 	{
 		IRenderer *renderer = game->GetRenderer();
-		renderer->LoadMap("..\\assets\\map-20kdm2.pk3", "20kdm2.bsp", Vec3(-1350,-130,-1400));
-		renderer->SetCameraPosition(Vec3(50,50,-60));
-		renderer->SetCameraTarget(Vec3(-70,30,-60));
-		/*
-		IRenderer *renderer = game->GetRenderer();
+		IPhysicsEngine *physics = game->GetPhysicsEngine();
+		renderer->LoadMap("..\\assets\\map-20kdm2.pk3", "20kdm2.bsp", Vec3(-1350,-130, 1400));
+		renderer->SetCameraPosition(Vec3(50,50,60));
+		renderer->SetCameraTarget(Vec3(-70,30,60));
+
 		unsigned int mudTexture = renderer->LoadTexture("..\\assets\\cracked_mud.jpg");
-		unsigned int woodBoxTexture = renderer->LoadTexture("..\\assets\\woodbox2.jpg");
+		//unsigned int woodBoxTexture = renderer->LoadTexture("..\\assets\\woodbox2.jpg");
+
+		StrongActorPtr ball(new GameActor(Vec3(0, 50, 60)));
+		game->AddActor(ball);
+		renderer->AddSphereSceneNode(7.5f, ball->GetID(), mudTexture);
+		physics->VAddSphere(7.5f, ball, "styrofoam", "Bouncy");
+		/*
 		unsigned int headCrabTexture = renderer->LoadTexture("..\\assets\\headcrabsheet.tga");
 
 		Sphere *sphere1 = new Sphere(7.5f, game->pRenderer->pSmgr);
@@ -112,8 +126,10 @@ namespace GameEngine
 	int Game::Run()
 	{
 		SetupInitialScene(m_pData);
+
 		IRenderer *renderer = m_pData->GetRenderer();
-		if (!renderer)
+		IPhysicsEngine *physics = m_pData->GetPhysicsEngine();
+		if (!renderer || !physics)
 			return 1;
 
 		float timeBegin = m_pData->CurrentTimeSec();
@@ -123,13 +139,15 @@ namespace GameEngine
 		{
 			if (renderer->WindowActive())
 			{
-				// physics->VUpdateSimulation(frameDeltaSec)
-				// physics->VSyncScene()
+				//physics->VUpdateSimulation(frameDeltaSec);
+				//physics->VSyncScene();
 				// TODO: handle inputs
 				renderer->DrawScene();
 			}
 			else
+			{
 				renderer->YieldDevice();
+			}
 			timeEnd = m_pData->CurrentTimeSec();
 			frameDeltaSec = timeEnd - timeBegin;
 			timeBegin = timeEnd;

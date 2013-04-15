@@ -38,9 +38,11 @@ namespace GameEngine
 {
 	namespace Display
 	{
+		// This handles the conversion from right-handed to left-handed
+		// coordinates as well as the type conversion.
 		vector3df ConvertVector(Vec3& vector)
 		{
-			return vector3df(vector.x(), vector.y(), vector.z());
+			return vector3df(vector.x(), vector.y(), -vector.z());
 		}
 
 		quaternion ConvertQuaternion(Quaternion& quat)
@@ -48,6 +50,7 @@ namespace GameEngine
 			return quaternion(quat.x(), quat.y(), quat.z(), quat.w());
 		}
 
+		// TODO: is handedness relevant in projection matrices?
 		matrix4 ConvertProjectionMatrix(Mat4& matrix)
 		{
 			matrix4 newMatrix;
@@ -91,7 +94,11 @@ namespace GameEngine
 			for (auto it = m_pData->sceneNodes.begin();
 				it != m_pData->sceneNodes.end(); it++)
 			{
-				GameActor *pActor = game->GetActor(it->first);
+				WeakActorPtr pWeakActor = game->GetActor(it->first);
+				if (pWeakActor.expired())
+					continue;
+
+				StrongActorPtr pActor(pWeakActor);
 				ISceneNode *pNode = it->second;
 				
 				if (pActor && pNode)

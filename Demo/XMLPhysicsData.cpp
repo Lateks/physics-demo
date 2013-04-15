@@ -5,6 +5,7 @@
 #include <string>
 #include <cassert>
 #include <functional>
+#include <iostream>
 
 using rapidxml::xml_document;
 using rapidxml::xml_node;
@@ -49,7 +50,7 @@ namespace GameEngine
 			assert(n);
 			density = stof(n->value());
 
-			return make_pair(string(node->value()), density);
+			return make_pair(string(node->name()), density);
 		}
 
 		void MapChildNodes(xml_node<> *inputNode,

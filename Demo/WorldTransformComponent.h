@@ -22,6 +22,7 @@ namespace GameEngine
 		{
 			m_rotation = newRotation;
 		}
+
 		Quaternion GetRotation() const
 		{
 			return m_rotation;
@@ -31,6 +32,7 @@ namespace GameEngine
 		{
 			m_scale = newScale;
 		}
+
 		Vec3 GetScale() const
 		{
 			return m_scale;
@@ -40,6 +42,7 @@ namespace GameEngine
 		{
 			m_position = newPosition;
 		}
+
 		Vec3 GetPosition() const
 		{
 			return m_position;

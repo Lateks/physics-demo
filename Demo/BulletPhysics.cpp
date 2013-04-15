@@ -43,11 +43,13 @@ namespace GameEngine
 				const Quaternion rot = btQuaternion_to_Quaternion(body->getOrientation());
 				const Vec3 pos = btVector3_to_Vec3(body->getCenterOfMassPosition());
 
-				GameActor *pActor = game->GetActor(id);
-				if (pActor)
+				WeakActorPtr pWeakActor = game->GetActor(id);
+				if (!pWeakActor.expired())
 				{
+					StrongActorPtr pActor(pWeakActor);
 					weak_ptr<WorldTransformComponent> pWeakWorldTrans =
 						pActor->GetWorldTransform();
+
 					if (!pWeakWorldTrans.expired())
 					{
 						bool changed = false;

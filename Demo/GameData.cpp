@@ -15,7 +15,10 @@ namespace GameEngine
 		delete m_pRenderer;
 		delete m_pPhysicsEngine;
 		std::for_each (m_actors.begin(), m_actors.end(),
-			[] (std::pair<unsigned int, GameActor*> actor) { delete actor.second; });
+			[] (std::pair<unsigned int, StrongActorPtr> actor)
+		{
+			actor.second.reset();
+		});
 		GameData::instance = nullptr;
 	}
 
@@ -24,8 +27,12 @@ namespace GameEngine
 		return m_pTimer->GetTimeMs() / 1000.0f;
 	}
 
-	void GameData::AddActor(GameActor *actor)
+	void GameData::AddActor(WeakActorPtr pActor)
 	{
-		m_actors[actor->GetID()] = actor; 
+		if (pActor.expired())
+			return;
+
+		StrongActorPtr pStrongActor(pActor);
+		m_actors[pStrongActor->GetID()] = pStrongActor; 
 	}
 }

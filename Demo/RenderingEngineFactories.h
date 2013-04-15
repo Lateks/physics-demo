@@ -8,9 +8,9 @@ namespace GameEngine
 {
 	namespace Display
 	{
-		std::auto_ptr<IRenderer> CreateRenderer()
+		std::unique_ptr<IRenderer> CreateRenderer()
 		{
-			std::auto_ptr<IRenderer> renderer;
+			std::unique_ptr<IRenderer> renderer;
 			renderer.reset(new IrrlichtRenderer());
 			if (!renderer.get())
 			{

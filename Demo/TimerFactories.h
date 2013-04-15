@@ -9,11 +9,11 @@
 
 namespace GameEngine
 {
-	std::auto_ptr<ITimer> GetTimer()
+	std::unique_ptr<ITimer> GetTimer()
 	{
 		Display::IRenderer *renderer = GameEngine::GameData::getInstance()->GetRenderer();
 		Display::IrrlichtRenderer *irrlicht = dynamic_cast<Display::IrrlichtRenderer*>(renderer);
-		std::auto_ptr<ITimer> timer;
+		std::unique_ptr<ITimer> timer;
 		if (irrlicht)
 		{
 			timer.reset(new IrrlichtTimer(irrlicht));

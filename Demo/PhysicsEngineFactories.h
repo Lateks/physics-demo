@@ -9,9 +9,9 @@ namespace GameEngine
 {
 	namespace PhysicsEngine
 	{
-		std::auto_ptr<IPhysicsEngine> CreatePhysicsEngine()
+		std::unique_ptr<IPhysicsEngine> CreatePhysicsEngine()
 		{
-			std::auto_ptr<IPhysicsEngine> physics;
+			std::unique_ptr<IPhysicsEngine> physics;
 			physics.reset(new BulletPhysics());
 			if (!physics.get() || !physics->VInitEngine())
 			{

@@ -12,7 +12,7 @@
  */
 namespace GameEngine
 {
-	namespace PhysicsEngine
+	namespace Physics
 	{
 		class IPhysicsEngine
 		{

@@ -7,7 +7,7 @@
 
 namespace GameEngine
 {
-	namespace PhysicsEngine
+	namespace Physics
 	{
 		Vec3 btVector3_to_Vec3(const btVector3& vec);
 		btVector3 Vec3_to_btVector3(const Vec3& vec);

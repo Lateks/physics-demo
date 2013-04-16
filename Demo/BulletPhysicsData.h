@@ -14,7 +14,7 @@
  */
 namespace GameEngine
 {
-	namespace PhysicsEngine
+	namespace Physics
 	{
 		typedef std::pair<btRigidBody const *, btRigidBody const *> CollisionPair;
 		typedef std::set<CollisionPair> CollisionPairs;

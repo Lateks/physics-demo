@@ -6,7 +6,7 @@
 
 namespace GameEngine
 {
-	namespace PhysicsEngine
+	namespace Physics
 	{
 		// Describes the bounciness (restitution) and friction of
 		// a physics material. Can be combined with material densities

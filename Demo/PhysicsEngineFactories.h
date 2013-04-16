@@ -7,7 +7,7 @@
 
 namespace GameEngine
 {
-	namespace PhysicsEngine
+	namespace Physics
 	{
 		std::unique_ptr<IPhysicsEngine> CreatePhysicsEngine()
 		{

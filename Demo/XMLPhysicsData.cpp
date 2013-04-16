@@ -21,7 +21,7 @@ using std::istreambuf_iterator;
 
 namespace GameEngine
 {
-	namespace PhysicsEngine
+	namespace Physics
 	{
 		float ReadFloatAttribute(xml_node<> *node, const string& attributeName)
 		{

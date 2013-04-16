@@ -16,7 +16,7 @@
 
 namespace GameEngine
 {
-	namespace PhysicsEngine
+	namespace Physics
 	{
 		std::vector<btRigidBody*> BulletPhysicsData::GetRigidBodies(ActorID id) const
 		{

@@ -5,7 +5,7 @@
 
 namespace GameEngine
 {
-	namespace PhysicsEngine
+	namespace Physics
 	{
 		// TODO: not implemented yet
 		class BulletDebugRenderer : public btIDebugDraw

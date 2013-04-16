@@ -22,7 +22,7 @@ using std::weak_ptr;
 
 namespace GameEngine
 {
-	namespace PhysicsEngine
+	namespace Physics
 	{
 		BulletPhysics::BulletPhysics() : m_pData(new BulletPhysicsData()) { }
 

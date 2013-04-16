@@ -6,7 +6,7 @@
 
 namespace GameEngine
 {
-	namespace PhysicsEngine
+	namespace Physics
 	{
 		class BulletPhysics : public IPhysicsEngine
 		{

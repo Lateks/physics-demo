@@ -14,7 +14,7 @@ namespace GameEngine
 		struct MessagingWindowImpl;
 	}
 
-	namespace PhysicsEngine
+	namespace Physics
 	{
 		class IPhysicsEngine;
 		struct MaterialData;

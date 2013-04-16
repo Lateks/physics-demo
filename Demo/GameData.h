@@ -14,7 +14,7 @@ namespace GameEngine
 		Display::IRenderer *m_pRenderer;
 		ITimer *m_pTimer;
 		Events::IEventManager *m_pEvents;
-		PhysicsEngine::IPhysicsEngine *m_pPhysicsEngine;
+		Physics::IPhysicsEngine *m_pPhysicsEngine;
 		std::map<ActorID, std::shared_ptr<GameActor>> m_actors;
 	public:
 		static GameData *getInstance()
@@ -34,11 +34,11 @@ namespace GameEngine
 		{
 			return m_actors[id];
 		}
-		void SetPhysicsEngine(PhysicsEngine::IPhysicsEngine *physics)
+		void SetPhysicsEngine(Physics::IPhysicsEngine *physics)
 		{
 			m_pPhysicsEngine = physics;
 		}
-		PhysicsEngine::IPhysicsEngine * const GetPhysicsEngine() const
+		Physics::IPhysicsEngine * const GetPhysicsEngine() const
 		{
 			return m_pPhysicsEngine;
 		}

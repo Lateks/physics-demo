@@ -17,7 +17,7 @@
 namespace GameEngine
 {
 	using Display::IRenderer;
-	using PhysicsEngine::IPhysicsEngine;
+	using Physics::IPhysicsEngine;
 	using Events::IEventManager;
 	using Events::EventManager;
 
@@ -124,8 +124,8 @@ namespace GameEngine
 		m_pData->SetEventManager(pEventManager.release());
 
 		// Setup physics.
-		std::unique_ptr<PhysicsEngine::IPhysicsEngine> physics(
-			PhysicsEngine::CreatePhysicsEngine());
+		std::unique_ptr<Physics::IPhysicsEngine> physics(
+			Physics::CreatePhysicsEngine());
 		if (!physics.get())
 		{
 			std::cerr << "Failed to initialize physics engine." << std::endl;

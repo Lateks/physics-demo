@@ -130,7 +130,7 @@ namespace GameEngine
 				delete body->getUserPointer(); // deletes the scene node that uses this rigid body
 
 				// destroy related constraints
-				for (int i = body->getNumConstraintRefs()-1; i >= 0; i++)
+				for (int i = body->getNumConstraintRefs()-1; i >= 0; i--)
 				{
 					auto constraintRef = body->getConstraintRef(i);
 					m_pDynamicsWorld->removeConstraint(constraintRef);

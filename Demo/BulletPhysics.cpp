@@ -7,6 +7,10 @@
 #include "XMLPhysicsData.h"
 #include "Events.h"
 #include "BulletConversions.h"
+
+#include <btBulletCollisionCommon.h>
+#include <btBulletDynamicsCommon.h>
+#include <LinearMath\btGeometryUtil.h>
 #include <cassert>
 #include <vector>
 #include <memory>
@@ -150,6 +154,23 @@ namespace GameEngine
 			btConvexHullShape* convexShape = new btConvexHullShape();
 			std::for_each(vertices.begin(), vertices.end(),
 				[&convexShape] (Vec3& vertex) { convexShape->addPoint(Vec3_to_btVector3(vertex)); });
+			m_pData->AddStaticColliderShape(pStrongActor, convexShape);
+		}
+
+		void BulletPhysics::VAddConvexStaticColliderMesh(std::vector<Vec4>& planeEquations, WeakActorPtr pActor)
+		{
+			if (pActor.expired())
+				return;
+			StrongActorPtr pStrongActor(pActor);
+
+			btAlignedObjectArray<btVector3> vertices;
+			btAlignedObjectArray<btVector3> btPlaneEquations;
+			std::for_each(planeEquations.begin(), planeEquations.end(),
+				[&btPlaneEquations] (Vec4& eq)
+			{ btPlaneEquations.push_back(Vec4_to_btVector3(eq)); });
+			btGeometryUtil::getVerticesFromPlaneEquations(btPlaneEquations, vertices);
+
+			btConvexHullShape *convexShape = new btConvexHullShape(&(vertices[0].getX()), vertices.size());
 			m_pData->AddStaticColliderShape(pStrongActor, convexShape);
 		}
 

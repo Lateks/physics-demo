@@ -14,6 +14,13 @@ namespace GameEngine
 			return btVector3(vec.x(), vec.y(), vec.z());
 		}
 
+		btVector3 Vec4_to_btVector3(const Vec4& vec)
+		{
+			btVector3 converted(vec.x(), vec.y(), vec.z());
+			converted[3] = vec.w();
+			return converted;
+		}
+
 		Quaternion btQuaternion_to_Quaternion(const btQuaternion& quat)
 		{
 			return Quaternion(quat.x(), quat.y(), quat.z(), quat.w());

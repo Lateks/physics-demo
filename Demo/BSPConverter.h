@@ -16,22 +16,21 @@ subject to the following restrictions:
 #ifndef BSP_CONVERTER_H
 #define BSP_CONVERTER_H
 
+#include "Vec4.h"
+#include <vector>
+#include <functional>
+
 class BspLoader;
-#include "LinearMath/btVector3.h"
-#include "LinearMath/btAlignedObjectArray.h"
+// See notes on changes made to this code in the corresponding cpp file. (-Laura)
 
 ///BspConverter turns a loaded bsp level into convex parts (vertices)
 class BspConverter
 {
 public:
 
-	void convertBsp(BspLoader& bspLoader,float scaling);
-	virtual ~BspConverter()
-	{
-	}
-
-	///this callback is called for each brush that succesfully converted into vertices
-	virtual void addConvexVerticesCollider(btAlignedObjectArray<btVector3>& vertices) = 0;
+	void convertBsp(BspLoader& bspLoader,float scaling,
+		std::function<void(std::vector<GameEngine::Vec4>& planeEquations)> addConvexMesh);
+	virtual ~BspConverter() { }
 
 };
 

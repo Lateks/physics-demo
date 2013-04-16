@@ -44,6 +44,7 @@ namespace GameEngine
 
 	class Mat4;
 	class Vec3;
+	class Vec4;
 
 	class Game;
 	class GameData;

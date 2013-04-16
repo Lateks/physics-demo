@@ -11,28 +11,42 @@ subject to the following restrictions:
 1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
 2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
-
-(Note: Modified by removing the unused parts from this file.)
+---------------------------
+Modifications made for the Game Engine Architecture project (Laura):
+- Removed loading of elements (non-static geometry in bsp map file such
+  as weapons etc.). Only load the leaves which describe the convex
+  polyhedra that make up the map geometry.
+- Refactored Bullet-specific functionality into BulletPhysics.h/cpp
+  to make it *theoretically* compatible with any physics system...
+  Also: using generic data structures here (std::vector and my own Vec3/4)
+  instead of Bullet's equivalents (btVector3 and btAlignedObjectArray).
+- Use a function callback for adding the vertices into the physics system
+  instead of an inheritance mechanism like in the original code (just
+  for simplicity).
 */
 
 #include "BspConverter.h"
 #include "BspLoader.h"
-#include "LinearMath/btVector3.h"
-#include "LinearMath/btGeometryUtil.h"
+#include "Vec4.h"
 #include <string.h>
+#include <vector>
+#include <functional>
 
+using GameEngine::Vec4;
 
-void BspConverter::convertBsp(BspLoader& bspLoader,float scaling)
+// Not sure what the scaling parameter stands for (?)
+void BspConverter::convertBsp(BspLoader& bspLoader, float scaling,
+	std::function<void(std::vector<Vec4>& planeEquations)> addConvexMesh)
 {
 	for (int i=0;i<bspLoader.m_numleafs;i++)
 	{			
-		bool isValidBrush = false;
+		bool isValidBrush = false; // TODO: is this really supposed to be set here and not inside the for loop below?
 			
 		BSPLeaf&	leaf = bspLoader.m_dleafs[i];
 	
 		for (int b=0;b<leaf.numLeafBrushes;b++)
 		{
-			btAlignedObjectArray<btVector3> planeEquations;
+			std::vector<Vec4> planeEquations;
 				
 			int brushid = bspLoader.m_dleafbrushes[leaf.firstLeafBrush+b];
 
@@ -49,21 +63,17 @@ void BspConverter::convertBsp(BspLoader& bspLoader,float scaling)
 						BSPBrushSide& brushside = bspLoader.m_dbrushsides[sideid];
 						int planeid = brushside.planeNum;
 						BSPPlane& plane = bspLoader.m_dplanes[planeid];
-						btVector3 planeEq;
-						planeEq.setValue(
-							plane.normal[0],
-							plane.normal[1],
-							plane.normal[2]);
-						planeEq[3] = scaling*-plane.dist;
+						Vec4 planeEq(plane.normal[0],
+									 plane.normal[1],
+									 plane.normal[2],
+									 scaling*-plane.dist);
 
 						planeEquations.push_back(planeEq);
 						isValidBrush=true;
 					}
 					if (isValidBrush)
 					{
-						btAlignedObjectArray<btVector3>	vertices;
-						btGeometryUtil::getVerticesFromPlaneEquations(planeEquations,vertices);
-						addConvexVerticesCollider(vertices);
+						addConvexMesh(planeEquations);
 					}
 				}
 			} 

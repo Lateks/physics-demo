@@ -48,41 +48,17 @@ namespace GameEngine
 		renderer->SetCameraTarget(Vec3(-70,30,60));
 
 		unsigned int mudTexture = renderer->LoadTexture("..\\assets\\cracked_mud.jpg");
-		//unsigned int woodBoxTexture = renderer->LoadTexture("..\\assets\\woodbox2.jpg");
+		unsigned int woodBoxTexture = renderer->LoadTexture("..\\assets\\woodbox2.jpg");
 
 		StrongActorPtr ball(new GameActor(Vec3(0, 50, 60)));
 		game->AddActor(ball);
-		renderer->AddSphereSceneNode(7.5f, ball->GetID(), mudTexture);
-		physics->VAddSphere(7.5f, ball, "styrofoam", "Bouncy");
+		renderer->AddSphereSceneNode(10.f, ball->GetID(), mudTexture);
+		physics->VAddSphere(10.f, ball, "styrofoam", "Bouncy");
 
-		/*
-		unsigned int headCrabTexture = renderer->LoadTexture("..\\assets\\headcrabsheet.tga");
-
-		Sphere *sphere1 = new Sphere(7.5f, game->pRenderer->pSmgr);
-		sphere1->SetPosition(vector3df(25, 0, 20));
-		sphere1->pModel->setMaterialTexture(0, mudTexture);
-
-		Sphere *sphere2 = new Sphere(4.5f, game->pRenderer->pSmgr);
-		sphere2->SetPosition(vector3df(-25, 0, 20));
-		sphere2->pModel->setMaterialTexture(0, mudTexture);
-		sphere2->movementNormal = vector3df(1,0,0);
-		sphere2->movementSpeed = 7.0f;
-
-		Cube *box1 = new Cube(10.0f, game->pRenderer->pSmgr);
-		box1->SetPosition(vector3df(0, 0, 0));
-		box1->pModel->setMaterialTexture(0, woodBoxTexture);
-		box1->movementNormal = vector3df(1, 0, 1).normalize();
-		box1->movementSpeed = 10.0f;
-
-		auto headCrab = game->pRenderer->pSmgr->getMesh("..\\assets\\headcrabclassic.obj");
-		auto headCrabNode = game->pRenderer->pSmgr->addAnimatedMeshSceneNode(headCrab);
-		headCrabNode->setMaterialFlag(irr::video::EMF_LIGHTING, false);
-		headCrabNode->setMaterialTexture(0, headCrabTexture);
-
-		game->actors[sphere1->GetID()] = sphere1;
-		game->actors[sphere2->GetID()] = sphere2;
-		game->actors[box1->GetID()] = box1;
-		*/
+		StrongActorPtr cube(new GameActor(Vec3(0, 80, 60)));
+		game->AddActor(cube);
+		renderer->AddCubeSceneNode(15.f, cube->GetID(), woodBoxTexture);
+		physics->VAddBox(Vec3(15.f, 15.f, 15.f), cube, "Titanium", "Bouncy");
 	}
 
 	Game::Game()

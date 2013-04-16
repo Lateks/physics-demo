@@ -47,9 +47,16 @@ namespace GameEngine
 	{
 		// This handles the conversion from right-handed to left-handed
 		// coordinates as well as the type conversion.
-		vector3df ConvertVector(Vec3& vector)
+		vector3df ConvertVectorRHtoLH(Vec3& vector)
 		{
 			return vector3df(vector.x(), vector.y(), -vector.z());
+		}
+
+		// No right-to-left-handed conversion (for vectors where it
+		// does not matter, like scale vectors).
+		vector3df ConvertVector(Vec3& vector)
+		{
+			return vector3df(vector.x(), vector.y(), vector.z());
 		}
 
 		quaternion ConvertQuaternion(Quaternion& quat)
@@ -121,7 +128,7 @@ namespace GameEngine
 					eulerRot *= irr::core::RADTODEG;
 					pNode->setRotation(eulerRot);
 
-					pNode->setPosition(ConvertVector(pWorldTransform->GetPosition()));
+					pNode->setPosition(ConvertVectorRHtoLH(pWorldTransform->GetPosition()));
 					pNode->setScale(ConvertVector(pWorldTransform->GetScale()));
 				}
 			}
@@ -188,14 +195,14 @@ namespace GameEngine
 		void IrrlichtRenderer::SetCameraPosition(Vec3& newPosition)
 		{
 			assert(m_pData->m_pCamera);
-			m_pData->m_pCamera->setPosition(ConvertVector(newPosition));
+			m_pData->m_pCamera->setPosition(ConvertVectorRHtoLH(newPosition));
 			m_pData->m_pCamera->updateAbsolutePosition();
 		}
 
 		void IrrlichtRenderer::SetCameraTarget(Vec3& newTarget)
 		{
 			assert(m_pData->m_pCamera);
-			m_pData->m_pCamera->setTarget(ConvertVector(newTarget));
+			m_pData->m_pCamera->setTarget(ConvertVectorRHtoLH(newTarget));
 		}
 
 		void IrrlichtRenderer::SetCameraProjection(Mat4& newProjection)
@@ -314,7 +321,7 @@ namespace GameEngine
 			}
 			if (node)
 			{
-				node->setPosition(ConvertVector(position));
+				node->setPosition(ConvertVectorRHtoLH(position));
 			}
 		}
 	}

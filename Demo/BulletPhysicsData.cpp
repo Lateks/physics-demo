@@ -265,8 +265,7 @@ namespace GameEngine
 
 				m_pDynamicsWorld->addRigidBody(body);
 
-				// Triggers should not be taken into account in collision detection.
-				if (isTrigger)
+				if (isTrigger) // triggers may intersect with other objects (this causes a trigger related event, not a collision event)
 				{
 					// TODO: should I do this?
 					// body->setUserPointer(pActor.get());

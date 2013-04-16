@@ -8,6 +8,7 @@
 #include "RenderingEngineFactories.h"
 #include "IPhysicsEngine.h"
 #include "PhysicsEngineFactories.h"
+#include "BspLoaderFactory.h"
 #include "Vec3.h"
 #include <irrlicht.h>
 #include <iostream>
@@ -30,7 +31,18 @@ namespace GameEngine
 	{
 		IRenderer *renderer = game->GetRenderer();
 		IPhysicsEngine *physics = game->GetPhysicsEngine();
-		renderer->LoadMap("..\\assets\\map-20kdm2.pk3", "20kdm2.bsp", Vec3(-1350,-130, 1400));
+
+		// Create an actor for the world map to be able to refer to the associated
+		// rigid bodies. Note: now that the map itself has an actor and a
+		// world transform, the renderer could also use it to determine the
+		// position of the map.
+		Vec3 mapPosition(-1350, -130, 1400);
+		StrongActorPtr world(new GameActor(mapPosition));
+		game->AddActor(world);
+		renderer->LoadMap("..\\assets\\map-20kdm2.pk3", "20kdm2.bsp", mapPosition);
+		std::unique_ptr<BspLoader> pBspLoader = CreateBspLoader("..\\assets\\20kdm2.bsp");
+		physics->VAddBspMap(*pBspLoader, world);
+
 		renderer->SetCameraPosition(Vec3(50,50,60));
 		renderer->SetCameraTarget(Vec3(-70,30,60));
 
@@ -41,6 +53,7 @@ namespace GameEngine
 		game->AddActor(ball);
 		renderer->AddSphereSceneNode(7.5f, ball->GetID(), mudTexture);
 		physics->VAddSphere(7.5f, ball, "styrofoam", "Bouncy");
+
 		/*
 		unsigned int headCrabTexture = renderer->LoadTexture("..\\assets\\headcrabsheet.tga");
 

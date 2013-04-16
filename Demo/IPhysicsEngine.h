@@ -2,6 +2,7 @@
 #define I_PHYSICS_ENGINE
 
 #include "enginefwd.h"
+#include "BSPLoader.h"
 #include <string>
 #include <vector>
 
@@ -32,9 +33,12 @@ namespace GameEngine
 				const std::string& density, const std::string& material) = 0;
 			virtual void VAddConvexMesh(std::vector<Vec3>& vertices,
 				WeakActorPtr pActor, const std::string& density, const std::string& material) = 0;
+
 			// These are used to add e.g. map parts and other static entities.
 			virtual void VAddConvexStaticColliderMesh(std::vector<Vec3>& vertices, WeakActorPtr pActor) = 0;
 			virtual void VAddConvexStaticColliderMesh(std::vector<Vec4>& planeEquations, WeakActorPtr pActor) = 0;
+			// Adding e.g. Quake maps from bsp files.
+			virtual void VAddBspMap(BspLoader& bspLoad, WeakActorPtr pActor) = 0;
 
 			virtual void VRemoveActor(ActorID id) = 0;
 

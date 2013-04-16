@@ -153,6 +153,9 @@
     <ClInclude Include="BSPConverter.h">
       <Filter>Header Files\3rdParty_BSPTools</Filter>
     </ClInclude>
+    <ClInclude Include="BspLoaderFactory.h">
+      <Filter>Header Files\3rdParty_BSPTools</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Demo.cpp">
@@ -210,6 +213,9 @@
       <Filter>Source Files\3rdParty_BSPTools</Filter>
     </ClCompile>
     <ClCompile Include="BSPConverter.cpp">
+      <Filter>Source Files\3rdParty_BSPTools</Filter>
+    </ClCompile>
+    <ClCompile Include="BspLoaderFactory.cpp">
       <Filter>Source Files\3rdParty_BSPTools</Filter>
     </ClCompile>
   </ItemGroup>

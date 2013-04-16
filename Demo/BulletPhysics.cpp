@@ -7,6 +7,7 @@
 #include "XMLPhysicsData.h"
 #include "Events.h"
 #include "BulletConversions.h"
+#include "BSPConverter.h"
 
 #include <btBulletCollisionCommon.h>
 #include <btBulletDynamicsCommon.h>
@@ -172,6 +173,19 @@ namespace GameEngine
 
 			btConvexHullShape *convexShape = new btConvexHullShape(&(vertices[0].getX()), vertices.size());
 			m_pData->AddStaticColliderShape(pStrongActor, convexShape);
+		}
+
+		void BulletPhysics::VAddBspMap(BspLoader& bspLoad, WeakActorPtr pActor)
+		{
+			if (pActor.expired())
+				return;
+
+			BspConverter bspConv;
+			bspConv.convertBsp(bspLoad, 1.0f,
+				[this, pActor] (std::vector<Vec4> planeEquations)
+			{
+				this->VAddConvexStaticColliderMesh(planeEquations, pActor);
+			});
 		}
 
 		void BulletPhysics::VCreateTrigger(WeakActorPtr pActor, const float dim)

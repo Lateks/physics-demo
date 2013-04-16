@@ -89,6 +89,7 @@
   <ItemGroup>
     <ClInclude Include="BSPConverter.h" />
     <ClInclude Include="BSPLoader.h" />
+    <ClInclude Include="BspLoaderFactory.h" />
     <ClInclude Include="BulletConversions.h" />
     <ClInclude Include="BulletDebugRenderer.h" />
     <ClInclude Include="BulletPhysics.h" />
@@ -122,6 +123,7 @@
   <ItemGroup>
     <ClCompile Include="BSPConverter.cpp" />
     <ClCompile Include="BSPLoader.cpp" />
+    <ClCompile Include="BspLoaderFactory.cpp" />
     <ClCompile Include="BulletConversions.cpp" />
     <ClCompile Include="BulletDebugRenderer.cpp" />
     <ClCompile Include="BulletPhysics.cpp" />

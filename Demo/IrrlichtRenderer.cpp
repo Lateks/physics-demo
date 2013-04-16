@@ -255,7 +255,7 @@ namespace GameEngine
 		void IrrlichtRenderer::AddCubeSceneNode(float dim, ActorID actorId, unsigned int texture, bool debug)
 		{
 			ISceneManager *manager = debug ? m_pData->m_pDebugSmgr : m_pData->m_pSmgr;
-			auto node = manager->addSphereSceneNode(dim);
+			auto node = manager->addCubeSceneNode(dim);
 			ITexture *txt = m_pData->textures[texture]; // TODO: check that this key is in the map
 			if (txt)
 			{

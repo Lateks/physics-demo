@@ -53,7 +53,7 @@ namespace GameEngine
 		StrongActorPtr ball(new GameActor(Vec3(0, 50, 60)));
 		game->AddActor(ball);
 		renderer->AddSphereSceneNode(10.f, ball->GetID(), mudTexture);
-		physics->VAddSphere(10.f, ball, "styrofoam", "Bouncy");
+		physics->VAddSphere(10.f, ball, "Vinyl", "Bouncy");
 
 		StrongActorPtr cube(new GameActor(Vec3(0, 80, 60)));
 		game->AddActor(cube);

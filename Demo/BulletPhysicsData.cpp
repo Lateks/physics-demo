@@ -272,6 +272,13 @@ namespace GameEngine
 					body->setCollisionFlags(
 						body->getCollisionFlags() | btRigidBody::CF_NO_CONTACT_RESPONSE);
 				}
+				else
+				{
+					// Set the same restitution and friction for all static objects.
+					// This could be based on the the material of the static object. (TODO?)
+					body->setRestitution(0.2f);
+					body->setFriction(0.6f);
+				}
 
 				m_actorToRigidBodyListMap[id].push_back(body);
 				m_rigidBodyToActorMap[body] = id;

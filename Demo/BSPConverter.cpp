@@ -17,13 +17,22 @@ Modifications made for the Game Engine Architecture project (Laura):
 - Removed loading of elements (non-static geometry in bsp map file such
   as weapons etc.). Only load the leaves which describe the convex
   polyhedra that make up the map geometry.
+
 - Refactored Bullet-specific functionality into BulletPhysics.h/cpp
   to make it *theoretically* compatible with any physics system...
-  Also: using generic data structures here (std::vector and my own Vec3/4)
-  instead of Bullet's equivalents (btVector3 and btAlignedObjectArray).
+  Also: using generic data structures here (std::vector and my own Vec4)
+  instead of Bullet's equivalents (btAlignedObjectArray and btVector3).
+
 - Use a function callback for adding the vertices into the physics system
   instead of an inheritance mechanism like in the original code (just
   for simplicity).
+
+- In Quake III the Y and Z axes are swapped, so I also have to swap these
+  in the calculated plane normals and convert them from a left-handed
+  coordinate system to a right-handed coordinate system (as used in Bullet).
+  For some reason, this is in no way taken into account in the Bullet example
+  project I took this original code from. (And which, by the way, can be found
+  here: https://github.com/alanjrogers/bullet-physics/tree/master/Demos/BspDemo.)
 */
 
 #include "BspConverter.h"
@@ -40,9 +49,7 @@ void BspConverter::convertBsp(BspLoader& bspLoader, float scaling,
 	std::function<void(std::vector<Vec4>& planeEquations)> addConvexMesh)
 {
 	for (int i=0;i<bspLoader.m_numleafs;i++)
-	{			
-		bool isValidBrush = false; // TODO: is this really supposed to be set here and not inside the for loop below?
-			
+	{	
 		BSPLeaf&	leaf = bspLoader.m_dleafs[i];
 	
 		for (int b=0;b<leaf.numLeafBrushes;b++)
@@ -56,6 +63,7 @@ void BspConverter::convertBsp(BspLoader& bspLoader, float scaling,
 			{
 				if (bspLoader.m_dshaders[ brush.shaderNum ].contentFlags & BSPCONTENTS_SOLID)
 				{
+					bool isValidBrush = false;
 					brush.shaderNum = -1;
 
 					for (int p=0;p<brush.numSides;p++)
@@ -64,12 +72,13 @@ void BspConverter::convertBsp(BspLoader& bspLoader, float scaling,
 						BSPBrushSide& brushside = bspLoader.m_dbrushsides[sideid];
 						int planeid = brushside.planeNum;
 						BSPPlane& plane = bspLoader.m_dplanes[planeid];
+
 						Vec4 planeEq(plane.normal[0],
-									 plane.normal[1],
 									 plane.normal[2],
+									 -plane.normal[1],
 									 scaling*-plane.dist); // Apparently this last parameter defines the
 														   // distance of the plane to the origin of the
-														   // object (?).
+														   // map.
 
 						planeEquations.push_back(planeEq);
 						isValidBrush=true;

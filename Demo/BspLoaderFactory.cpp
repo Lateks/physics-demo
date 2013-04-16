@@ -21,8 +21,8 @@ namespace GameEngine
 			}
 			else
 			{
-				void *memoryBuffer = malloc(fileSize+1);
-				fread(memoryBuffer,1,fileSize,file);
+				void *memoryBuffer = malloc(fileSize + 1);
+				fread(memoryBuffer, 1, fileSize, file);
 
 				bspLoader.reset(new BspLoader());
 				bspLoader->loadBSPFile(memoryBuffer);

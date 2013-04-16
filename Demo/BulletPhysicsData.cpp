@@ -225,7 +225,7 @@ namespace GameEngine
 
 				MaterialData matData(m_physicsMaterialData->LookupMaterial(material));
 
-				btVector3 localInertia;
+				btVector3 localInertia(0, 0, 0);
 				if (mass > 0.f)
 					shape->calculateLocalInertia(mass, localInertia);
 

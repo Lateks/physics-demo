@@ -31,6 +31,7 @@ namespace GameEngine
 	{
 		IRenderer *renderer = game->GetRenderer();
 		IPhysicsEngine *physics = game->GetPhysicsEngine();
+		physics->VSetGlobalGravity(Vec3(0, -100.f, 0));
 
 		// Create an actor for the world map to be able to refer to the associated
 		// rigid bodies. Note: now that the map itself has an actor and a

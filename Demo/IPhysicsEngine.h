@@ -49,6 +49,7 @@ namespace GameEngine
 			virtual void VApplyTorque(const Vec3& direction, float magnitude, ActorID id) = 0;
 			virtual void VStopActor(ActorID id) = 0;
 			virtual void VSetVelocity(ActorID id, const Vec3& newVelocity) = 0;
+			virtual void VSetGlobalGravity(Vec3& gravity) = 0;
 		};
 	}
 }

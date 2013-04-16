@@ -263,5 +263,11 @@ namespace GameEngine
 				bodies[0]->setLinearVelocity(velocity);
 			}
 		}
+
+		void BulletPhysics::VSetGlobalGravity(Vec3& gravity)
+		{
+			assert(m_pData && m_pData->m_pDynamicsWorld);
+			m_pData->m_pDynamicsWorld->setGravity(Vec3_to_btVector3(gravity));
+		}
 	}
 }

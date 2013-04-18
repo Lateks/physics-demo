@@ -41,13 +41,13 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)\include\rapidxml-1.13\;$(SolutionDir)\include\bullet\;C:\Users\tuuli\Documents\Irrlicht\irrlicht-1.8\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)\lib\bullet;C:\Users\tuuli\Documents\Irrlicht\irrlicht-1.8\lib\Win32-visualstudio;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)\lib\rapidxml-1.13\;$(SolutionDir)\lib\bullet-2.81\src\;$(SolutionDir)\lib\irrlicht-1.8\include\;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)\lib\bullet-2.81\lib\;$(SolutionDir)\lib\irrlicht-1.8\lib\Win32-visualstudio\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)\include\eigen;$(SolutionDir)\include\bullet;C:\Users\tuuli\Documents\Irrlicht\irrlicht-1.8\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)\lib\bullet;C:\Users\tuuli\Documents\Irrlicht\irrlicht-1.8\lib\Win32-visualstudio;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)\lib\rapidxml-1.13\;$(SolutionDir)\lib\bullet-2.81\src\;$(SolutionDir)\lib\irrlicht-1.8\include\;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)\lib\bullet-2.81\lib\;$(SolutionDir)\lib\irrlicht-1.8\lib\Win32-visualstudio\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

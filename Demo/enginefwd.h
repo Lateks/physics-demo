@@ -47,6 +47,7 @@ namespace GameEngine
 	class Mat4;
 	class Vec3;
 	class Vec4;
+	typedef Vec4 Quaternion; // may be used as a quaternion structure
 
 	class Game;
 	class GameData;

@@ -25,8 +25,6 @@ namespace GameEngine
 		float m_z;
 		float m_w;
 	};
-
-	typedef Vec4 Quaternion; // may be used as a quaternion structure
 }
 
 #endif

@@ -60,12 +60,12 @@ namespace GameEngine
 
 		StrongActorPtr ball(new GameActor(Vec3(0, 50, 60)));
 		game->AddActor(ball);
-		renderer->AddSphereSceneNode(10.f, ball->GetID(), MUD_TEXTURE);
+		renderer->AddSphereSceneNode(10.f, ball, MUD_TEXTURE);
 		physics->VAddSphere(10.f, ball, "Vinyl", "Bouncy");
 
 		StrongActorPtr cube(new GameActor(Vec3(0, 80, 60)));
 		game->AddActor(cube);
-		renderer->AddCubeSceneNode(15.f, cube->GetID(), WOODBOX_TEXTURE);
+		renderer->AddCubeSceneNode(15.f, cube, WOODBOX_TEXTURE);
 		physics->VAddBox(Vec3(15.f, 15.f, 15.f), cube, "Titanium", "Bouncy");
 	}
 
@@ -145,7 +145,7 @@ namespace GameEngine
 		m_pData->AddActor(cube);
 
 		auto renderer = m_pData->GetRenderer();
-		renderer->AddCubeSceneNode(15.f, cube->GetID(), WOODBOX_TEXTURE);
+		renderer->AddCubeSceneNode(15.f, cube, WOODBOX_TEXTURE);
 		auto physics = m_pData->GetPhysicsEngine();
 		physics->VAddBox(Vec3(15.f, 15.f, 15.f), cube, "Titanium", "Bouncy");
 		physics->VApplyForce(throwDirection, 20.0f, cube->GetID());

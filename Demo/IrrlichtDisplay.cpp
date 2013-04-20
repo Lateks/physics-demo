@@ -46,56 +46,19 @@ namespace GameEngine
 {
 	namespace Display
 	{
-		// This handles the conversion from right-handed to left-handed
-		// coordinates (or vice versa) as well as the type conversion.
-		vector3df ConvertVectorWithHandedness(Vec3& vector)
-		{
-			return vector3df(vector.x(), vector.y(), -vector.z());
-		}
-
-		Vec3 ConvertVectorWithHandedness(vector3df& vector)
-		{
-			return Vec3(vector.X, vector.Y, -vector.Z);
-		}
-
-		// No right-to-left-handed conversion (for vectors where it
-		// does not matter, like scale vectors).
-		vector3df ConvertVector(Vec3& vector)
-		{
-			return vector3df(vector.x(), vector.y(), vector.z());
-		}
-
-		quaternion ConvertQuaternion(Quaternion& quat)
-		{
-			return quaternion(quat.x(), quat.y(), quat.z(), quat.w());
-		}
-
-		// TODO: handedness
-		matrix4 ConvertProjectionMatrix(Mat4& matrix)
-		{
-			matrix4 newMatrix;
-			for (int i = 0; i < 4; i++)
-				for (int j = 0; j < 4; j++)
-				{
-					float value = matrix.index(i, j);
-					newMatrix[i*4 + j] = (float) matrix.index(i, j);
-				}
-			return newMatrix;
-		}
-
 		IrrlichtDisplay::IrrlichtDisplay()
 		{
 			m_pData = new IrrlichtDisplayImpl();
 			m_pData->m_pInputState.reset(new IrrlichtInputState());
 			m_pData->m_pMoveEventHandler =
 				Events::EventHandlerPtr(new std::function<void(EventPtr)>(
-				[this] (EventPtr event) { this->UpdateActorPosition(event); }));
+				[this] (EventPtr event) { this->m_pData->UpdateActorPosition(event); }));
 		}
 
 		Vec3 IrrlichtDisplay::GetCameraPosition() const
 		{
 			vector3df pos = m_pData->m_pCamera->getAbsolutePosition();
-			return ConvertVectorWithHandedness(pos);
+			return m_pData->ConvertVectorWithHandedness(pos);
 		}
 
 		std::shared_ptr<IInputState> IrrlichtDisplay::GetInputState() const
@@ -117,39 +80,6 @@ namespace GameEngine
 			m_pData->m_pGui->drawAll();
 
 			m_pData->m_pDriver->endScene();
-		}
-
-		void IrrlichtDisplay::UpdateActorPosition(EventPtr pEvent)
-		{
-			assert(pEvent->GetEventType() == EventType::ACTOR_MOVED);
-			ActorMoveEvent *pMoveEvent =
-				dynamic_cast<ActorMoveEvent*>(pEvent.get());
-
-			GameData *game = GameData::getInstance();
-			WeakActorPtr pWeakActor = game->GetActor(pMoveEvent->GetActorId());
-			if (pWeakActor.expired())
-				return;
-
-			StrongActorPtr pActor(pWeakActor);
-			ISceneNode *pNode = m_pData->GetSceneNode(pActor->GetID());
-
-			if (pActor.get() && pNode)
-			{
-				weak_ptr<WorldTransformComponent> pWeakTransform = pActor->GetWorldTransform();
-				if (!pWeakTransform.expired())
-				{
-					shared_ptr<WorldTransformComponent> pWorldTransform(pWeakTransform);
-
-					quaternion rot = ConvertQuaternion(pWorldTransform->GetRotation());
-					vector3df eulerRot;
-					rot.toEuler(eulerRot);
-					eulerRot *= irr::core::RADTODEG;
-					pNode->setRotation(eulerRot);
-
-					pNode->setPosition(ConvertVectorWithHandedness(pWorldTransform->GetPosition()));
-					pNode->setScale(ConvertVector(pWorldTransform->GetScale()));
-				}
-			}
 		}
 
 		E_DRIVER_TYPE GetDriverType(DRIVER_TYPE type)
@@ -213,20 +143,20 @@ namespace GameEngine
 		void IrrlichtDisplay::SetCameraPosition(Vec3& newPosition)
 		{
 			assert(m_pData->m_pCamera);
-			m_pData->m_pCamera->setPosition(ConvertVectorWithHandedness(newPosition));
+			m_pData->m_pCamera->setPosition(m_pData->ConvertVectorWithHandedness(newPosition));
 			m_pData->m_pCamera->updateAbsolutePosition();
 		}
 
 		void IrrlichtDisplay::SetCameraTarget(Vec3& newTarget)
 		{
 			assert(m_pData->m_pCamera);
-			m_pData->m_pCamera->setTarget(ConvertVectorWithHandedness(newTarget));
+			m_pData->m_pCamera->setTarget(m_pData->ConvertVectorWithHandedness(newTarget));
 		}
 
 		void IrrlichtDisplay::SetCameraProjection(Mat4& newProjection)
 		{
 			assert(m_pData->m_pCamera);
-			m_pData->m_pCamera->setProjectionMatrix(ConvertProjectionMatrix(newProjection));
+			m_pData->m_pCamera->setProjectionMatrix(m_pData->ConvertProjectionMatrix(newProjection));
 		}
 
 		bool IrrlichtDisplay::Running()
@@ -259,58 +189,29 @@ namespace GameEngine
 			return TEXTURE_ID;
 		}
 
-		// TODO: refactor this and handle the mapping better
-		// TODO: set initial position here as well
-		void IrrlichtDisplay::AddSphereSceneNode(float radius, ActorID actorId, unsigned int texture, bool debug)
+		void IrrlichtDisplay::AddSphereSceneNode(float radius, WeakActorPtr pActor, unsigned int texture, bool debug)
 		{
 			ISceneManager *manager = debug ? m_pData->m_pDebugSmgr : m_pData->m_pSmgr;
 			auto node = manager->addSphereSceneNode(radius);
-			ITexture *txt = m_pData->textures[texture]; // TODO: check that this key is in the map
-			if (txt)
-			{
-				node->setMaterialTexture(0, txt);
-			}
-			node->setMaterialFlag(irr::video::EMF_LIGHTING, false);
-			m_pData->sceneNodes[actorId] = node;
-			auto game = GameData::getInstance();
-			game->GetEventManager()->RegisterHandler(EventType::ACTOR_MOVED,
-				m_pData->m_pMoveEventHandler);
+			m_pData->AddSceneNode(pActor, node, texture);
 		}
 
-		void IrrlichtDisplay::AddCubeSceneNode(float dim, ActorID actorId, unsigned int texture, bool debug)
+		void IrrlichtDisplay::AddCubeSceneNode(float dim, WeakActorPtr pActor, unsigned int texture, bool debug)
 		{
 			ISceneManager *manager = debug ? m_pData->m_pDebugSmgr : m_pData->m_pSmgr;
 			auto node = manager->addCubeSceneNode(dim);
-			ITexture *txt = m_pData->textures[texture]; // TODO: check that this key is in the map
-			if (txt)
-			{
-				node->setMaterialTexture(0, txt);
-			}
-			node->setMaterialFlag(irr::video::EMF_LIGHTING, false);
-			m_pData->sceneNodes[actorId] = node;
-			auto game = GameData::getInstance();
-			game->GetEventManager()->RegisterHandler(EventType::ACTOR_MOVED,
-				m_pData->m_pMoveEventHandler);
+			m_pData->AddSceneNode(pActor, node, texture);
 		}
 
-		void IrrlichtDisplay::AddMeshSceneNode(const std::string& meshFilePath, ActorID actorId, unsigned int texture, bool debug)
+		void IrrlichtDisplay::AddMeshSceneNode(const std::string& meshFilePath, WeakActorPtr pActor, unsigned int texture, bool debug)
 		{
 			ISceneManager *manager = debug ? m_pData->m_pDebugSmgr : m_pData->m_pSmgr;
 			auto mesh = manager->getMesh(meshFilePath.c_str());
 			if (mesh)
 			{
 				auto node = manager->addAnimatedMeshSceneNode(mesh);
-				ITexture *txt = m_pData->textures[texture]; // TODO: check that this key is in the map
-				if (txt)
-				{
-					node->setMaterialTexture(0, txt);
-				}
-				node->setMaterialFlag(irr::video::EMF_LIGHTING, false);
-				m_pData->sceneNodes[actorId] = node;
+				m_pData->AddSceneNode(pActor, node, texture);
 			}
-			auto game = GameData::getInstance();
-			game->GetEventManager()->RegisterHandler(EventType::ACTOR_MOVED,
-				m_pData->m_pMoveEventHandler);
 		}
 
 		void IrrlichtDisplay::RemoveSceneNode(ActorID actorId, bool debug)
@@ -339,7 +240,7 @@ namespace GameEngine
 			}
 			if (node)
 			{
-				node->setPosition(ConvertVectorWithHandedness(position));
+				node->setPosition(m_pData->ConvertVectorWithHandedness(position));
 			}
 		}
 	}

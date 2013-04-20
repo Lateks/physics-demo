@@ -45,9 +45,9 @@ namespace GameEngine
 			// Returns 0 if loading fails.
 			virtual unsigned int LoadTexture(const std::string& filePath) = 0;
 
-			virtual void AddSphereSceneNode(float radius, ActorID actorId, unsigned int texture, bool debug = false) = 0;
-			virtual void AddCubeSceneNode(float dim, ActorID actorId, unsigned int texture, bool debug = false) = 0;
-			virtual void AddMeshSceneNode(const std::string& meshFilePath, ActorID actorId, unsigned int texture = 0, bool debug = false) = 0;
+			virtual void AddSphereSceneNode(float radius, WeakActorPtr pActor, unsigned int texture, bool debug = false) = 0;
+			virtual void AddCubeSceneNode(float dim, WeakActorPtr pActor, unsigned int texture, bool debug = false) = 0;
+			virtual void AddMeshSceneNode(const std::string& meshFilePath, WeakActorPtr pActor, unsigned int texture = 0, bool debug = false) = 0;
 			virtual void RemoveSceneNode(ActorID actorId, bool debug = false) = 0;
 
 			virtual void LoadMap(const std::string& mapFilePath, const std::string& meshName, Vec3& position) = 0;

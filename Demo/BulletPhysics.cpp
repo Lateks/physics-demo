@@ -225,9 +225,8 @@ namespace GameEngine
 			if (bodies.size() > 0)
 			{
 				assert(bodies.size() == 1); // only static actors can have many bodies
-				const btVector3 force(direction.x() * newtons,
-					direction.y() * newtons, direction.z() * newtons);
-				bodies[0]->applyCentralImpulse(force);
+				const btVector3 dir = Vec3_to_btVector3(direction);
+				bodies[0]->applyCentralImpulse(dir.normalized() * newtons);
 			}
 		}
 
@@ -237,25 +236,24 @@ namespace GameEngine
 			if (bodies.size() > 0)
 			{
 				assert(bodies.size() == 1);
-				const btVector3 torque(direction.x() * magnitude,
-					direction.y() * magnitude, direction.z() * magnitude);
-				bodies[0]->applyTorqueImpulse(torque);
+				const btVector3 dir = Vec3_to_btVector3(direction);
+				bodies[0]->applyTorqueImpulse(dir.normalized() * magnitude);
 			}
 		}
 
 		void BulletPhysics::VStopActor(ActorID id)
 		{
-			VSetVelocity(id, Vec3(0, 0, 0));
+			VSetVelocity(id, Vec3(0, 0, 0), 1.0f);
 		}
 
-		void BulletPhysics::VSetVelocity(ActorID id, const Vec3& newVelocity)
+		void BulletPhysics::VSetVelocity(ActorID id, const Vec3& direction, float magnitude)
 		{
 			std::vector<btRigidBody*> bodies = m_pData->GetRigidBodies(id);
 			if (bodies.size() > 0)
 			{
 				assert(bodies.size() == 1);
-				const btVector3 velocity(newVelocity.x(), newVelocity.y(), newVelocity.z());
-				bodies[0]->setLinearVelocity(velocity);
+				const btVector3 dir = Vec3_to_btVector3(direction).normalized();
+				bodies[0]->setLinearVelocity(dir * magnitude);
 			}
 		}
 

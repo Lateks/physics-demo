@@ -31,6 +31,7 @@ namespace GameEngine
 			virtual void SetCameraTarget(Vec3& newTarget) override;
 			virtual void SetCameraProjection(Mat4& newProjection) override;
 			virtual Vec3 GetCameraPosition() const override;
+			virtual Vec3 GetCameraLookAt() const override;
 
 			virtual unsigned int LoadTexture(const std::string& filePath) override;
 

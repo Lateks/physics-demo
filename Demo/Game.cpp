@@ -17,8 +17,8 @@
 
 namespace
 {
-	static unsigned int WOODBOX_TEXTURE;
-	static unsigned int MUD_TEXTURE;
+	unsigned int WOODBOX_TEXTURE;
+	unsigned int MUD_TEXTURE;
 }
 
 namespace GameEngine
@@ -148,7 +148,7 @@ namespace GameEngine
 		renderer->AddCubeSceneNode(15.f, cube, WOODBOX_TEXTURE);
 		auto physics = m_pData->GetPhysicsEngine();
 		physics->VAddBox(Vec3(15.f, 15.f, 15.f), cube, "Titanium", "Bouncy");
-		physics->VApplyForce(throwDirection, 20.0f, cube->GetID());
+		physics->VSetVelocity(cube->GetID(), throwDirection, 250.0f);
 	}
 
 	void Game::HandleInputs()
@@ -158,7 +158,7 @@ namespace GameEngine
 			m_pData->GetInputStateHandler()->GetMouseState();
 		if (!mouse.LeftMouseDown && prevMouseState.LeftMouseDown)
 		{
-			ThrowCube(Vec3((float)mouse.X, (float)mouse.Y, 0.f));
+			ThrowCube(m_pData->GetRenderer()->GetCameraLookAt());
 		}
 		prevMouseState = mouse;
 	}

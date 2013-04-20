@@ -243,5 +243,11 @@ namespace GameEngine
 				node->setPosition(m_pData->ConvertVectorWithHandedness(position));
 			}
 		}
+
+		Vec3 IrrlichtDisplay::GetCameraLookAt() const
+		{
+			auto cameraLookAt = m_pData->m_pCamera->getTarget();
+			return m_pData->ConvertVectorWithHandedness(cameraLookAt);
+		}
 	}
 }

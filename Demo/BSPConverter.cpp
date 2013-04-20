@@ -44,13 +44,13 @@ Modifications made for the Game Engine Architecture project (Laura):
 
 using GameEngine::Vec4;
 
-// Not sure what the scaling parameter stands for (?)
-void BspConverter::convertBsp(BspLoader& bspLoader, float scaling,
-	std::function<void(std::vector<Vec4>& planeEquations)> addConvexMesh)
+void BspConverter::convertBsp(BspLoader& bspLoader,
+	std::function<void(std::vector<Vec4>& planeEquations)> addConvexMesh,
+	float scaling)
 {
 	for (int i=0;i<bspLoader.m_numleafs;i++)
 	{	
-		BSPLeaf&	leaf = bspLoader.m_dleafs[i];
+		BSPLeaf& leaf = bspLoader.m_dleafs[i];
 	
 		for (int b=0;b<leaf.numLeafBrushes;b++)
 		{

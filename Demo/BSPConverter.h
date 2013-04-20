@@ -27,8 +27,9 @@ class BspLoader;
 class BspConverter
 {
 public:
-	void convertBsp(BspLoader& bspLoader,float scaling,
-		std::function<void(std::vector<GameEngine::Vec4>& planeEquations)> addConvexMesh);
+	void convertBsp(BspLoader& bspLoader,
+		std::function<void(std::vector<GameEngine::Vec4>& planeEquations)> addConvexMesh,
+		float scaling = 1.0f);
 	virtual ~BspConverter() { }
 
 };

@@ -181,7 +181,7 @@ namespace GameEngine
 				return;
 
 			BspConverter bspConv;
-			bspConv.convertBsp(bspLoad, 1.0f,
+			bspConv.convertBsp(bspLoad,
 				[this, pActor] (std::vector<Vec4> planeEquations)
 			{
 				this->VAddConvexStaticColliderMesh(planeEquations, pActor);

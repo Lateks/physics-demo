@@ -1,17 +1,17 @@
 #ifndef RENDERING_ENGINE_FACTORIES_H
 #define RENDERING_ENGINE_FACTORIES_H
 
-#include "IRenderer.h"
-#include "IrrlichtRenderer.h"
+#include "IDisplay.h"
+#include "IrrlichtDisplay.h"
 
 namespace GameEngine
 {
 	namespace Display
 	{
-		std::unique_ptr<IRenderer> CreateRenderer()
+		std::unique_ptr<IDisplay> CreateRenderer()
 		{
-			std::unique_ptr<IRenderer> renderer;
-			renderer.reset(new IrrlichtRenderer());
+			std::unique_ptr<IDisplay> renderer;
+			renderer.reset(new IrrlichtDisplay());
 			if (!renderer.get())
 			{
 				renderer.reset();

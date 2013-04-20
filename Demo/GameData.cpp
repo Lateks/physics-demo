@@ -1,6 +1,6 @@
 #include "GameData.h"
 #include "GameActor.h"
-#include "IRenderer.h"
+#include "IDisplay.h"
 #include "IPhysicsEngine.h"
 #include "ITimer.h"
 #include <algorithm>

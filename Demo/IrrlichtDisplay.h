@@ -1,21 +1,24 @@
-#ifndef BASIC_IRRLICHT_RENDERER_H
-#define BASIC_IRRLICHT_RENDERER_H
+#ifndef IRRLICHT_DISPLAY_H
+#define IRRLICHT_DISPLAY_H
 
 #include "enginefwd.h"
-#include "IRenderer.h"
+#include "IDisplay.h"
 #include "IEventManager.h"
+#include <memory>
 
 namespace GameEngine
 {
 	namespace Display
 	{
-		class IrrlichtRenderer : public IRenderer
+		class IrrlichtDisplay : public IDisplay
 		{
 		public:
 			friend class IrrlichtTimer;
 
-			IrrlichtRenderer();
-			~IrrlichtRenderer();
+			IrrlichtDisplay();
+			~IrrlichtDisplay();
+
+			virtual std::shared_ptr<IInputState> GetInputState() const;
 
 			virtual void YieldDevice() override;
 			virtual bool Running() override;
@@ -37,7 +40,7 @@ namespace GameEngine
 
 			virtual void LoadMap(const std::string& mapFilePath, const std::string& meshName, Vec3& position) override;
 		private:
-			IrrlichtRendererImpl *m_pData;
+			IrrlichtDisplayImpl *m_pData;
 			void UpdateActorPosition(Events::EventPtr pEvent);
 		};
 	}

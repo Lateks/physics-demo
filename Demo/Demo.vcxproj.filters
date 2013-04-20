@@ -63,9 +63,6 @@
     <ClInclude Include="Game.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="IrrlichtRenderer.h">
-      <Filter>Header Files\Display</Filter>
-    </ClInclude>
     <ClInclude Include="MessagingWindow.h">
       <Filter>Header Files\Display</Filter>
     </ClInclude>
@@ -108,9 +105,6 @@
     <ClInclude Include="GameData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="IRenderer.h">
-      <Filter>Header Files\Display</Filter>
-    </ClInclude>
     <ClInclude Include="RenderingEngineFactories.h">
       <Filter>Header Files\Display</Filter>
     </ClInclude>
@@ -122,9 +116,6 @@
     </ClInclude>
     <ClInclude Include="TimerFactories.h">
       <Filter>Header Files\TimeKeeping</Filter>
-    </ClInclude>
-    <ClInclude Include="IrrlichtRendererImpl.h">
-      <Filter>Header Files\Display</Filter>
     </ClInclude>
     <ClInclude Include="WorldTransformComponent.h">
       <Filter>Header Files\GameObject</Filter>
@@ -156,6 +147,21 @@
     <ClInclude Include="BspLoaderFactory.h">
       <Filter>Header Files\3rdParty_BSPTools</Filter>
     </ClInclude>
+    <ClInclude Include="IrrlichtInputState.h">
+      <Filter>Header Files\Display</Filter>
+    </ClInclude>
+    <ClInclude Include="IInputState.h">
+      <Filter>Header Files\Display</Filter>
+    </ClInclude>
+    <ClInclude Include="IDisplay.h">
+      <Filter>Header Files\Display</Filter>
+    </ClInclude>
+    <ClInclude Include="IrrlichtDisplay.h">
+      <Filter>Header Files\Display</Filter>
+    </ClInclude>
+    <ClInclude Include="IrrlichtDisplayImpl.h">
+      <Filter>Header Files\Display</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Demo.cpp">
@@ -163,9 +169,6 @@
     </ClCompile>
     <ClCompile Include="Game.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="IrrlichtRenderer.cpp">
-      <Filter>Source Files\Display</Filter>
     </ClCompile>
     <ClCompile Include="MessagingWindow.cpp">
       <Filter>Source Files\Display</Filter>
@@ -206,9 +209,6 @@
     <ClCompile Include="BulletDebugRenderer.cpp">
       <Filter>Source Files\Physics</Filter>
     </ClCompile>
-    <ClCompile Include="IrrlichtRendererImpl.cpp">
-      <Filter>Source Files\Display</Filter>
-    </ClCompile>
     <ClCompile Include="BSPLoader.cpp">
       <Filter>Source Files\3rdParty_BSPTools</Filter>
     </ClCompile>
@@ -217,6 +217,12 @@
     </ClCompile>
     <ClCompile Include="BspLoaderFactory.cpp">
       <Filter>Source Files\3rdParty_BSPTools</Filter>
+    </ClCompile>
+    <ClCompile Include="IrrlichtDisplay.cpp">
+      <Filter>Source Files\Display</Filter>
+    </ClCompile>
+    <ClCompile Include="IrrlichtDisplayImpl.cpp">
+      <Filter>Source Files\Display</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

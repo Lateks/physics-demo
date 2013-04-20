@@ -1,5 +1,5 @@
 #include "BulletDebugRenderer.h"
-#include "IrrlichtRenderer.h"
+#include "IrrlichtDisplay.h"
 
 namespace GameEngine
 {

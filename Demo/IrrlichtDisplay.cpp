@@ -1,5 +1,6 @@
-#include "IrrlichtRenderer.h"
-#include "IrrlichtRendererImpl.h"
+#include "IrrlichtDisplay.h"
+#include "IrrlichtDisplayImpl.h"
+#include "IrrlichtInputState.h"
 #include "GameActor.h"
 #include "WorldTransformComponent.h"
 #include "GameData.h"
@@ -77,15 +78,21 @@ namespace GameEngine
 			return newMatrix;
 		}
 
-		IrrlichtRenderer::IrrlichtRenderer()
+		IrrlichtDisplay::IrrlichtDisplay()
 		{
-			m_pData = new IrrlichtRendererImpl();
+			m_pData = new IrrlichtDisplayImpl();
+			m_pData->m_pInputState.reset(new IrrlichtInputState());
 			m_pData->m_pMoveEventHandler =
 				Events::EventHandlerPtr(new std::function<void(EventPtr)>(
 				[this] (EventPtr event) { this->UpdateActorPosition(event); }));
 		}
 
-		void IrrlichtRenderer::DrawScene()
+		std::shared_ptr<IInputState> IrrlichtDisplay::GetInputState() const
+		{
+			return m_pData->m_pInputState;
+		}
+
+		void IrrlichtDisplay::DrawScene()
 		{
 			assert(m_pData->m_pDriver);
 
@@ -101,7 +108,7 @@ namespace GameEngine
 			m_pData->m_pDriver->endScene();
 		}
 
-		void IrrlichtRenderer::UpdateActorPosition(EventPtr pEvent)
+		void IrrlichtDisplay::UpdateActorPosition(EventPtr pEvent)
 		{
 			assert(pEvent->GetEventType() == EventType::ACTOR_MOVED);
 			ActorMoveEvent *pMoveEvent =
@@ -151,7 +158,7 @@ namespace GameEngine
 			}
 		}
 
-		bool IrrlichtRenderer::SetupAndOpenWindow(unsigned int width, unsigned int height,
+		bool IrrlichtDisplay::SetupAndOpenWindow(unsigned int width, unsigned int height,
 			DRIVER_TYPE driverType, CAMERA_TYPE cameraType)
 		{
 			m_pData->m_pDevice = irr::createDevice(GetDriverType(driverType),
@@ -183,7 +190,7 @@ namespace GameEngine
 			return true;
 		}
 
-		IrrlichtRenderer::~IrrlichtRenderer()
+		IrrlichtDisplay::~IrrlichtDisplay()
 		{
 			if (m_pData->m_pDevice)
 			{
@@ -192,46 +199,46 @@ namespace GameEngine
 			delete m_pData;
 		}
 
-		void IrrlichtRenderer::SetCameraPosition(Vec3& newPosition)
+		void IrrlichtDisplay::SetCameraPosition(Vec3& newPosition)
 		{
 			assert(m_pData->m_pCamera);
 			m_pData->m_pCamera->setPosition(ConvertVectorRHtoLH(newPosition));
 			m_pData->m_pCamera->updateAbsolutePosition();
 		}
 
-		void IrrlichtRenderer::SetCameraTarget(Vec3& newTarget)
+		void IrrlichtDisplay::SetCameraTarget(Vec3& newTarget)
 		{
 			assert(m_pData->m_pCamera);
 			m_pData->m_pCamera->setTarget(ConvertVectorRHtoLH(newTarget));
 		}
 
-		void IrrlichtRenderer::SetCameraProjection(Mat4& newProjection)
+		void IrrlichtDisplay::SetCameraProjection(Mat4& newProjection)
 		{
 			assert(m_pData->m_pCamera);
 			m_pData->m_pCamera->setProjectionMatrix(ConvertProjectionMatrix(newProjection));
 		}
 
-		bool IrrlichtRenderer::Running()
+		bool IrrlichtDisplay::Running()
 		{
 			if (!m_pData->m_pDevice)
 				return false;
 			return m_pData->m_pDevice->run();
 		}
 
-		bool IrrlichtRenderer::WindowActive()
+		bool IrrlichtDisplay::WindowActive()
 		{
 			if (!m_pData->m_pDevice)
 				return false;
 			return m_pData->m_pDevice->isWindowActive();
 		}
 
-		void IrrlichtRenderer::YieldDevice()
+		void IrrlichtDisplay::YieldDevice()
 		{
 			assert(m_pData->m_pDevice);
 			m_pData->m_pDevice->yield();
 		}
 
-		unsigned int IrrlichtRenderer::LoadTexture(const std::string& filePath)
+		unsigned int IrrlichtDisplay::LoadTexture(const std::string& filePath)
 		{
 			assert(m_pData->m_pDriver);
 			auto texture = m_pData->m_pDriver->getTexture(filePath.c_str());
@@ -243,7 +250,7 @@ namespace GameEngine
 
 		// TODO: refactor this and handle the mapping better
 		// TODO: set initial position here as well
-		void IrrlichtRenderer::AddSphereSceneNode(float radius, ActorID actorId, unsigned int texture, bool debug)
+		void IrrlichtDisplay::AddSphereSceneNode(float radius, ActorID actorId, unsigned int texture, bool debug)
 		{
 			ISceneManager *manager = debug ? m_pData->m_pDebugSmgr : m_pData->m_pSmgr;
 			auto node = manager->addSphereSceneNode(radius);
@@ -259,7 +266,7 @@ namespace GameEngine
 				m_pData->m_pMoveEventHandler);
 		}
 
-		void IrrlichtRenderer::AddCubeSceneNode(float dim, ActorID actorId, unsigned int texture, bool debug)
+		void IrrlichtDisplay::AddCubeSceneNode(float dim, ActorID actorId, unsigned int texture, bool debug)
 		{
 			ISceneManager *manager = debug ? m_pData->m_pDebugSmgr : m_pData->m_pSmgr;
 			auto node = manager->addCubeSceneNode(dim);
@@ -275,7 +282,7 @@ namespace GameEngine
 				m_pData->m_pMoveEventHandler);
 		}
 
-		void IrrlichtRenderer::AddMeshSceneNode(const std::string& meshFilePath, ActorID actorId, unsigned int texture, bool debug)
+		void IrrlichtDisplay::AddMeshSceneNode(const std::string& meshFilePath, ActorID actorId, unsigned int texture, bool debug)
 		{
 			ISceneManager *manager = debug ? m_pData->m_pDebugSmgr : m_pData->m_pSmgr;
 			auto mesh = manager->getMesh(meshFilePath.c_str());
@@ -295,7 +302,7 @@ namespace GameEngine
 				m_pData->m_pMoveEventHandler);
 		}
 
-		void IrrlichtRenderer::RemoveSceneNode(ActorID actorId, bool debug)
+		void IrrlichtDisplay::RemoveSceneNode(ActorID actorId, bool debug)
 		{
 			auto node = m_pData->sceneNodes[actorId];
 			if (node)
@@ -304,7 +311,7 @@ namespace GameEngine
 			}
 		}
 
-		void IrrlichtRenderer::LoadMap(const std::string& mapFilePath,
+		void IrrlichtDisplay::LoadMap(const std::string& mapFilePath,
 			const std::string& meshName, Vec3& position)
 		{
 			if (!m_pData->m_pDevice || !m_pData->m_pSmgr)

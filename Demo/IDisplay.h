@@ -1,5 +1,5 @@
-#ifndef I_RENDERER_H
-#define I_RENDERER_H
+#ifndef I_DISPLAY_H
+#define I_DISPLAY_H
 
 #include "enginefwd.h"
 #include <string>
@@ -22,10 +22,12 @@ namespace GameEngine
 			STATIC
 		};
 
-		class IRenderer
+		class IDisplay
 		{
 		public:
-			virtual ~IRenderer() { }
+			virtual ~IDisplay() { }
+
+			virtual std::shared_ptr<IInputState> GetInputState() const = 0;
 
 			virtual void YieldDevice() = 0;
 			virtual bool Running() = 0;

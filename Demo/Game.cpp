@@ -1,7 +1,7 @@
 #include "Game.h"
 #include "GameActor.h"
 #include "GameData.h"
-#include "IRenderer.h"
+#include "IDisplay.h"
 #include "TimerFactories.h"
 #include "IEventManager.h"
 #include "EventManager.h" // TODO: make a factory method for these.
@@ -16,20 +16,20 @@
 
 namespace GameEngine
 {
-	using Display::IRenderer;
+	using Display::IDisplay;
 	using Physics::IPhysicsEngine;
 	using Events::IEventManager;
 	using Events::EventManager;
 
 	/* Note: the coordinates given here are all given in a right-handed
-	 * coordinate system. The IrrlichtRenderer component converts them to
+	 * coordinate system. The IrrlichtDisplay component converts them to
 	 * the left-handed system used by Irrlicht by negating the z component.
 	 * (Also note that the concept of handedness does not affect quaternions
 	 * used for handling rotations.)
 	 */
 	void SetupInitialScene(GameData *game)
 	{
-		IRenderer *renderer = game->GetRenderer();
+		IDisplay *renderer = game->GetRenderer();
 		IPhysicsEngine *physics = game->GetPhysicsEngine();
 		physics->VSetGlobalGravity(Vec3(0, -100.f, 0));
 
@@ -64,7 +64,7 @@ namespace GameEngine
 	Game::Game()
 	{
 		// Setup rendering component.
-		std::unique_ptr<IRenderer> renderer(Display::CreateRenderer());
+		std::unique_ptr<IDisplay> renderer(Display::CreateRenderer());
 		if (!renderer.get())
 		{
 			std::cerr << "Failed to create rendering device." << std::cerr;
@@ -129,7 +129,7 @@ namespace GameEngine
 	{
 		SetupInitialScene(m_pData);
 
-		IRenderer *renderer = m_pData->GetRenderer();
+		IDisplay *renderer = m_pData->GetRenderer();
 		IPhysicsEngine *physics = m_pData->GetPhysicsEngine();
 		IEventManager *events = m_pData->GetEventManager();
 		if (!renderer || !physics || !events)

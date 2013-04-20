@@ -1,5 +1,5 @@
-#ifndef IRRLICHT_RENDERER_IMPL_H
-#define IRRLICHT_RENDERER_IMPL_H
+#ifndef IRRLICHT_DISPLAY_IMPL_H
+#define IRRLICHT_DISPLAY_IMPL_H
 
 #include "enginefwd.h"
 #include "IEventManager.h"
@@ -12,7 +12,7 @@ namespace GameEngine
 {
 	namespace Display
 	{
-		struct IrrlichtRendererImpl
+		struct IrrlichtDisplayImpl
 		{
 			std::map<unsigned int, irr::video::ITexture*> textures;
 			std::map<ActorID, irr::scene::ISceneNode*> sceneNodes;
@@ -31,6 +31,8 @@ namespace GameEngine
 			irr::scene::ICameraSceneNode *m_pCamera;
 			irr::gui::IGUIEnvironment *m_pGui;
 			Events::EventHandlerPtr m_pMoveEventHandler;
+
+			std::shared_ptr<IInputState> m_pInputState;
 		};
 	}
 }

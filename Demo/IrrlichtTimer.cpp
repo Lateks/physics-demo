@@ -1,8 +1,8 @@
 #include "IrrlichtTimer.h"
-#include "IrrlichtRenderer.h"
-#include "IrrlichtRendererImpl.h"
+#include "IrrlichtDisplay.h"
+#include "IrrlichtDisplayImpl.h"
 
-using GameEngine::Display::IrrlichtRenderer;
+using GameEngine::Display::IrrlichtDisplay;
 
 namespace GameEngine
 {

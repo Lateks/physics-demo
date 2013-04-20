@@ -9,12 +9,12 @@ namespace GameEngine
 	class IrrlichtTimer : public ITimer
 	{
 	public:
-		IrrlichtTimer(Display::IrrlichtRenderer *renderer)
+		IrrlichtTimer(Display::IrrlichtDisplay *renderer)
 			: m_pRenderer(renderer) { }
 		~IrrlichtTimer();
 		virtual unsigned int GetTimeMs() override;
 	private:
-		Display::IrrlichtRenderer *m_pRenderer;
+		Display::IrrlichtDisplay *m_pRenderer;
 	};
 }
 

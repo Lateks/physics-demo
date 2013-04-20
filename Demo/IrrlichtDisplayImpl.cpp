@@ -1,4 +1,4 @@
-#include "IrrlichtRendererImpl.h"
+#include "IrrlichtDisplayImpl.h"
 #include <irrlicht.h>
 #include <map>
 #include <cassert>
@@ -9,7 +9,7 @@ namespace GameEngine
 {
 	namespace Display
 	{
-		ISceneNode *IrrlichtRendererImpl::GetSceneNode(ActorID actorId)
+		ISceneNode *IrrlichtDisplayImpl::GetSceneNode(ActorID actorId)
 		{
 			auto it = sceneNodes.find(actorId);
 			assert(it != sceneNodes.end());

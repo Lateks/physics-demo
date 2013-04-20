@@ -7,11 +7,13 @@ namespace GameEngine
 {
 	namespace Display
 	{
-		class IRenderer;
-		class IrrlichtRenderer;
-		struct IrrlichtRendererImpl;
+		class IDisplay;
+		class IrrlichtDisplay;
+		struct IrrlichtDisplayImpl;
+		class IrrlichtInputState;
 		class MessagingWindow;
 		struct MessagingWindowImpl;
+		class IInputState;
 	}
 
 	namespace Physics

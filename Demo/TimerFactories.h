@@ -3,7 +3,7 @@
 
 #include "enginefwd.h"
 #include "ITimer.h"
-#include "IrrlichtRenderer.h"
+#include "IrrlichtDisplay.h"
 #include "IrrlichtTimer.h"
 #include "GameData.h"
 
@@ -11,8 +11,8 @@ namespace GameEngine
 {
 	std::unique_ptr<ITimer> GetTimer()
 	{
-		Display::IRenderer *renderer = GameEngine::GameData::getInstance()->GetRenderer();
-		Display::IrrlichtRenderer *irrlicht = dynamic_cast<Display::IrrlichtRenderer*>(renderer);
+		Display::IDisplay *renderer = GameEngine::GameData::getInstance()->GetRenderer();
+		Display::IrrlichtDisplay *irrlicht = dynamic_cast<Display::IrrlichtDisplay*>(renderer);
 		std::unique_ptr<ITimer> timer;
 		if (irrlicht)
 		{

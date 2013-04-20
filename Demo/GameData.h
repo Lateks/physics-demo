@@ -11,7 +11,7 @@ namespace GameEngine
 	private:
 		static GameData *instance;
 		GameData() : m_pRenderer(nullptr), m_pPhysicsEngine(nullptr) { }
-		Display::IRenderer *m_pRenderer;
+		Display::IDisplay *m_pRenderer;
 		ITimer *m_pTimer;
 		Events::IEventManager *m_pEvents;
 		Physics::IPhysicsEngine *m_pPhysicsEngine;
@@ -42,11 +42,11 @@ namespace GameEngine
 		{
 			return m_pPhysicsEngine;
 		}
-		void SetRenderer(Display::IRenderer *renderer)
+		void SetRenderer(Display::IDisplay *renderer)
 		{
 			m_pRenderer = renderer;
 		}
-		Display::IRenderer * const GetRenderer() const
+		Display::IDisplay * const GetRenderer() const
 		{
 			return m_pRenderer;
 		}

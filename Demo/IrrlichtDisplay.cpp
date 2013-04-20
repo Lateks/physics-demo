@@ -244,7 +244,7 @@ namespace GameEngine
 			}
 		}
 
-		Vec3 IrrlichtDisplay::GetCameraLookAt() const
+		Vec3 IrrlichtDisplay::GetCameraTarget() const
 		{
 			auto cameraLookAt = m_pData->m_pCamera->getTarget();
 			return m_pData->ConvertVectorWithHandedness(cameraLookAt);

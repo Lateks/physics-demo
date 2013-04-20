@@ -158,7 +158,7 @@ namespace GameEngine
 			m_pData->GetInputStateHandler()->GetMouseState();
 		if (!mouse.LeftMouseDown && prevMouseState.LeftMouseDown)
 		{
-			ThrowCube(m_pData->GetRenderer()->GetCameraLookAt());
+			ThrowCube(m_pData->GetRenderer()->GetCameraTarget());
 		}
 		prevMouseState = mouse;
 	}

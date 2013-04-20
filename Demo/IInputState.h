@@ -18,7 +18,7 @@ namespace GameEngine
 
 			virtual ~IInputState() { }
 
-			MouseState GetMouseState()
+			const MouseState GetMouseState() const
 			{
 				return m_mouseState;
 			}

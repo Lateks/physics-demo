@@ -18,7 +18,7 @@ namespace GameEngine
 			IrrlichtDisplay();
 			~IrrlichtDisplay();
 
-			virtual std::shared_ptr<IInputState> GetInputState() const;
+			virtual std::shared_ptr<IInputState> GetInputState() const override;
 
 			virtual void YieldDevice() override;
 			virtual bool Running() override;
@@ -30,6 +30,7 @@ namespace GameEngine
 			virtual void SetCameraPosition(Vec3& newPosition) override;
 			virtual void SetCameraTarget(Vec3& newTarget) override;
 			virtual void SetCameraProjection(Mat4& newProjection) override;
+			virtual Vec3 GetCameraPosition() const override;
 
 			virtual unsigned int LoadTexture(const std::string& filePath) override;
 

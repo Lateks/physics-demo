@@ -32,7 +32,7 @@ namespace GameEngine
 			irr::gui::IGUIEnvironment *m_pGui;
 			Events::EventHandlerPtr m_pMoveEventHandler;
 
-			std::shared_ptr<IInputState> m_pInputState;
+			std::shared_ptr<IrrlichtInputState> m_pInputState;
 		};
 	}
 }

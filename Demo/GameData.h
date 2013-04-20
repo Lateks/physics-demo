@@ -3,6 +3,7 @@
 
 #include "enginefwd.h"
 #include <map>
+#include <memory>
 
 namespace GameEngine
 {
@@ -15,6 +16,7 @@ namespace GameEngine
 		ITimer *m_pTimer;
 		Events::IEventManager *m_pEvents;
 		Physics::IPhysicsEngine *m_pPhysicsEngine;
+		std::shared_ptr<Display::IInputState> m_pInputState;
 		std::map<ActorID, std::shared_ptr<GameActor>> m_actors;
 	public:
 		static GameData *getInstance()
@@ -41,6 +43,17 @@ namespace GameEngine
 		Physics::IPhysicsEngine * const GetPhysicsEngine() const
 		{
 			return m_pPhysicsEngine;
+		}
+		void SetInputStateHandler(std::weak_ptr<Display::IInputState> inputState)
+		{
+			if (!inputState.expired())
+			{
+				m_pInputState = std::shared_ptr<Display::IInputState>(inputState);
+			}
+		}
+		std::shared_ptr<Display::IInputState> GetInputStateHandler() const
+		{
+			return m_pInputState;
 		}
 		void SetRenderer(Display::IDisplay *renderer)
 		{

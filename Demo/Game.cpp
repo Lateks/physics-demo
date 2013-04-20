@@ -47,6 +47,7 @@ namespace GameEngine
 		renderer->SetCameraPosition(Vec3(50,50,60));
 		renderer->SetCameraTarget(Vec3(-70,30,60));
 
+		// Setup actors.
 		unsigned int mudTexture = renderer->LoadTexture("..\\assets\\cracked_mud.jpg");
 		unsigned int woodBoxTexture = renderer->LoadTexture("..\\assets\\woodbox2.jpg");
 
@@ -80,6 +81,7 @@ namespace GameEngine
 
 		m_pData = GameData::getInstance();
 		m_pData->SetRenderer(renderer.release());
+		m_pData->SetInputStateHandler(renderer->GetInputState());
 
 		// Setup timer.
 		std::unique_ptr<ITimer> timer(GetTimer());

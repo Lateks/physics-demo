@@ -47,10 +47,15 @@ namespace GameEngine
 	namespace Display
 	{
 		// This handles the conversion from right-handed to left-handed
-		// coordinates as well as the type conversion.
-		vector3df ConvertVectorRHtoLH(Vec3& vector)
+		// coordinates (or vice versa) as well as the type conversion.
+		vector3df ConvertVectorWithHandedness(Vec3& vector)
 		{
 			return vector3df(vector.x(), vector.y(), -vector.z());
+		}
+
+		Vec3 ConvertVectorWithHandedness(vector3df& vector)
+		{
+			return Vec3(vector.X, vector.Y, -vector.Z);
 		}
 
 		// No right-to-left-handed conversion (for vectors where it
@@ -65,7 +70,7 @@ namespace GameEngine
 			return quaternion(quat.x(), quat.y(), quat.z(), quat.w());
 		}
 
-		// TODO: is handedness relevant in projection matrices?
+		// TODO: handedness
 		matrix4 ConvertProjectionMatrix(Mat4& matrix)
 		{
 			matrix4 newMatrix;
@@ -85,6 +90,12 @@ namespace GameEngine
 			m_pData->m_pMoveEventHandler =
 				Events::EventHandlerPtr(new std::function<void(EventPtr)>(
 				[this] (EventPtr event) { this->UpdateActorPosition(event); }));
+		}
+
+		Vec3 IrrlichtDisplay::GetCameraPosition() const
+		{
+			vector3df pos = m_pData->m_pCamera->getAbsolutePosition();
+			return ConvertVectorWithHandedness(pos);
 		}
 
 		std::shared_ptr<IInputState> IrrlichtDisplay::GetInputState() const
@@ -135,7 +146,7 @@ namespace GameEngine
 					eulerRot *= irr::core::RADTODEG;
 					pNode->setRotation(eulerRot);
 
-					pNode->setPosition(ConvertVectorRHtoLH(pWorldTransform->GetPosition()));
+					pNode->setPosition(ConvertVectorWithHandedness(pWorldTransform->GetPosition()));
 					pNode->setScale(ConvertVector(pWorldTransform->GetScale()));
 				}
 			}
@@ -163,7 +174,7 @@ namespace GameEngine
 		{
 			m_pData->m_pDevice = irr::createDevice(GetDriverType(driverType),
 				irr::core::dimension2d<u32>(width, height),
-				16, false, false, false, 0);
+				16, false, false, false, m_pData->m_pInputState.get());
 			if (!m_pData->m_pDevice)
 			{
 				return false;
@@ -202,14 +213,14 @@ namespace GameEngine
 		void IrrlichtDisplay::SetCameraPosition(Vec3& newPosition)
 		{
 			assert(m_pData->m_pCamera);
-			m_pData->m_pCamera->setPosition(ConvertVectorRHtoLH(newPosition));
+			m_pData->m_pCamera->setPosition(ConvertVectorWithHandedness(newPosition));
 			m_pData->m_pCamera->updateAbsolutePosition();
 		}
 
 		void IrrlichtDisplay::SetCameraTarget(Vec3& newTarget)
 		{
 			assert(m_pData->m_pCamera);
-			m_pData->m_pCamera->setTarget(ConvertVectorRHtoLH(newTarget));
+			m_pData->m_pCamera->setTarget(ConvertVectorWithHandedness(newTarget));
 		}
 
 		void IrrlichtDisplay::SetCameraProjection(Mat4& newProjection)
@@ -328,7 +339,7 @@ namespace GameEngine
 			}
 			if (node)
 			{
-				node->setPosition(ConvertVectorRHtoLH(position));
+				node->setPosition(ConvertVectorWithHandedness(position));
 			}
 		}
 	}

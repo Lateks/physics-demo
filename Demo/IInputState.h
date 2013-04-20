@@ -10,6 +10,7 @@ namespace GameEngine
 		public:
 			struct MouseState
 			{
+				MouseState() : LeftMouseDown(false), RightMouseDown(false) { }
 				bool LeftMouseDown;
 				bool RightMouseDown;
 				int X;

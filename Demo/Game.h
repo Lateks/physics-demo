@@ -14,6 +14,8 @@ namespace GameEngine
 		int Run();
 	private:
 		GameData *m_pData;
+		void HandleInputs();
+		void ThrowCube(Vec3& throwTowards);
 	};
 }
 

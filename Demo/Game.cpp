@@ -3,6 +3,7 @@
 #include "GameData.h"
 #include "IDisplay.h"
 #include "TimerFactories.h"
+#include "IInputState.h"
 #include "IEventManager.h"
 #include "EventManager.h" // TODO: make a factory method for these.
 #include "RenderingEngineFactories.h"
@@ -13,6 +14,12 @@
 #include <irrlicht.h>
 #include <iostream>
 #include <memory>
+
+namespace
+{
+	static unsigned int WOODBOX_TEXTURE;
+	static unsigned int MUD_TEXTURE;
+}
 
 namespace GameEngine
 {
@@ -48,17 +55,17 @@ namespace GameEngine
 		renderer->SetCameraTarget(Vec3(-70,30,60));
 
 		// Setup actors.
-		unsigned int mudTexture = renderer->LoadTexture("..\\assets\\cracked_mud.jpg");
-		unsigned int woodBoxTexture = renderer->LoadTexture("..\\assets\\woodbox2.jpg");
+		MUD_TEXTURE = renderer->LoadTexture("..\\assets\\cracked_mud.jpg");
+		WOODBOX_TEXTURE = renderer->LoadTexture("..\\assets\\woodbox2.jpg");
 
 		StrongActorPtr ball(new GameActor(Vec3(0, 50, 60)));
 		game->AddActor(ball);
-		renderer->AddSphereSceneNode(10.f, ball->GetID(), mudTexture);
+		renderer->AddSphereSceneNode(10.f, ball->GetID(), MUD_TEXTURE);
 		physics->VAddSphere(10.f, ball, "Vinyl", "Bouncy");
 
 		StrongActorPtr cube(new GameActor(Vec3(0, 80, 60)));
 		game->AddActor(cube);
-		renderer->AddCubeSceneNode(15.f, cube->GetID(), woodBoxTexture);
+		renderer->AddCubeSceneNode(15.f, cube->GetID(), WOODBOX_TEXTURE);
 		physics->VAddBox(Vec3(15.f, 15.f, 15.f), cube, "Titanium", "Bouncy");
 	}
 
@@ -80,8 +87,8 @@ namespace GameEngine
 		}
 
 		m_pData = GameData::getInstance();
-		m_pData->SetRenderer(renderer.release());
 		m_pData->SetInputStateHandler(renderer->GetInputState());
+		m_pData->SetRenderer(renderer.release());
 
 		// Setup timer.
 		std::unique_ptr<ITimer> timer(GetTimer());
@@ -127,6 +134,35 @@ namespace GameEngine
 		}
 	}
 
+	void Game::ThrowCube(Vec3& throwTowards)
+	{
+		Vec3 cameraPos = m_pData->GetRenderer()->GetCameraPosition();
+		// TODO: make it possible to do simple calculations like
+		// these with the Vec3 class.
+		Vec3 throwDirection(throwTowards.x() - cameraPos.x(),
+			throwTowards.y() - cameraPos.y(), throwTowards.z() - cameraPos.z());
+		StrongActorPtr cube(new GameActor(cameraPos));
+		m_pData->AddActor(cube);
+
+		auto renderer = m_pData->GetRenderer();
+		renderer->AddCubeSceneNode(15.f, cube->GetID(), WOODBOX_TEXTURE);
+		auto physics = m_pData->GetPhysicsEngine();
+		physics->VAddBox(Vec3(15.f, 15.f, 15.f), cube, "Titanium", "Bouncy");
+		physics->VApplyForce(throwDirection, 20.0f, cube->GetID());
+	}
+
+	void Game::HandleInputs()
+	{
+		static Display::IInputState::MouseState prevMouseState;
+		Display::IInputState::MouseState mouse =
+			m_pData->GetInputStateHandler()->GetMouseState();
+		if (!mouse.LeftMouseDown && prevMouseState.LeftMouseDown)
+		{
+			ThrowCube(Vec3((float)mouse.X, (float)mouse.Y, 0.f));
+		}
+		prevMouseState = mouse;
+	}
+
 	int Game::Run()
 	{
 		SetupInitialScene(m_pData);
@@ -144,10 +180,10 @@ namespace GameEngine
 		{
 			if (renderer->WindowActive())
 			{
+				HandleInputs();
 				physics->VUpdateSimulation(frameDeltaSec);
 				physics->VSyncScene();
 				events->DispatchEvents();
-				// TODO: handle inputs
 				renderer->DrawScene();
 			}
 			else

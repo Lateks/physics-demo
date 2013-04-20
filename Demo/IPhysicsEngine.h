@@ -42,8 +42,6 @@ namespace GameEngine
 
 			virtual void VRemoveActor(ActorID id) = 0;
 
-			virtual void VRenderDiagnostics() = 0;
-
 			virtual void VCreateTrigger(WeakActorPtr gameActor, const float dim) = 0;
 			virtual void VApplyForce(const Vec3& direction, float newtons, ActorID id) = 0;
 			virtual void VApplyTorque(const Vec3& direction, float magnitude, ActorID id) = 0;

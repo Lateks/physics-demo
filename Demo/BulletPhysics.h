@@ -30,8 +30,6 @@ namespace GameEngine
 
 			virtual void VRemoveActor(ActorID id) override;
 
-			virtual void VRenderDiagnostics() override;
-
 			virtual void VCreateTrigger(WeakActorPtr pActor, const float dim) override;
 			virtual void VApplyForce(const Vec3& direction, float newtons, ActorID id) override;
 			virtual void VApplyTorque(const Vec3& direction, float magnitude, ActorID id) override;

@@ -202,11 +202,6 @@ namespace GameEngine
 				new btBoxShape(Vec3_to_btVector3(Vec3(dim, dim, dim)));
 			m_pData->AddStaticColliderShape(pStrongActor, boxShape, true);
 		}
-
-		void BulletPhysics::VRenderDiagnostics()
-		{
-			//m_pData->m_pDynamicsWorld->debugDrawWorld();
-		}
 		
 		void BulletPhysics::VRemoveActor(ActorID id)
 		{

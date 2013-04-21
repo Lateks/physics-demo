@@ -307,7 +307,11 @@ namespace GameEngine
 			return actorHit;
 		}
 
-		// Constraint code from Bullet tutorials (DemoApplication.cpp).
+		/* Constraint code from Bullet tutorials (DemoApplication.cpp).
+		 * This is really a convenience method to allow adding constraints for
+		 * picking up items. In general, a physics SDK wrapper should probably
+		 * define more generic methods for setting up constraints.
+		 */
 		unsigned int BulletPhysics::AddPickConstraint(ActorID actorId, Vec3& pickPosition)
 		{
 			std::shared_ptr<BulletPhysicsObject> pObject = m_pData->GetPhysicsObject(actorId);

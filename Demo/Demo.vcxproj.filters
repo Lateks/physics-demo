@@ -162,6 +162,9 @@
     <ClInclude Include="IrrlichtDisplayImpl.h">
       <Filter>Header Files\Display</Filter>
     </ClInclude>
+    <ClInclude Include="IrrlichtConversions.h">
+      <Filter>Header Files\Display</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Demo.cpp">
@@ -222,6 +225,9 @@
       <Filter>Source Files\Display</Filter>
     </ClCompile>
     <ClCompile Include="IrrlichtDisplayImpl.cpp">
+      <Filter>Source Files\Display</Filter>
+    </ClCompile>
+    <ClCompile Include="IrrlichtConversions.cpp">
       <Filter>Source Files\Display</Filter>
     </ClCompile>
   </ItemGroup>

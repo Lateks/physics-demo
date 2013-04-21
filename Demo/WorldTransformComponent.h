@@ -17,7 +17,7 @@ namespace GameEngine
 		Vec3 m_position;
 	public:
 		WorldTransformComponent()
-			: m_scale(1, 1, 1), m_rotation(0, 0, 0, 1), m_position(0, 0, 0) { }
+			: m_scale(1, 1, 1, CSHandedness::NONE), m_rotation(0, 0, 0, 1), m_position(0, 0, 0) { }
 
 		void SetRotation(const Quaternion& newRotation)
 		{

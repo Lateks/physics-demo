@@ -138,8 +138,9 @@ namespace GameEngine
 	void Game::ThrowCube(Vec3& throwTowards)
 	{
 		Vec3 cameraPos = m_pData->GetRenderer()->GetCameraPosition();
-
 		Vec3 throwDirection = throwTowards - cameraPos;
+
+		// Also make the object rotate slightly "away from the camera".
 		Vec3 rotationAxis = m_pData->GetRenderer()->GetCameraRightVector();
 		rotationAxis[2] = -rotationAxis[2];
 

@@ -36,20 +36,6 @@ namespace GameEngine
 
 			void AddSceneNode(WeakActorPtr pActor, irr::scene::ISceneNode *pNode, unsigned int texture);
 			void UpdateActorPosition(Events::EventPtr pEvent);
-
-			// Vector conversion methods:
-
-			// This handles the conversion from right-handed to left-handed
-			// coordinates (or vice versa) as well as the type conversion.
-			irr::core::vector3df ConvertVectorWithHandedness(Vec3& vector);
-			Vec3 ConvertVectorWithHandedness(irr::core::vector3df& vector);
-
-			// No right-to-left-handed conversion (for vectors where it
-			// does not matter, like scale vectors).
-			irr::core::vector3df ConvertVector(Vec3& vector);
-			Vec3 ConvertVector(irr::core::vector3df& vector);
-			irr::core::quaternion ConvertQuaternion(Quaternion& quat);
-			irr::core::matrix4 ConvertProjectionMatrix(Mat4& matrix);
 		private:
 			void SetNodeTransform(irr::scene::ISceneNode *pNode, std::shared_ptr<WorldTransformComponent> pWorldTransform);
 		};

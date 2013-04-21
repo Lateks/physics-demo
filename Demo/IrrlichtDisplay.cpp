@@ -1,6 +1,7 @@
 #include "IrrlichtDisplay.h"
 #include "IrrlichtDisplayImpl.h"
 #include "IrrlichtInputState.h"
+#include "IrrlichtConversions.h"
 #include "GameActor.h"
 #include "WorldTransformComponent.h"
 #include "GameData.h"
@@ -58,7 +59,7 @@ namespace GameEngine
 		Vec3 IrrlichtDisplay::GetCameraPosition() const
 		{
 			vector3df pos = m_pData->m_pCamera->getAbsolutePosition();
-			return m_pData->ConvertVectorWithHandedness(pos);
+			return ConvertVector(pos);
 		}
 
 		std::shared_ptr<IInputState> IrrlichtDisplay::GetInputState() const
@@ -143,20 +144,20 @@ namespace GameEngine
 		void IrrlichtDisplay::SetCameraPosition(Vec3& newPosition)
 		{
 			assert(m_pData->m_pCamera);
-			m_pData->m_pCamera->setPosition(m_pData->ConvertVectorWithHandedness(newPosition));
+			m_pData->m_pCamera->setPosition(ConvertVector(newPosition));
 			m_pData->m_pCamera->updateAbsolutePosition();
 		}
 
 		void IrrlichtDisplay::SetCameraTarget(Vec3& newTarget)
 		{
 			assert(m_pData->m_pCamera);
-			m_pData->m_pCamera->setTarget(m_pData->ConvertVectorWithHandedness(newTarget));
+			m_pData->m_pCamera->setTarget(ConvertVector(newTarget));
 		}
 
 		void IrrlichtDisplay::SetCameraProjection(Mat4& newProjection)
 		{
 			assert(m_pData->m_pCamera);
-			m_pData->m_pCamera->setProjectionMatrix(m_pData->ConvertProjectionMatrix(newProjection));
+			m_pData->m_pCamera->setProjectionMatrix(ConvertProjectionMatrix(newProjection));
 		}
 
 		bool IrrlichtDisplay::Running()
@@ -240,20 +241,20 @@ namespace GameEngine
 			}
 			if (node)
 			{
-				node->setPosition(m_pData->ConvertVectorWithHandedness(position));
+				node->setPosition(ConvertVector(position));
 			}
 		}
 
 		Vec3 IrrlichtDisplay::GetCameraTarget() const
 		{
 			auto cameraLookAt = m_pData->m_pCamera->getTarget();
-			return m_pData->ConvertVectorWithHandedness(cameraLookAt);
+			return ConvertVector(cameraLookAt);
 		}
 
 		Vec3 IrrlichtDisplay::GetCameraUpVector() const
 		{
 			auto cameraUp = m_pData->m_pCamera->getUpVector();
-			return m_pData->ConvertVectorWithHandedness(cameraUp);
+			return ConvertVector(cameraUp);
 		}
 
 		Vec3 IrrlichtDisplay::GetCameraRightVector() const
@@ -263,7 +264,7 @@ namespace GameEngine
 			auto forward = camera->getTarget() - camera->getAbsolutePosition();
 			auto rightVector = up.crossProduct(forward);
 
-			return m_pData->ConvertVectorWithHandedness(rightVector);
+			return ConvertVector(rightVector);
 		}
 	}
 }

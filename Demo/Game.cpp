@@ -66,8 +66,8 @@ namespace GameEngine
 
 		StrongActorPtr cube(new GameActor(Vec3(0, 80, 60)));
 		game->AddActor(cube);
-		renderer->AddCubeSceneNode(15.f, cube, WOODBOX_TEXTURE);
-		physics->VAddBox(Vec3(15.f, 15.f, 15.f), cube, "Titanium", "Bouncy");
+		renderer->AddCubeSceneNode(25.f, cube, WOODBOX_TEXTURE);
+		physics->VAddBox(Vec3(25.f, 25.f, 25.f), cube, "Titanium", "Bouncy");
 	}
 
 	Game::Game()

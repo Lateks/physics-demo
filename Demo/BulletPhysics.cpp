@@ -115,7 +115,8 @@ namespace GameEngine
 				return;
 			StrongActorPtr pStrongActor(pActor);
 
-			btBoxShape * const boxShape = new btBoxShape(Vec3_to_btVector3(dimensions));
+			Vec3 boxHalfExtents = 0.5f * dimensions;
+			btBoxShape * const boxShape = new btBoxShape(Vec3_to_btVector3(boxHalfExtents));
 
 			float matDensity = m_pData->m_physicsMaterialData->LookupDensity(density);
 			const float boxVolume = dimensions.x() * dimensions.y() * dimensions.z();

@@ -175,7 +175,7 @@ namespace GameEngine
 			m_pData->AddStaticColliderShape(pStrongActor, convexShape);
 		}
 
-		void BulletPhysics::VAddBspMap(BspLoader& bspLoad, WeakActorPtr pActor)
+		void BulletPhysics::VLoadBspMap(BspLoader& bspLoad, WeakActorPtr pActor)
 		{
 			if (pActor.expired())
 				return;

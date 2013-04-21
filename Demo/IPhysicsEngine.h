@@ -39,7 +39,7 @@ namespace GameEngine
 			virtual void VAddConvexStaticColliderMesh(std::vector<Vec4>& planeEquations, WeakActorPtr pActor) = 0;
 
 			// Adding e.g. Quake maps from bsp files.
-			virtual void VAddBspMap(BspLoader& bspLoad, WeakActorPtr pActor) = 0;
+			virtual void VLoadBspMap(BspLoader& bspLoad, WeakActorPtr pActor) = 0;
 
 			virtual void VRemoveActor(ActorID id) = 0;
 

@@ -49,7 +49,7 @@ namespace GameEngine
 		game->AddActor(world);
 		renderer->LoadMap("..\\assets\\map-20kdm2.pk3", "20kdm2.bsp", mapPosition);
 		std::unique_ptr<BspLoader> pBspLoader = CreateBspLoader("..\\assets\\20kdm2.bsp");
-		physics->VAddBspMap(*pBspLoader, world);
+		physics->VLoadBspMap(*pBspLoader, world);
 
 		renderer->SetCameraPosition(Vec3(50,50,60));
 		renderer->SetCameraTarget(Vec3(-70,30,60));

@@ -14,6 +14,7 @@
 #include <irrlicht.h>
 #include <iostream>
 #include <memory>
+#include <iostream>
 
 namespace
 {
@@ -137,11 +138,10 @@ namespace GameEngine
 	void Game::ThrowCube(Vec3& throwTowards)
 	{
 		Vec3 cameraPos = m_pData->GetRenderer()->GetCameraPosition();
-		Vec3 upAxis(0, 1, 0);
 
-		Vec3 forward = throwTowards - cameraPos;
-		Vec3 rotationAxis = m_pData->GetRenderer()->GetCameraRightVector() * -1.f;
-		// TODO: rotationAxis should always point left (now it sometimes points right)
+		Vec3 throwDirection = throwTowards - cameraPos;
+		Vec3 rotationAxis = m_pData->GetRenderer()->GetCameraRightVector();
+		rotationAxis[2] = -rotationAxis[2];
 
 		StrongActorPtr cube(new GameActor(cameraPos));
 		m_pData->AddActor(cube);
@@ -150,7 +150,8 @@ namespace GameEngine
 		renderer->AddCubeSceneNode(15.f, cube, WOODBOX_TEXTURE);
 		auto physics = m_pData->GetPhysicsEngine();
 		physics->VAddBox(Vec3(15.f, 15.f, 15.f), cube, "Titanium", "Bouncy");
-		physics->VSetLinearVelocity(cube->GetID(), forward, 250.f);
+
+		physics->VSetLinearVelocity(cube->GetID(), throwDirection, 250.f);
 		physics->VSetAngularVelocity(cube->GetID(), rotationAxis, 2.5f);
 	}
 

@@ -121,6 +121,11 @@ namespace GameEngine
 			return vector3df(vector.x(), vector.y(), vector.z());
 		}
 
+		Vec3 IrrlichtDisplayImpl::ConvertVector(vector3df& vector)
+		{
+			return Vec3(vector.X, vector.Y, vector.Z);
+		}
+
 		quaternion IrrlichtDisplayImpl::ConvertQuaternion(Quaternion& quat)
 		{
 			return quaternion(quat.x(), quat.y(), quat.z(), quat.w());

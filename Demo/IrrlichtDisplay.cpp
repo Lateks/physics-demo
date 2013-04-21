@@ -256,15 +256,14 @@ namespace GameEngine
 			return m_pData->ConvertVectorWithHandedness(cameraUp);
 		}
 
-		// This appears to have a bug: sometimes it returns the camera right
-		// vector and sometimes the camera left vector. Possibly some other
-		// problems as well.
 		Vec3 IrrlichtDisplay::GetCameraRightVector() const
 		{
 			auto camera = m_pData->m_pCamera;
 			auto up = camera->getUpVector();
 			auto forward = camera->getTarget() - camera->getAbsolutePosition();
-			return m_pData->ConvertVectorWithHandedness(forward.crossProduct(up));
+			auto rightVector = up.crossProduct(forward);
+
+			return m_pData->ConvertVectorWithHandedness(rightVector);
 		}
 	}
 }

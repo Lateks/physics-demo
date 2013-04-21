@@ -95,9 +95,11 @@
     <ClInclude Include="BulletPhysics.h" />
     <ClInclude Include="BulletPhysicsData.h" />
     <ClInclude Include="BulletPhysicsObject.h" />
+    <ClInclude Include="DemoInputHandler.h" />
     <ClInclude Include="enginefwd.h" />
     <ClInclude Include="EventManager.h" />
     <ClInclude Include="Events.h" />
+    <ClInclude Include="IGameInputHandler.h" />
     <ClInclude Include="IEventManager.h" />
     <ClInclude Include="IInputState.h" />
     <ClInclude Include="IrrlichtConversions.h" />
@@ -132,8 +134,10 @@
     <ClCompile Include="BulletDebugRenderer.cpp" />
     <ClCompile Include="BulletPhysics.cpp" />
     <ClCompile Include="BulletPhysicsData.cpp" />
+    <ClCompile Include="DemoInputHandler.cpp" />
     <ClCompile Include="EventManager.cpp" />
     <ClCompile Include="GameActor.cpp" />
+    <ClCompile Include="IGameInputHandler.cpp" />
     <ClCompile Include="IrrlichtConversions.cpp" />
     <ClCompile Include="IrrlichtDisplay.cpp" />
     <ClCompile Include="Demo.cpp" />

@@ -55,14 +55,17 @@
     <Filter Include="Header Files\3rdParty_BSPTools">
       <UniqueIdentifier>{3a6d4dd1-d549-40f3-a483-7746f65fff59}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\BaseGameLogic">
+      <UniqueIdentifier>{9429ec77-a942-4afe-9c32-8049ec61c050}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BaseGameLogic">
+      <UniqueIdentifier>{6a1d097c-88b1-4fea-b9f3-aaf5e350d497}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Game.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="MessagingWindow.h">
       <Filter>Header Files\Display</Filter>
     </ClInclude>
@@ -101,9 +104,6 @@
     </ClInclude>
     <ClInclude Include="PhysicsEngineFactories.h">
       <Filter>Header Files\Physics</Filter>
-    </ClInclude>
-    <ClInclude Include="GameData.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="RenderingEngineFactories.h">
       <Filter>Header Files\Display</Filter>
@@ -168,12 +168,21 @@
     <ClInclude Include="BulletPhysicsObject.h">
       <Filter>Header Files\Physics</Filter>
     </ClInclude>
+    <ClInclude Include="Game.h">
+      <Filter>Header Files\BaseGameLogic</Filter>
+    </ClInclude>
+    <ClInclude Include="GameData.h">
+      <Filter>Header Files\BaseGameLogic</Filter>
+    </ClInclude>
+    <ClInclude Include="DemoInputHandler.h">
+      <Filter>Header Files\BaseGameLogic</Filter>
+    </ClInclude>
+    <ClInclude Include="IGameInputHandler.h">
+      <Filter>Header Files\BaseGameLogic</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Demo.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Game.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="MessagingWindow.cpp">
@@ -196,9 +205,6 @@
     </ClCompile>
     <ClCompile Include="XMLPhysicsData.cpp">
       <Filter>Source Files\Physics</Filter>
-    </ClCompile>
-    <ClCompile Include="GameData.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="IrrlichtTimer.cpp">
       <Filter>Source Files\TimeKeeping</Filter>
@@ -232,6 +238,18 @@
     </ClCompile>
     <ClCompile Include="IrrlichtConversions.cpp">
       <Filter>Source Files\Display</Filter>
+    </ClCompile>
+    <ClCompile Include="Game.cpp">
+      <Filter>Source Files\BaseGameLogic</Filter>
+    </ClCompile>
+    <ClCompile Include="GameData.cpp">
+      <Filter>Source Files\BaseGameLogic</Filter>
+    </ClCompile>
+    <ClCompile Include="DemoInputHandler.cpp">
+      <Filter>Source Files\BaseGameLogic</Filter>
+    </ClCompile>
+    <ClCompile Include="IGameInputHandler.cpp">
+      <Filter>Source Files\BaseGameLogic</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

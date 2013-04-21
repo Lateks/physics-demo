@@ -16,6 +16,7 @@ namespace GameEngine
 		ITimer *m_pTimer;
 		Events::IEventManager *m_pEvents;
 		Physics::IPhysicsEngine *m_pPhysicsEngine;
+		IGameInputHandler *m_pInputHandler;
 		std::shared_ptr<Display::IInputState> m_pInputState;
 		std::map<ActorID, std::shared_ptr<GameActor>> m_actors;
 	public:
@@ -35,6 +36,14 @@ namespace GameEngine
 		std::weak_ptr<GameActor> GetActor(ActorID id)
 		{
 			return m_actors[id];
+		}
+		void SetInputHandler(IGameInputHandler *inputHandler)
+		{
+			m_pInputHandler = inputHandler;
+		}
+		IGameInputHandler *GetInputHandler()
+		{
+			return m_pInputHandler;
 		}
 		void SetPhysicsEngine(Physics::IPhysicsEngine *physics)
 		{

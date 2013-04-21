@@ -3,24 +3,18 @@
 #include "GameData.h"
 #include "IDisplay.h"
 #include "TimerFactories.h"
+#include "IGameInputHandler.h"
 #include "IInputState.h"
 #include "IEventManager.h"
 #include "EventManager.h" // TODO: make a factory method for these.
 #include "RenderingEngineFactories.h"
 #include "IPhysicsEngine.h"
 #include "PhysicsEngineFactories.h"
-#include "BspLoaderFactory.h"
 #include "Vec3.h"
 #include <irrlicht.h>
 #include <iostream>
 #include <memory>
 #include <iostream>
-
-namespace
-{
-	unsigned int WOODBOX_TEXTURE;
-	unsigned int MUD_TEXTURE;
-}
 
 namespace GameEngine
 {
@@ -28,47 +22,6 @@ namespace GameEngine
 	using Physics::IPhysicsEngine;
 	using Events::IEventManager;
 	using Events::EventManager;
-
-	/* Note: the coordinates given here are all given in a right-handed
-	 * coordinate system. The IrrlichtDisplay component converts them to
-	 * the left-handed system used by Irrlicht by negating the z component.
-	 * (Also note that the concept of handedness does not affect quaternions
-	 * used for handling rotations.)
-	 */
-	void SetupInitialScene(GameData *game)
-	{
-		IDisplay *renderer = game->GetRenderer();
-		IPhysicsEngine *physics = game->GetPhysicsEngine();
-		physics->VSetGlobalGravity(Vec3(0, -100.f, 0));
-
-		// Create an actor for the world map to be able to refer to the associated
-		// rigid bodies. Note: now that the map itself has an actor and a
-		// world transform, the renderer could also use it to determine the
-		// position of the map.
-		Vec3 mapPosition(-1350, -130, 1400);
-		StrongActorPtr world(new GameActor(mapPosition));
-		game->AddActor(world);
-		renderer->LoadMap("..\\assets\\map-20kdm2.pk3", "20kdm2.bsp", mapPosition);
-		std::unique_ptr<BspLoader> pBspLoader = CreateBspLoader("..\\assets\\20kdm2.bsp");
-		physics->VLoadBspMap(*pBspLoader, world);
-
-		renderer->SetCameraPosition(Vec3(50,50,60));
-		renderer->SetCameraTarget(Vec3(-70,30,60));
-
-		// Setup actors.
-		MUD_TEXTURE = renderer->LoadTexture("..\\assets\\cracked_mud.jpg");
-		WOODBOX_TEXTURE = renderer->LoadTexture("..\\assets\\woodbox2.jpg");
-
-		StrongActorPtr ball(new GameActor(Vec3(0, 50, 60)));
-		game->AddActor(ball);
-		renderer->AddSphereSceneNode(10.f, ball, MUD_TEXTURE);
-		physics->VAddSphere(10.f, ball, "Vinyl", "Bouncy");
-
-		StrongActorPtr cube(new GameActor(Vec3(0, 80, 60)));
-		game->AddActor(cube);
-		renderer->AddCubeSceneNode(25.f, cube, WOODBOX_TEXTURE);
-		physics->VAddBox(Vec3(25.f, 25.f, 25.f), cube, "Titanium", "Bouncy");
-	}
 
 	Game::Game()
 	{
@@ -90,6 +43,14 @@ namespace GameEngine
 		m_pData = GameData::getInstance();
 		m_pData->SetInputStateHandler(renderer->GetInputState());
 		m_pData->SetRenderer(renderer.release());
+
+		std::unique_ptr<IGameInputHandler> pInputHandler(CreateDemoInputHandler());
+		if (!pInputHandler.get())
+		{
+			std::cerr << "Failed to create demo input handler." << std::endl;
+			return;
+		}
+		m_pData->SetInputHandler(pInputHandler.release());
 
 		// Setup timer.
 		std::unique_ptr<ITimer> timer(GetTimer());
@@ -135,48 +96,16 @@ namespace GameEngine
 		}
 	}
 
-	void Game::ThrowCube(Vec3& throwTowards)
-	{
-		Vec3 cameraPos = m_pData->GetRenderer()->GetCameraPosition();
-		Vec3 throwDirection = throwTowards - cameraPos;
-
-		// Also make the object rotate slightly "away from the camera".
-		Vec3 rotationAxis = m_pData->GetRenderer()->GetCameraRightVector();
-		rotationAxis[2] = -rotationAxis[2];
-
-		StrongActorPtr cube(new GameActor(cameraPos));
-		m_pData->AddActor(cube);
-
-		auto renderer = m_pData->GetRenderer();
-		renderer->AddCubeSceneNode(15.f, cube, WOODBOX_TEXTURE);
-		auto physics = m_pData->GetPhysicsEngine();
-		physics->VAddBox(Vec3(15.f, 15.f, 15.f), cube, "Titanium", "Bouncy");
-
-		physics->VSetLinearVelocity(cube->GetID(), throwDirection, 250.f);
-		physics->VSetAngularVelocity(cube->GetID(), rotationAxis, 2.5f);
-	}
-
-	void Game::HandleInputs()
-	{
-		static Display::IInputState::MouseState prevMouseState;
-		Display::IInputState::MouseState mouse =
-			m_pData->GetInputStateHandler()->GetMouseState();
-		if (!mouse.RightMouseDown && prevMouseState.RightMouseDown)
-		{
-			ThrowCube(m_pData->GetRenderer()->GetCameraTarget());
-		}
-		prevMouseState = mouse;
-	}
-
 	int Game::Run()
 	{
-		SetupInitialScene(m_pData);
-
 		IDisplay *renderer = m_pData->GetRenderer();
 		IPhysicsEngine *physics = m_pData->GetPhysicsEngine();
 		IEventManager *events = m_pData->GetEventManager();
-		if (!renderer || !physics || !events)
+		IGameInputHandler *gameLogic = m_pData->GetInputHandler();
+		if (!renderer || !physics || !events || !gameLogic)
 			return 1;
+
+		gameLogic->SetupInitialScene(m_pData);
 
 		float timeBegin = m_pData->CurrentTimeSec();
 		float timeEnd;
@@ -185,7 +114,7 @@ namespace GameEngine
 		{
 			if (renderer->WindowActive())
 			{
-				HandleInputs();
+				gameLogic->HandleInputs();
 				physics->VUpdateSimulation(frameDeltaSec);
 				physics->VSyncScene();
 				events->DispatchEvents();

@@ -2,29 +2,42 @@
 #define VEC_3_H
 
 #include "enginefwd.h"
+#include <Eigen\Dense>
 #include <iosfwd>
 
 namespace GameEngine
 {
-	class Vec3
+	enum class CSHandedness
+	{
+		NONE,
+		LEFT,
+		RIGHT
+	};
+
+	class Vec3 : public Eigen::Vector3f
 	{
 	public:
 		Vec3()
-			: m_x(0), m_y(0), m_z(0) { }
-		Vec3(float x, float y, float z)
-			: m_x(x), m_y(y), m_z(z) { }
-		Vec3(const Vec3& other);
-		~Vec3() { };
-		Vec3 operator=(const Vec3& other);
-		bool operator==(const Vec3& other) const;
-		bool operator!=(const Vec3& other) const;
-		float x() const;
-		float y() const;
-		float z() const;
+			: Eigen::Vector3f(0.f, 0.f, 0.f), m_handedness(CSHandedness::RIGHT) { };
+		Vec3(float x, float y, float z, CSHandedness handedness = CSHandedness::RIGHT)
+			: Eigen::Vector3f(x, y, z), m_handedness(handedness) { };
+		Vec3(Eigen::Vector3f vector, CSHandedness handedness = CSHandedness::RIGHT)
+			: Eigen::Vector3f(vector), m_handedness(handedness) { };
+		virtual ~Vec3() { };
+		CSHandedness GetHandedness()
+		{
+			return m_handedness;
+		}
+		Vec3 FlipHandedness()
+		{
+			if (m_handedness == CSHandedness::NONE)
+				return *this;
+			CSHandedness newHandedness = m_handedness == CSHandedness::RIGHT ?
+				CSHandedness::LEFT : CSHandedness::RIGHT;
+			return Vec3(x(), y(), -z(), newHandedness);
+		}
 	private:
-		float m_x;
-		float m_y;
-		float m_z;
+		CSHandedness m_handedness;
 	};
 
 	std::ostream& operator<<(std::ostream& stream, const Vec3& vec);

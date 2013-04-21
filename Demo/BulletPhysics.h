@@ -26,11 +26,12 @@ namespace GameEngine
 				WeakActorPtr pActor, const std::string& density, const std::string& material) override;
 			virtual void VAddConvexStaticColliderMesh(std::vector<Vec3>& vertices, WeakActorPtr pActor) override;
 			virtual void VAddConvexStaticColliderMesh(std::vector<Vec4>& planeEquations, WeakActorPtr pActor) override;
+			virtual void VCreateTrigger(WeakActorPtr pActor, const float dim) override;
+
 			virtual void VLoadBspMap(BspLoader& bspLoad, WeakActorPtr pActor) override;
 
 			virtual void VRemoveActor(ActorID id) override;
 
-			virtual void VCreateTrigger(WeakActorPtr pActor, const float dim) override;
 			virtual void VApplyForce(const Vec3& direction, float newtons, ActorID id) override;
 			virtual void VApplyTorque(const Vec3& direction, float magnitude, ActorID id) override;
 			virtual void VStopActor(ActorID id) override;

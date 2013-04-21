@@ -38,12 +38,13 @@ namespace GameEngine
 			virtual void VAddConvexStaticColliderMesh(std::vector<Vec3>& vertices, WeakActorPtr pActor) = 0;
 			virtual void VAddConvexStaticColliderMesh(std::vector<Vec4>& planeEquations, WeakActorPtr pActor) = 0;
 
+			virtual void VCreateTrigger(WeakActorPtr gameActor, const float dim) = 0;
+
 			// Adding e.g. Quake maps from bsp files.
 			virtual void VLoadBspMap(BspLoader& bspLoad, WeakActorPtr pActor) = 0;
 
 			virtual void VRemoveActor(ActorID id) = 0;
 
-			virtual void VCreateTrigger(WeakActorPtr gameActor, const float dim) = 0;
 			virtual void VApplyForce(const Vec3& direction, float newtons, ActorID id) = 0;
 			virtual void VApplyTorque(const Vec3& direction, float magnitude, ActorID id) = 0;
 			virtual void VStopActor(ActorID id) = 0; // set velocity to 0

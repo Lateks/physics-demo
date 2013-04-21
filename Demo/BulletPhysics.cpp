@@ -243,7 +243,8 @@ namespace GameEngine
 
 		void BulletPhysics::VStopActor(ActorID id)
 		{
-			VSetLinearVelocity(id, Vec3(0, 0, 0), 1.0f);
+			VSetLinearVelocity(id, Vec3(0, 0, 0), 1.f);
+			VSetAngularVelocity(id, Vec3(0, 0, 0), 1.f);
 		}
 
 		void BulletPhysics::VSetLinearVelocity(ActorID id, const Vec3& direction, float magnitude)
@@ -254,6 +255,17 @@ namespace GameEngine
 				assert(bodies.size() == 1);
 				const btVector3 dir = Vec3_to_btVector3(direction).normalized();
 				bodies[0]->setLinearVelocity(dir * magnitude);
+			}
+		}
+
+		void BulletPhysics::VSetAngularVelocity(ActorID id, const Vec3& rotationAxis, float magnitude)
+		{
+			std::vector<btRigidBody*> bodies = m_pData->GetRigidBodies(id);
+			if (bodies.size() > 0)
+			{
+				assert(bodies.size() == 1);
+				const btVector3 axis = Vec3_to_btVector3(rotationAxis).normalized();
+				bodies[0]->setAngularVelocity(axis * magnitude);
 			}
 		}
 

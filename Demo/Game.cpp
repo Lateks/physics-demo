@@ -148,7 +148,8 @@ namespace GameEngine
 		renderer->AddCubeSceneNode(15.f, cube, WOODBOX_TEXTURE);
 		auto physics = m_pData->GetPhysicsEngine();
 		physics->VAddBox(Vec3(15.f, 15.f, 15.f), cube, "Titanium", "Bouncy");
-		physics->VSetLinearVelocity(cube->GetID(), throwDirection, 250.0f);
+		physics->VSetLinearVelocity(cube->GetID(), throwDirection, 250.f);
+		physics->VSetAngularVelocity(cube->GetID(), throwDirection, 2.5f);
 	}
 
 	void Game::HandleInputs()

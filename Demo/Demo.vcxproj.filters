@@ -165,6 +165,9 @@
     <ClInclude Include="IrrlichtConversions.h">
       <Filter>Header Files\Display</Filter>
     </ClInclude>
+    <ClInclude Include="BulletPhysicsObject.h">
+      <Filter>Header Files\Physics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Demo.cpp">

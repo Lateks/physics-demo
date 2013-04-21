@@ -2,6 +2,7 @@
 #define BULLET_PHYSICS_DATA_H
 
 #include "enginefwd.h"
+#include "BulletPhysicsObject.h"
 #include <btBulletCollisionCommon.h>
 #include <btBulletDynamicsCommon.h>
 #include <map>
@@ -45,9 +46,10 @@ namespace GameEngine
 			 * only "static" actors (basically map elements) can own several
 			 * rigid bodies.
 			 */
-			std::map<ActorID, std::vector<btRigidBody*>> m_actorToRigidBodyListMap;
+			std::map<ActorID, std::shared_ptr<BulletPhysicsObject>> m_actorToBulletPhysicsObjectMap;
 			std::map<const btRigidBody*, ActorID> m_rigidBodyToActorMap;
-			std::vector<btRigidBody*> GetRigidBodies(ActorID id) const;
+
+			std::shared_ptr<BulletPhysicsObject> GetPhysicsObject(ActorID id) const;
 			ActorID GetActorID(const btRigidBody *pBody) const;
 
 			CollisionPairs m_previousTickCollisions;

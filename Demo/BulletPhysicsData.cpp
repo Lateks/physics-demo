@@ -18,12 +18,12 @@ namespace GameEngine
 {
 	namespace Physics
 	{
-		std::vector<btRigidBody*> BulletPhysicsData::GetRigidBodies(ActorID id) const
+		std::shared_ptr<BulletPhysicsObject> BulletPhysicsData::GetPhysicsObject(ActorID id) const
 		{
-			auto it = m_actorToRigidBodyListMap.find(id);
-			if (it != m_actorToRigidBodyListMap.end())
+			auto it = m_actorToBulletPhysicsObjectMap.find(id);
+			if (it != m_actorToBulletPhysicsObjectMap.end())
 				return it->second;
-			return std::vector<btRigidBody*>();
+			return std::shared_ptr<BulletPhysicsObject>(nullptr);
 		}
 
 		ActorID BulletPhysicsData::GetActorID(const btRigidBody *pBody) const
@@ -49,9 +49,6 @@ namespace GameEngine
 				return false;
 			}
 
-			// TODO: set debug drawer
-			// m_pDynamicsWorld->setDebugDrawer(m_pDebugDrawer);
-
 			m_pDynamicsWorld->setInternalTickCallback(BulletInternalTickCallback);
 			m_pDynamicsWorld->setWorldUserInfo(this);
 
@@ -69,18 +66,12 @@ namespace GameEngine
 		{
 			m_pCollisionConfig = new btDefaultCollisionConfiguration();
 			m_pCollisionDispatcher = new btCollisionDispatcher(m_pCollisionConfig);
-
-			// Use an AABB tree for broad phase collision detection.
 			m_pCollisionBroadPhase = new btDbvtBroadphase();
-
-			// TODO: demo this
 			m_pConstraintSolver = new btSequentialImpulseConstraintSolver();
 			
 			m_pDynamicsWorld = new btDiscreteDynamicsWorld(
 				m_pCollisionDispatcher, m_pCollisionBroadPhase,
 				m_pConstraintSolver, m_pCollisionConfig);
-
-			//m_pDebugRenderer = new BulletDebugRenderer();
 		}
 
 		void BulletPhysicsData::CleanUpSystems()
@@ -103,7 +94,7 @@ namespace GameEngine
 				RemoveCollisionObject(collisionObjects[idx]);
 				--idx;
 			}
-			m_actorToRigidBodyListMap.clear();
+			m_actorToBulletPhysicsObjectMap.clear();
 			m_rigidBodyToActorMap.clear();
 		}
 
@@ -212,9 +203,10 @@ namespace GameEngine
 			float mass, const std::string& material)
 		{
 			assert(pActor.get());
-			// There can be only one rigid body per (non-static) actor in this implementation.
+			// There can be only one rigid body per (non-static) actor currently in this implementation.
 			ActorID id = pActor->GetID();
-			assert(m_actorToRigidBodyListMap.find(id) == m_actorToRigidBodyListMap.end());
+			assert(m_actorToBulletPhysicsObjectMap.find(id) == m_actorToBulletPhysicsObjectMap.end());
+			m_actorToBulletPhysicsObjectMap[id].reset(new BulletPhysicsObject(id)); // creates a dynamic object
 
 			std::weak_ptr<WorldTransformComponent> pWeakWorldTransform
 				= pActor->GetWorldTransform();
@@ -238,7 +230,7 @@ namespace GameEngine
 				btRigidBody * const body = new btRigidBody(rbInfo);
 				m_pDynamicsWorld->addRigidBody(body);
 
-				m_actorToRigidBodyListMap[id].push_back(body);
+				m_actorToBulletPhysicsObjectMap[id]->AddRigidBody(body);
 				m_rigidBodyToActorMap[body] = id;
 			}
 		}
@@ -247,8 +239,18 @@ namespace GameEngine
 		{
 			assert(pActor.get());
 			ActorID id = pActor->GetID();
+
 			// Triggers may have only one rigid body but other static actors may have several.
-			assert(!isTrigger || m_actorToRigidBodyListMap.find(id) == m_actorToRigidBodyListMap.end());
+			auto objectIt = m_actorToBulletPhysicsObjectMap.find(id);
+			assert(!isTrigger || objectIt == m_actorToBulletPhysicsObjectMap.end());
+
+			if (objectIt == m_actorToBulletPhysicsObjectMap.end())
+			{
+				m_actorToBulletPhysicsObjectMap[id].reset(new BulletPhysicsObject(id,
+					isTrigger
+					? BulletPhysicsObject::PhysicsType::TRIGGER
+					: BulletPhysicsObject::PhysicsType::STATIC));
+			}
 
 			std::weak_ptr<WorldTransformComponent> pWeakWorldTransform
 				= pActor->GetWorldTransform();
@@ -264,23 +266,24 @@ namespace GameEngine
 				btRigidBody * const body = new btRigidBody(rbInfo);
 
 				m_pDynamicsWorld->addRigidBody(body);
+				body->setCollisionFlags(body->getCollisionFlags() | btRigidBody::CF_STATIC_OBJECT);
 
 				if (isTrigger) // triggers may intersect with other objects (this causes a trigger related event, not a collision event)
 				{
-					// TODO: should I do this?
-					// body->setUserPointer(pActor.get());
+					body->setUserPointer(pActor.get());
 					body->setCollisionFlags(
 						body->getCollisionFlags() | btRigidBody::CF_NO_CONTACT_RESPONSE);
 				}
 				else
 				{
 					// Set the same restitution and friction for all static objects.
-					// This could be based on the the material of the static object. (TODO?)
+					// This could possibly be based on the the material of the static object.
+					// (Can this data be parsed from the bsp file?)
 					body->setRestitution(0.2f);
 					body->setFriction(0.6f);
 				}
 
-				m_actorToRigidBodyListMap[id].push_back(body);
+				m_actorToBulletPhysicsObjectMap[id]->AddRigidBody(body);
 				m_rigidBodyToActorMap[body] = id;
 			}
 		}
@@ -300,12 +303,16 @@ namespace GameEngine
 			auto pEventManager = pGameData->GetEventManager();
 			assert(pEventManager);
 
+			ActorID id1 = GetActorID(pBody1);
+			ActorID id2 = GetActorID(pBody2);
+			if (id1 == 0 || id2 == 0)
+				return;
+
 			std::shared_ptr<Events::IEventData> event;
-			// Only triggers have a user pointer, so we use this
-			// to distinguish them from other actors.
-			if (pBody1->getUserPointer() || pBody2->getUserPointer())
+			bool firstIsTrigger;
+			if ((firstIsTrigger = m_actorToBulletPhysicsObjectMap[id1]->IsTrigger()) ||
+				m_actorToBulletPhysicsObjectMap[id2]->IsTrigger())
 			{
-				bool firstIsTrigger = pBody1->getUserPointer() != nullptr;
 				ActorID triggerId = firstIsTrigger ? GetActorID(pBody1) : GetActorID(pBody2);
 				ActorID actorId = firstIsTrigger ? GetActorID(pBody2) : GetActorID(pBody1);
 				event.reset(new Events::TriggerEntryEvent(pGameData->CurrentTimeSec(),
@@ -314,11 +321,6 @@ namespace GameEngine
 			}
 			else // not a trigger event
 			{
-				ActorID id1 = GetActorID(pBody1);
-				ActorID id2 = GetActorID(pBody2);
-				if (id1 == 0 || id2 == 0)
-					return;
-
 				std::vector<Vec3> collisionPoints;
 				btVector3 sumNormalForce;
 				btVector3 sumFrictionForce;
@@ -344,10 +346,16 @@ namespace GameEngine
 			auto pEventManager = pGameData->GetEventManager();
 			assert(pEventManager);
 
+			ActorID id1 = GetActorID(pBody1);
+			ActorID id2 = GetActorID(pBody2);
+			if (id1 == 0 || id2 == 0)
+				return;
+
 			std::shared_ptr<Events::IEventData> event;
-			if (pBody1->getUserPointer() || pBody2->getUserPointer())
+			bool firstIsTrigger;
+			if ((firstIsTrigger = m_actorToBulletPhysicsObjectMap[id1]->IsTrigger()) ||
+				m_actorToBulletPhysicsObjectMap[id2]->IsTrigger())
 			{
-				bool firstIsTrigger = pBody1->getUserPointer() != nullptr;
 				ActorID triggerId = firstIsTrigger ? GetActorID(pBody1) : GetActorID(pBody2);
 				ActorID actorId = firstIsTrigger ? GetActorID(pBody2) : GetActorID(pBody1);
 				event.reset(new Events::TriggerExitEvent(pGameData->CurrentTimeSec(),
@@ -356,11 +364,6 @@ namespace GameEngine
 			}
 			else
 			{
-				ActorID id1 = GetActorID(pBody1);
-				ActorID id2 = GetActorID(pBody2);
-				if (id1 == 0 || id2 == 0)
-					return;
-
 				event.reset(new Events::ActorSeparationEvent(
 					pGameData->CurrentTimeSec(), id1, id2));
 				pEventManager->QueueEvent(event);

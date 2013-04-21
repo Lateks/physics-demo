@@ -39,6 +39,8 @@ namespace GameEngine
 			virtual void VSetAngularVelocity(ActorID id, const Vec3& rotationAxis, float magnitude) override;
 
 			virtual void VSetGlobalGravity(Vec3& gravity) override;
+
+			virtual ActorID GetClosestActorHit(Vec3& rayFrom, Vec3& rayTo) const override;
 		private:
 			// The VS11 C++ compiler does not yet support deleting
 			// constructors, so make these private to make the class

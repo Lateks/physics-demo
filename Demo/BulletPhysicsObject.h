@@ -1,0 +1,78 @@
+#ifndef BULLET_PHYSICS_OBJECT_H
+#define BULLET_PHYSICS_OBJECT_H
+
+#include "enginefwd.h"
+#include <btBulletCollisionCommon.h>
+#include <vector>
+
+namespace GameEngine
+{
+	namespace Physics
+	{
+		class BulletPhysicsObject
+		{
+		public:
+			enum class PhysicsType
+			{
+				STATIC,
+				DYNAMIC,
+				KINEMATIC,
+				TRIGGER // is also static
+			};
+
+			BulletPhysicsObject(ActorID actorId, PhysicsType type = PhysicsType::DYNAMIC)
+				: m_type(type), m_actorId(actorId) { }
+
+			ActorID GetActorId()
+			{
+				return m_actorId;
+			}
+
+			void SetPhysicsType(PhysicsType type)
+			{
+				m_type = type;
+			}
+
+			bool IsDynamic() const
+			{
+				return m_type == PhysicsType::DYNAMIC;
+			}
+
+			bool IsKinematic() const
+			{
+				return m_type == PhysicsType::KINEMATIC;
+			}
+
+			bool IsTrigger() const
+			{
+				return m_type == PhysicsType::TRIGGER;
+			}
+
+			bool IsStatic() const
+			{
+				return m_type == PhysicsType::TRIGGER || m_type == PhysicsType::STATIC;
+			}
+
+			const std::vector<btRigidBody*>& GetRigidBodies() const
+			{
+				return m_rigidBodies;
+			}
+
+			void AddRigidBody(btRigidBody *pBody)
+			{
+				m_rigidBodies.push_back(pBody);
+			}
+
+			size_t GetNumBodies()
+			{
+				return m_rigidBodies.size();
+			}
+		private:
+			PhysicsType m_type;
+			ActorID m_actorId;
+			std::vector<btRigidBody*> m_rigidBodies;
+		};
+	}
+}
+
+#endif

@@ -161,7 +161,7 @@ namespace GameEngine
 		static Display::IInputState::MouseState prevMouseState;
 		Display::IInputState::MouseState mouse =
 			m_pData->GetInputStateHandler()->GetMouseState();
-		if (!mouse.LeftMouseDown && prevMouseState.LeftMouseDown)
+		if (!mouse.RightMouseDown && prevMouseState.RightMouseDown)
 		{
 			ThrowCube(m_pData->GetRenderer()->GetCameraTarget());
 		}

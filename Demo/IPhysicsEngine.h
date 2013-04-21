@@ -52,6 +52,10 @@ namespace GameEngine
 			virtual void VSetAngularVelocity(ActorID id, const Vec3& rotationAxis, float magnitude) = 0;
 
 			virtual void VSetGlobalGravity(Vec3& gravity) = 0;
+
+			// Uses a ray cast to determine the closest actor intersected by
+			// the ray. Returns 0 if no actor was hit.
+			virtual ActorID GetClosestActorHit(Vec3& rayFrom, Vec3& rayTo) const = 0;
 		};
 	}
 }

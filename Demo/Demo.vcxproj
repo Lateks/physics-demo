@@ -94,6 +94,7 @@
     <ClInclude Include="BulletDebugRenderer.h" />
     <ClInclude Include="BulletPhysics.h" />
     <ClInclude Include="BulletPhysicsData.h" />
+    <ClInclude Include="BulletPhysicsObject.h" />
     <ClInclude Include="enginefwd.h" />
     <ClInclude Include="EventManager.h" />
     <ClInclude Include="Events.h" />

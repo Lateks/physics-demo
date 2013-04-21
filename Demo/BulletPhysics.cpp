@@ -1,5 +1,6 @@
 #include "BulletPhysics.h"
 #include "BulletPhysicsData.h"
+#include "BulletPhysicsObject.h"
 #include "GameActor.h"
 #include "WorldTransformComponent.h"
 #include "GameData.h"
@@ -41,15 +42,16 @@ namespace GameEngine
 		void BulletPhysics::VSyncScene()
 		{
 			GameData *game = GameData::getInstance();
-			for (auto it = m_pData->m_actorToRigidBodyListMap.begin();
-				      it != m_pData->m_actorToRigidBodyListMap.end(); it++)
+			for (auto it = m_pData->m_actorToBulletPhysicsObjectMap.begin();
+				it != m_pData->m_actorToBulletPhysicsObjectMap.end(); it++)
 			{
 				ActorID id = it->first;
-				std::vector<btRigidBody*> bodies = it->second;
-				if (bodies.size() > 1)
+				std::shared_ptr<BulletPhysicsObject> pObject = it->second;
+				assert(pObject.get());
+				if (pObject->GetNumBodies() > 1 || pObject->GetNumBodies() == 0)
 					continue; // do not update static actors
 
-				const btRigidBody *body = bodies[0];
+				const btRigidBody *body = pObject->GetRigidBodies()[0];
 				const Quaternion rot = btQuaternion_to_Quaternion(body->getOrientation());
 				const Vec3 pos = btVector3_to_Vec3(body->getCenterOfMassPosition());
 
@@ -205,7 +207,7 @@ namespace GameEngine
 		
 		void BulletPhysics::VRemoveActor(ActorID id)
 		{
-			std::vector<btRigidBody*> bodies = m_pData->GetRigidBodies(id);
+			std::vector<btRigidBody*> bodies = m_pData->GetPhysicsObject(id)->GetRigidBodies();
 			if (bodies.size() > 0)
 			{
 				std::for_each(bodies.begin(), bodies.end(),
@@ -214,30 +216,30 @@ namespace GameEngine
 					this->m_pData->RemoveCollisionObject(body);
 					this->m_pData->m_rigidBodyToActorMap.erase(body);
 				});
-				m_pData->m_actorToRigidBodyListMap.erase(id);
+				m_pData->m_actorToBulletPhysicsObjectMap.erase(id);
 			}
 		}
 
 		void BulletPhysics::VApplyForce(const Vec3& direction, float newtons, ActorID id)
 		{
-			std::vector<btRigidBody*> bodies = m_pData->GetRigidBodies(id);
+			std::shared_ptr<BulletPhysicsObject> pObject = m_pData->GetPhysicsObject(id);
 			// Could e.g. log an error if the body is not found.
-			if (bodies.size() > 0)
+			if (pObject->GetNumBodies() > 0)
 			{
-				assert(bodies.size() == 1); // only static actors can have many bodies
+				assert(pObject->GetNumBodies() == 1); // only static actors can have many bodies
 				const btVector3 dir = Vec3_to_btVector3(direction);
-				bodies[0]->applyCentralImpulse(dir.normalized() * newtons);
+				pObject->GetRigidBodies()[0]->applyCentralImpulse(dir.normalized() * newtons);
 			}
 		}
 
 		void BulletPhysics::VApplyTorque(const Vec3& direction, float magnitude, ActorID id)
 		{
-			std::vector<btRigidBody*> bodies = m_pData->GetRigidBodies(id);
-			if (bodies.size() > 0)
+			std::shared_ptr<BulletPhysicsObject> pObject = m_pData->GetPhysicsObject(id);
+			if (pObject->GetNumBodies() > 0)
 			{
-				assert(bodies.size() == 1);
+				assert(pObject->GetNumBodies() == 1);
 				const btVector3 dir = Vec3_to_btVector3(direction);
-				bodies[0]->applyTorqueImpulse(dir.normalized() * magnitude);
+				pObject->GetRigidBodies()[0]->applyTorqueImpulse(dir.normalized() * magnitude);
 			}
 		}
 
@@ -249,23 +251,25 @@ namespace GameEngine
 
 		void BulletPhysics::VSetLinearVelocity(ActorID id, const Vec3& direction, float magnitude)
 		{
-			std::vector<btRigidBody*> bodies = m_pData->GetRigidBodies(id);
-			if (bodies.size() > 0)
+			std::shared_ptr<BulletPhysicsObject> pObject = m_pData->GetPhysicsObject(id);
+			if (pObject->GetNumBodies() > 0)
 			{
-				assert(bodies.size() == 1);
+				assert(pObject->GetNumBodies() == 1);
+
 				const btVector3 dir = Vec3_to_btVector3(direction).normalized();
-				bodies[0]->setLinearVelocity(dir * magnitude);
+				pObject->GetRigidBodies()[0]->setLinearVelocity(dir * magnitude);
 			}
 		}
 
 		void BulletPhysics::VSetAngularVelocity(ActorID id, const Vec3& rotationAxis, float magnitude)
 		{
-			std::vector<btRigidBody*> bodies = m_pData->GetRigidBodies(id);
-			if (bodies.size() > 0)
+			std::shared_ptr<BulletPhysicsObject> pObject = m_pData->GetPhysicsObject(id);
+			if (pObject->GetNumBodies() > 0)
 			{
-				assert(bodies.size() == 1);
+				assert(pObject->GetNumBodies() == 1);
+
 				const btVector3 axis = Vec3_to_btVector3(rotationAxis).normalized();
-				bodies[0]->setAngularVelocity(axis * magnitude);
+				pObject->GetRigidBodies()[0]->setAngularVelocity(axis * magnitude);
 			}
 		}
 
@@ -273,6 +277,26 @@ namespace GameEngine
 		{
 			assert(m_pData && m_pData->m_pDynamicsWorld);
 			m_pData->m_pDynamicsWorld->setGravity(Vec3_to_btVector3(gravity));
+		}
+
+		ActorID BulletPhysics::GetClosestActorHit(Vec3& rayFrom, Vec3& rayTo) const
+		{
+			btVector3 btRayFrom = Vec3_to_btVector3(rayFrom);
+			btVector3 btRayTo = Vec3_to_btVector3(rayTo);
+			btCollisionWorld::ClosestRayResultCallback rayCallback(btRayFrom, btRayTo);
+
+			m_pData->m_pDynamicsWorld->rayTest(btRayFrom, btRayTo, rayCallback);
+			ActorID actorHit = 0;
+			if (rayCallback.hasHit())
+			{
+				const btRigidBody *pBody = btRigidBody::upcast(rayCallback.m_collisionObject);
+				assert(pBody);
+				if (pBody && !pBody->isStaticOrKinematicObject())
+				{
+					actorHit = m_pData->m_rigidBodyToActorMap[pBody];
+				}
+			}
+			return actorHit;
 		}
 	}
 }

@@ -71,7 +71,7 @@ namespace GameEngine
 
 	Game::Game()
 	{
-		// Setup rendering component.
+		// Setup the display component (rendering and input handling).
 		std::unique_ptr<IDisplay> renderer(Display::CreateRenderer());
 		if (!renderer.get())
 		{
@@ -148,7 +148,7 @@ namespace GameEngine
 		renderer->AddCubeSceneNode(15.f, cube, WOODBOX_TEXTURE);
 		auto physics = m_pData->GetPhysicsEngine();
 		physics->VAddBox(Vec3(15.f, 15.f, 15.f), cube, "Titanium", "Bouncy");
-		physics->VSetVelocity(cube->GetID(), throwDirection, 250.0f);
+		physics->VSetLinearVelocity(cube->GetID(), throwDirection, 250.0f);
 	}
 
 	void Game::HandleInputs()

@@ -243,10 +243,10 @@ namespace GameEngine
 
 		void BulletPhysics::VStopActor(ActorID id)
 		{
-			VSetVelocity(id, Vec3(0, 0, 0), 1.0f);
+			VSetLinearVelocity(id, Vec3(0, 0, 0), 1.0f);
 		}
 
-		void BulletPhysics::VSetVelocity(ActorID id, const Vec3& direction, float magnitude)
+		void BulletPhysics::VSetLinearVelocity(ActorID id, const Vec3& direction, float magnitude)
 		{
 			std::vector<btRigidBody*> bodies = m_pData->GetRigidBodies(id);
 			if (bodies.size() > 0)

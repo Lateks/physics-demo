@@ -17,6 +17,7 @@ namespace GameEngine
 		Display::IInputState::MouseState m_previousMouseState;
 		Display::IInputState::MouseState m_currentMouseState;
 		ActorID m_pickedActor;
+		unsigned int m_pickConstraintId;
 
 		bool LeftMousePressed();
 		bool LeftMouseDown();

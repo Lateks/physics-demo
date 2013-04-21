@@ -64,25 +64,36 @@ namespace GameEngine
 		assert(pGame && pGame->GetInputStateHandler());
 		m_currentMouseState = pGame->GetInputStateHandler()->GetMouseState();
 
+		auto pRenderer = pGame->GetRenderer();
+		auto pPhysics = pGame->GetPhysicsEngine();
+		Vec3 rayFrom = pRenderer->GetCameraPosition();
+		Vec3 rayTo = pRenderer->GetCameraTarget();
+
 		if (RightMouseReleased())
 		{
 			ThrowCube(pGame->GetRenderer()->GetCameraTarget());
 		}
 		else if (LeftMousePressed())
 		{
-			auto renderer = pGame->GetRenderer();
+			Vec3 pickPoint;
 			ActorID pickedActorId = pGame->GetPhysicsEngine()->GetClosestActorHit(
-				renderer->GetCameraPosition(), renderer->GetCameraTarget());
-			std::cerr << pickedActorId << std::endl;
-			// TODO: setup constraints
+				rayFrom, rayTo, pickPoint);
+			if (pickedActorId != 0)
+			{
+				std::cerr << pickedActorId << std::endl;
+				m_pickConstraintId = pPhysics->AddPickConstraint(pickedActorId, pickPoint);
+				m_pickedActor = pickedActorId;
+			}
 		}
 		else if (LeftMouseDown())
 		{
 			// TODO: drag item
 		}
-		else if (LeftMouseReleased())
+		else if (LeftMouseReleased() && m_pickedActor != 0)
 		{
-			// TODO: release item
+			pPhysics->RemoveConstraint(m_pickedActor, m_pickConstraintId);
+			m_pickedActor = 0;
+			m_pickConstraintId = 0;
 		}
 
 		m_previousMouseState = m_currentMouseState;

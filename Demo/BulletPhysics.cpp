@@ -9,6 +9,7 @@
 #include "Events.h"
 #include "BulletConversions.h"
 #include "BSPConverter.h"
+#include "utils.h"
 
 #include <btBulletCollisionCommon.h>
 #include <btBulletDynamicsCommon.h>
@@ -20,6 +21,11 @@
 
 using std::shared_ptr;
 using std::weak_ptr;
+
+namespace
+{
+	btTypedConstraint *pickConstraint;
+}
 
 namespace GameEngine
 {
@@ -280,7 +286,7 @@ namespace GameEngine
 			m_pData->m_pDynamicsWorld->setGravity(Vec3_to_btVector3(gravity));
 		}
 
-		ActorID BulletPhysics::GetClosestActorHit(Vec3& rayFrom, Vec3& rayTo) const
+		ActorID BulletPhysics::GetClosestActorHit(Vec3& rayFrom, Vec3& rayTo, Vec3& pickPosition) const
 		{
 			btVector3 btRayFrom = Vec3_to_btVector3(rayFrom);
 			btVector3 btRayTo = Vec3_to_btVector3(rayTo);
@@ -295,9 +301,66 @@ namespace GameEngine
 				if (pBody && !pBody->isStaticOrKinematicObject())
 				{
 					actorHit = m_pData->m_rigidBodyToActorMap[pBody];
+					pickPosition = btVector3_to_Vec3(rayCallback.m_hitPointWorld);
 				}
 			}
 			return actorHit;
+		}
+
+		// Constraint code from Bullet tutorials (DemoApplication.cpp).
+		unsigned int BulletPhysics::AddPickConstraint(ActorID actorId, Vec3& pickPosition)
+		{
+			std::shared_ptr<BulletPhysicsObject> pObject = m_pData->GetPhysicsObject(actorId);
+			if (!pObject.get() || pObject->IsStatic() || pObject->IsKinematic())
+				return 0;
+
+			btVector3 btPickPosition = Vec3_to_btVector3(pickPosition);
+			btRigidBody *pBody = pObject->GetRigidBodies()[0];
+			pBody->setActivationState(DISABLE_DEACTIVATION);
+
+			btVector3 localPivot = pBody->getCenterOfMassTransform().inverse() * btPickPosition;
+
+			btTransform transform;
+			transform.setIdentity();
+			transform.setOrigin(localPivot);
+
+			btGeneric6DofConstraint* dof6 = new btGeneric6DofConstraint(*pBody, transform, false);
+			dof6->setLinearLowerLimit(btVector3(0,0,0));
+			dof6->setLinearUpperLimit(btVector3(0,0,0));
+			dof6->setAngularLowerLimit(btVector3(0,0,0));
+			dof6->setAngularUpperLimit(btVector3(0,0,0));
+
+			m_pData->m_pDynamicsWorld->addConstraint(dof6,true);
+			pickConstraint = dof6; // TODO: store in a map in BulletPhysicsData
+
+			dof6->setParam(BT_CONSTRAINT_STOP_CFM,0.8,0);
+			dof6->setParam(BT_CONSTRAINT_STOP_CFM,0.8,1);
+			dof6->setParam(BT_CONSTRAINT_STOP_CFM,0.8,2);
+			dof6->setParam(BT_CONSTRAINT_STOP_CFM,0.8,3);
+			dof6->setParam(BT_CONSTRAINT_STOP_CFM,0.8,4);
+			dof6->setParam(BT_CONSTRAINT_STOP_CFM,0.8,5);
+
+			dof6->setParam(BT_CONSTRAINT_STOP_ERP,0.1,0);
+			dof6->setParam(BT_CONSTRAINT_STOP_ERP,0.1,1);
+			dof6->setParam(BT_CONSTRAINT_STOP_ERP,0.1,2);
+			dof6->setParam(BT_CONSTRAINT_STOP_ERP,0.1,3);
+			dof6->setParam(BT_CONSTRAINT_STOP_ERP,0.1,4);
+			dof6->setParam(BT_CONSTRAINT_STOP_ERP,0.1,5);
+
+			return 1; // TODO
+		}
+
+		void BulletPhysics::RemoveConstraint(ActorID actorId, unsigned int constraintId)
+		{
+			std::shared_ptr<BulletPhysicsObject> pObject = m_pData->GetPhysicsObject(actorId);
+			if (!pObject.get() || pObject->GetNumBodies() == 0)
+				return;
+
+			btRigidBody *pBody = pObject->GetRigidBodies()[0];
+			m_pData->m_pDynamicsWorld->removeConstraint(pickConstraint);
+			safe_delete(pickConstraint);
+			pBody->forceActivationState(ACTIVE_TAG);
+			pBody->setDeactivationTime( 0.f );
 		}
 	}
 }

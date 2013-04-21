@@ -53,9 +53,15 @@ namespace GameEngine
 
 			virtual void VSetGlobalGravity(Vec3& gravity) = 0;
 
-			// Uses a ray cast to determine the closest actor intersected by
-			// the ray. Returns 0 if no actor was hit.
-			virtual ActorID GetClosestActorHit(Vec3& rayFrom, Vec3& rayTo) const = 0;
+			/* Uses a ray cast to determine the closest actor intersected by
+			 * the ray. Returns 0 if no actor was hit. The last parameter is an
+			 * output vector specifying the "picking point" of the actor. This is
+			 * the point where the ray intersects the rigid body associated with
+			 * the actor. Only dynamic bodies are picked by this method.
+			 */
+			virtual ActorID GetClosestActorHit(Vec3& rayFrom, Vec3& rayTo, Vec3& pickPosition) const = 0;
+			virtual unsigned int AddPickConstraint(ActorID actorID, Vec3& pickPosition) = 0;
+			virtual void RemoveConstraint(ActorID actorID, unsigned int constraintId) = 0;
 		};
 	}
 }

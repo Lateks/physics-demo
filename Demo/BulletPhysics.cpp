@@ -22,6 +22,11 @@
 using std::shared_ptr;
 using std::weak_ptr;
 
+namespace
+{
+	GameEngine::Events::EventHandlerPtr pHandler;
+}
+
 namespace GameEngine
 {
 	namespace Physics
@@ -222,6 +227,13 @@ namespace GameEngine
 			}
 		}
 
+		/* VApplyForce and VApplyTorque are presented in the Game Coding Complete
+		 * example code, but I could not figure out good uses for these. Forces
+		 * are cleared out after each simulation step, so either the impulse
+		 * applied to the object must be very strong or the force must be
+		 * applied repeatedly for several simulation steps for it to have an
+		 * effect.
+		 */
 		void BulletPhysics::VApplyForce(const Vec3& direction, float newtons, ActorID id)
 		{
 			std::shared_ptr<BulletPhysicsObject> pObject = m_pData->GetPhysicsObject(id);
@@ -304,8 +316,8 @@ namespace GameEngine
 
 		/* Constraint code from Bullet tutorials (DemoApplication.cpp).
 		 * This is really a convenience method to allow adding constraints for
-		 * picking up items. In general, a physics SDK wrapper should probably
-		 * define more generic methods for setting up constraints.
+		 * picking up items. In general, a physics SDK wrapper should possibly
+		 * define more generic methods for setting up constraints (?).
 		 */
 		unsigned int BulletPhysics::AddPickConstraint(ActorID actorId, Vec3& pickPosition)
 		{
@@ -332,21 +344,71 @@ namespace GameEngine
 			m_pData->m_pDynamicsWorld->addConstraint(dof6,true);
 			ConstraintID pickConstraintId = pObject->AddConstraint(dof6);
 
-			dof6->setParam(BT_CONSTRAINT_STOP_CFM,0.8,0);
-			dof6->setParam(BT_CONSTRAINT_STOP_CFM,0.8,1);
-			dof6->setParam(BT_CONSTRAINT_STOP_CFM,0.8,2);
-			dof6->setParam(BT_CONSTRAINT_STOP_CFM,0.8,3);
-			dof6->setParam(BT_CONSTRAINT_STOP_CFM,0.8,4);
-			dof6->setParam(BT_CONSTRAINT_STOP_CFM,0.8,5);
+			dof6->setParam(BT_CONSTRAINT_STOP_CFM,0.8f,0);
+			dof6->setParam(BT_CONSTRAINT_STOP_CFM,0.8f,1);
+			dof6->setParam(BT_CONSTRAINT_STOP_CFM,0.8f,2);
+			dof6->setParam(BT_CONSTRAINT_STOP_CFM,0.8f,3);
+			dof6->setParam(BT_CONSTRAINT_STOP_CFM,0.8f,4);
+			dof6->setParam(BT_CONSTRAINT_STOP_CFM,0.8f,5);
 
-			dof6->setParam(BT_CONSTRAINT_STOP_ERP,0.1,0);
-			dof6->setParam(BT_CONSTRAINT_STOP_ERP,0.1,1);
-			dof6->setParam(BT_CONSTRAINT_STOP_ERP,0.1,2);
-			dof6->setParam(BT_CONSTRAINT_STOP_ERP,0.1,3);
-			dof6->setParam(BT_CONSTRAINT_STOP_ERP,0.1,4);
-			dof6->setParam(BT_CONSTRAINT_STOP_ERP,0.1,5);
+			dof6->setParam(BT_CONSTRAINT_STOP_ERP,0.1f,0);
+			dof6->setParam(BT_CONSTRAINT_STOP_ERP,0.1f,1);
+			dof6->setParam(BT_CONSTRAINT_STOP_ERP,0.1f,2);
+			dof6->setParam(BT_CONSTRAINT_STOP_ERP,0.1f,3);
+			dof6->setParam(BT_CONSTRAINT_STOP_ERP,0.1f,4);
+			dof6->setParam(BT_CONSTRAINT_STOP_ERP,0.1f,5);
+
+			pHandler.reset(new std::function<void(Events::EventPtr)>(
+				[this, pickConstraintId, actorId] (Events::EventPtr pEvent)
+			{
+				assert(pEvent->GetEventType() == Events::EventType::CAMERA_MOVED);
+				Events::CameraMoveEvent *pMoveEvent =
+					dynamic_cast<Events::CameraMoveEvent*>(pEvent.get());
+
+				this->UpdatePickConstraint(actorId, pickConstraintId,
+					pMoveEvent->GetRayFrom(), pMoveEvent->GetRayTo());
+			})
+			);
+			GameData *pGame = GameData::getInstance();
+			assert(pGame && pGame->GetEventManager());
+			Events::IEventManager *pEventMgr = pGame->GetEventManager();
+			if (pEventMgr)
+			{
+				pEventMgr->RegisterHandler(Events::EventType::CAMERA_MOVED, pHandler);
+			}
 
 			return pickConstraintId;
+		}
+
+		void BulletPhysics::UpdatePickConstraint(ActorID actorId, ConstraintID constraintId, Vec3& rayFrom, Vec3& rayTo)
+		{
+			std::shared_ptr<BulletPhysicsObject> pObject = m_pData->GetPhysicsObject(actorId);
+			if (!pObject.get() || pObject->GetNumBodies() != 1 || pObject->GetNumConstraints() == 0)
+				return;
+
+			btTypedConstraint *pPickConstraint = pObject->GetConstraint(constraintId);
+			assert(pPickConstraint);
+			if (!pPickConstraint)
+				return;
+
+			if (pPickConstraint->getConstraintType() == D6_CONSTRAINT_TYPE)
+			{
+				btGeneric6DofConstraint* pDof6PickConstraint = static_cast<btGeneric6DofConstraint*>(pPickConstraint);
+				if (pDof6PickConstraint)
+				{
+					btVector3 btRayFrom = Vec3_to_btVector3(rayFrom);
+					btVector3 btRayTo = Vec3_to_btVector3(rayTo);
+
+					btVector3 newPivot;
+					btVector3 dir = btRayTo - btRayFrom;
+					// TODO:
+					// dir.normalize();
+					// dir *= gOldPickingDist;
+
+					newPivot = btRayFrom + dir;
+					pDof6PickConstraint->getFrameOffsetA().setOrigin(newPivot);
+				}
+			}
 		}
 
 		void BulletPhysics::RemoveConstraint(ActorID actorId, unsigned int constraintId)
@@ -366,6 +428,14 @@ namespace GameEngine
 
 			pBody->forceActivationState(ACTIVE_TAG);
 			pBody->setDeactivationTime( 0.f );
+
+			GameData *pGame = GameData::getInstance();
+			assert(pGame && pGame->GetEventManager());
+			Events::IEventManager *pEventMgr = pGame->GetEventManager();
+			if (pEventMgr)
+			{
+				pEventMgr->DeregisterHandler(Events::EventType::CAMERA_MOVED, pHandler);
+			}
 		}
 	}
 }

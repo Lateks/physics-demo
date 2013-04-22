@@ -1,6 +1,7 @@
 #include "EventManager.h"
 #include "IEventManager.h"
 #include <algorithm>
+#include <iostream>
 
 using std::vector;
 
@@ -70,7 +71,7 @@ namespace GameEngine
 
 		void EventManager::DeregisterHandler(EventType type, EventHandlerPtr handler)
 		{
-			EventHandlerList handlers = m_eventHandlers[type];
+			EventHandlerList& handlers = m_eventHandlers[type];
 			auto it = std::find_if(handlers.begin(), handlers.end(),
 				[&handler] (EventHandlerPtr storedHandler) { return handler == storedHandler; });
 			if (it != handlers.end())

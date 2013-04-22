@@ -138,6 +138,39 @@ namespace GameEngine
 			const static EventType eventType = EventType::ACTOR_MOVED;
 			ActorID m_actorId;
 		};
+
+		class RayChangeEvent : public BaseEventData
+		{
+		public:
+			RayChangeEvent(const float timeStamp, Vec3 rayFrom, Vec3 rayTo)
+				: BaseEventData(timeStamp), m_rayFrom(rayFrom), m_rayTo(rayTo) { }
+			virtual ~RayChangeEvent() { }
+			Vec3 GetRayFrom()
+			{
+				return m_rayFrom;
+			}
+			Vec3 GetRayTo()
+			{
+				return m_rayTo;
+			}
+		private:
+			Vec3 m_rayFrom;
+			Vec3 m_rayTo;
+		};
+
+		class CameraMoveEvent : public RayChangeEvent
+		{
+		public:
+			CameraMoveEvent(const float timeStamp, Vec3 cameraPos, Vec3 cameraTarget)
+				: RayChangeEvent(timeStamp, cameraPos, cameraTarget) { }
+			virtual ~CameraMoveEvent() { }
+			virtual EventType GetEventType() const override
+			{
+				return eventType;
+			}
+		private:
+			const static EventType eventType = EventType::CAMERA_MOVED;
+		};
 	}
 }
 

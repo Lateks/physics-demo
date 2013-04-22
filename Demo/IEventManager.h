@@ -18,7 +18,8 @@ namespace GameEngine
 			SEPARATION_EVENT,
 			ACTOR_MOVED,
 			ENTER_TRIGGER,
-			EXIT_TRIGGER
+			EXIT_TRIGGER,
+			CAMERA_MOVED
 		};
 
 		class IEventData

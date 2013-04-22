@@ -1,6 +1,8 @@
 #include "DemoInputHandler.h"
 #include "WorldTransformComponent.h"
 #include "IPhysicsEngine.h"
+#include "IEventManager.h"
+#include "Events.h"
 #include "GameData.h"
 #include "GameActor.h"
 #include "IDisplay.h"
@@ -67,8 +69,7 @@ namespace GameEngine
 
 		auto pRenderer = pGame->GetRenderer();
 		auto pPhysics = pGame->GetPhysicsEngine();
-		Vec3 rayFrom = pRenderer->GetCameraPosition();
-		Vec3 rayTo = pRenderer->GetCameraTarget();
+		m_currentCameraState = CameraState(pRenderer->GetCameraPosition(), pRenderer->GetCameraTarget());
 
 		if (RightMouseReleased())
 		{
@@ -78,7 +79,7 @@ namespace GameEngine
 		{
 			Vec3 pickPoint;
 			ActorID pickedActorId = pGame->GetPhysicsEngine()->GetClosestActorHit(
-				rayFrom, rayTo, pickPoint);
+				m_currentCameraState.cameraPos, m_currentCameraState.cameraTarget, pickPoint);
 			if (pickedActorId != 0)
 			{
 				std::cerr << pickedActorId << std::endl;
@@ -86,18 +87,25 @@ namespace GameEngine
 				m_pickedActor = pickedActorId;
 			}
 		}
-		else if (LeftMouseDown())
-		{
-			// TODO: drag item
-		}
 		else if (LeftMouseReleased() && m_pickedActor != 0)
 		{
 			pPhysics->RemoveConstraint(m_pickedActor, m_pickConstraintId);
 			m_pickedActor = 0;
 			m_pickConstraintId = 0;
 		}
+		else if (CameraMoved())
+		{
+			auto pEventMgr = pGame->GetEventManager();
+			if (pEventMgr)
+			{
+				std::shared_ptr<Events::IEventData> event(new Events::CameraMoveEvent(pGame->CurrentTimeSec(),
+					m_currentCameraState.cameraPos, m_currentCameraState.cameraTarget));
+				pEventMgr->QueueEvent(event);
+			}
+		}
 
 		m_previousMouseState = m_currentMouseState;
+		m_previousCameraState = m_currentCameraState;
 	}
 
 	void DemoInputHandler::ThrowCube(Vec3& throwTowards)
@@ -127,6 +135,12 @@ namespace GameEngine
 
 		physics->VSetLinearVelocity(cube->GetID(), throwDirection, 250.f);
 		physics->VSetAngularVelocity(cube->GetID(), rotationAxis, 2.5f);
+	}
+
+	bool DemoInputHandler::CameraMoved()
+	{
+		return m_previousCameraState.cameraPos != m_currentCameraState.cameraPos ||
+			m_previousCameraState.cameraTarget != m_currentCameraState.cameraTarget;
 	}
 
 	bool DemoInputHandler::LeftMousePressed()

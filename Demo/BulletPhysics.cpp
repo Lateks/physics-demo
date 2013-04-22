@@ -311,7 +311,7 @@ namespace GameEngine
 			return actorHit;
 		}
 
-		/* Constraint code from Bullet tutorials (DemoApplication.cpp).
+		/* Most of the constraint code is from Bullet tutorials (DemoApplication.cpp).
 		 * This is really a convenience method to allow adding constraints for
 		 * picking up items. In general, a physics SDK wrapper should possibly
 		 * define more generic methods for setting up constraints (?).
@@ -384,6 +384,12 @@ namespace GameEngine
 			pConstraint->SetConstraintUpdater(pHandler, handledType);
 			pConstraint->SetPickDistance(pickDistance);
 
+			// Disable rotations to avoid jitter when rigid body is
+			// pushed against e.g. a wall. Store the current angular
+			// factor to restore it later.
+			pConstraint->SetOriginalAngularFactor(btVector3_to_Vec3(pBody->getAngularFactor()));
+			pBody->setAngularFactor(0);
+
 			GameData *pGame = GameData::getInstance();
 			assert(pGame && pGame->GetEventManager());
 			Events::IEventManager *pEventMgr = pGame->GetEventManager();
@@ -436,13 +442,20 @@ namespace GameEngine
 			std::shared_ptr<BulletPhysicsObject> pObject = m_pData->GetPhysicsObject(actorId);
 			if (!pObject.get() || pObject->GetNumBodies() != 1 || pObject->GetNumConstraints() == 0)
 				return;
-			std::shared_ptr<BulletPhysicsConstraint> pPickConstraint = pObject->GetConstraint(constraintId);
-			assert(pPickConstraint && pPickConstraint->GetBulletConstraint());
-			if (!pPickConstraint || !pPickConstraint->GetBulletConstraint())
+			std::shared_ptr<BulletPhysicsConstraint> pConstraint = pObject->GetConstraint(constraintId);
+			assert(pConstraint && pConstraint->GetBulletConstraint());
+			if (!pConstraint || !pConstraint->GetBulletConstraint())
 				return;
 
 			btRigidBody *pBody = pObject->GetRigidBodies()[0];
-			m_pData->m_pDynamicsWorld->removeConstraint(pPickConstraint->GetBulletConstraint());
+			m_pData->m_pDynamicsWorld->removeConstraint(pConstraint->GetBulletConstraint());
+
+			// Restore angular factor to re-enable rotations.
+			if (pConstraint->GetConstraintType() == BulletPhysicsConstraint::ConstraintType::PICK_CONSTRAINT)
+			{
+				BulletPickConstraint *pPickConstraint = dynamic_cast<BulletPickConstraint*>(pConstraint.get());
+				pBody->setAngularFactor(Vec3_to_btVector3(pPickConstraint->GetOriginalAngularFactor()));
+			}
 
 			pBody->forceActivationState(ACTIVE_TAG);
 			pBody->setDeactivationTime(0.f);
@@ -452,7 +465,7 @@ namespace GameEngine
 			Events::IEventManager *pEventMgr = pGame->GetEventManager();
 			if (pEventMgr)
 			{
-				pEventMgr->DeregisterHandler(pPickConstraint->GetHandlerEventType(), pPickConstraint->GetConstraintUpdater());
+				pEventMgr->DeregisterHandler(pConstraint->GetHandlerEventType(), pConstraint->GetConstraintUpdater());
 			}
 			pObject->RemoveConstraint(constraintId);
 		}

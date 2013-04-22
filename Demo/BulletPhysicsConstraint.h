@@ -3,6 +3,7 @@
 
 #include "enginefwd.h"
 #include "IEventManager.h"
+#include "Vec3.h"
 #include <btBulletDynamicsCommon.h>
 
 namespace GameEngine
@@ -80,6 +81,15 @@ namespace GameEngine
 			{
 				m_pickDistance = pickDistance;
 			}
+			Vec3 GetOriginalAngularFactor()
+			{
+				return m_angularFactor;
+			}
+			void SetOriginalAngularFactor(Vec3& angularFactor)
+			{
+				m_angularFactor = angularFactor;
+			}
+
 			virtual ConstraintType GetConstraintType()
 			{
 				return constraintType;
@@ -88,6 +98,7 @@ namespace GameEngine
 			BulletPickConstraint(BulletPickConstraint& other);
 			BulletPickConstraint& operator=(BulletPickConstraint& other);
 
+			Vec3 m_angularFactor;
 			float m_pickDistance;
 			const static ConstraintType constraintType = ConstraintType::PICK_CONSTRAINT;
 		};

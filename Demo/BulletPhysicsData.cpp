@@ -72,15 +72,17 @@ namespace GameEngine
 			/* Note: btDiscreteDynamicsWorld uses discrete (non-continuous)
 			 * collision detection, so e.g. moving objects with pick
 			 * constraints forcibly against walls or other rigid bodies
-			 * will cause them to penetrate the wall too deeply and start
+			 * can cause them to penetrate the wall too deeply and start
 			 * to jitter due to the forces applied to it by Bullet when
 			 * trying to push the objects apart. For some reason this is
-			 * less noticeable or even non-existent on spherical shapes, though.
+			 * less noticeable or even non-existent on spherical shapes.
 			 *
-			 * This could probably be fixed by using continuous collision
-			 * detection, but at the time of writing, the default implementation
+			 * This could be fixed by using continuous collision detection,
+			 * but at the time of writing, the default implementation
 			 * offering this feature (btContinuousDynamicsWorld) appears to
-			 * still be under works.
+			 * still be under works. I have opted to manually disable
+			 * angular factors (rotations) for objects that are picked
+			 * up to get rid of the jitter.
 			 */
 			m_pDynamicsWorld = new btDiscreteDynamicsWorld(
 				m_pCollisionDispatcher, m_pCollisionBroadPhase,

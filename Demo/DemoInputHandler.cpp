@@ -82,7 +82,6 @@ namespace GameEngine
 				m_currentCameraState.cameraPos, m_currentCameraState.cameraTarget, pickPoint);
 			if (pickedActorId != 0)
 			{
-				std::cerr << pickedActorId << std::endl;
 				m_pickConstraintId = pPhysics->AddPickConstraint(pickedActorId, pickPoint);
 				m_pickedActor = pickedActorId;
 			}

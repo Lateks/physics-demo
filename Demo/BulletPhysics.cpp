@@ -371,9 +371,8 @@ namespace GameEngine
 
 			std::shared_ptr<BulletPhysicsConstraint> pPickConstraint =
 				pObject->GetConstraint(pickConstraintId);
-			assert(pPickConstraint.get() && pPickConstraint->pConstraint);
-			pPickConstraint->pConstraintUpdater = pHandler;
-			pPickConstraint->updaterEventType = handledType;
+			assert(pPickConstraint.get() && pPickConstraint->GetBulletConstraint());
+			pPickConstraint->SetConstraintUpdater(pHandler, handledType);
 
 			GameData *pGame = GameData::getInstance();
 			assert(pGame && pGame->GetEventManager());
@@ -393,13 +392,14 @@ namespace GameEngine
 				return;
 
 			std::shared_ptr<BulletPhysicsConstraint> pPickConstraint = pObject->GetConstraint(constraintId);
-			assert(pPickConstraint.get() && pPickConstraint->pConstraint);
-			if (!pPickConstraint.get() || !pPickConstraint->pConstraint)
+			assert(pPickConstraint.get() && pPickConstraint->GetBulletConstraint());
+			if (!pPickConstraint.get() || !pPickConstraint->GetBulletConstraint())
 				return;
 
-			if (pPickConstraint->pConstraint->getConstraintType() == D6_CONSTRAINT_TYPE)
+			btTypedConstraint *btConstraint = pPickConstraint->GetBulletConstraint();
+			if (btConstraint->getConstraintType() == D6_CONSTRAINT_TYPE)
 			{
-				btGeneric6DofConstraint* pDof6PickConstraint = static_cast<btGeneric6DofConstraint*>(pPickConstraint->pConstraint);
+				btGeneric6DofConstraint* pDof6PickConstraint = static_cast<btGeneric6DofConstraint*>(btConstraint);
 				if (pDof6PickConstraint)
 				{
 					btVector3 btRayFrom = Vec3_to_btVector3(rayFrom);
@@ -423,12 +423,12 @@ namespace GameEngine
 			if (!pObject.get() || pObject->GetNumBodies() != 1 || pObject->GetNumConstraints() == 0)
 				return;
 			std::shared_ptr<BulletPhysicsConstraint> pPickConstraint = pObject->GetConstraint(constraintId);
-			assert(pPickConstraint && pPickConstraint->pConstraint);
-			if (!pPickConstraint || !pPickConstraint->pConstraint)
+			assert(pPickConstraint && pPickConstraint->GetBulletConstraint());
+			if (!pPickConstraint || !pPickConstraint->GetBulletConstraint())
 				return;
 
 			btRigidBody *pBody = pObject->GetRigidBodies()[0];
-			m_pData->m_pDynamicsWorld->removeConstraint(pPickConstraint->pConstraint);
+			m_pData->m_pDynamicsWorld->removeConstraint(pPickConstraint->GetBulletConstraint());
 
 			pBody->forceActivationState(ACTIVE_TAG);
 			pBody->setDeactivationTime(0.f);
@@ -438,7 +438,7 @@ namespace GameEngine
 			Events::IEventManager *pEventMgr = pGame->GetEventManager();
 			if (pEventMgr)
 			{
-				pEventMgr->DeregisterHandler(pPickConstraint->updaterEventType, pPickConstraint->pConstraintUpdater);
+				pEventMgr->DeregisterHandler(pPickConstraint->GetHandlerEventType(), pPickConstraint->GetConstraintUpdater());
 			}
 			pObject->RemoveConstraint(constraintId);
 		}

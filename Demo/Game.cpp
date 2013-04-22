@@ -115,9 +115,9 @@ namespace GameEngine
 			if (renderer->WindowActive())
 			{
 				gameLogic->HandleInputs();
+				events->DispatchEvents();
 				physics->VUpdateSimulation(frameDeltaSec);
 				physics->VSyncScene();
-				events->DispatchEvents();
 				renderer->DrawScene();
 			}
 			else

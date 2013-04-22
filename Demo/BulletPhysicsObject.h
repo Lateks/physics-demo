@@ -12,22 +12,40 @@ namespace GameEngine
 {
 	namespace Physics
 	{
-		struct BulletPhysicsConstraint
+		class BulletPhysicsConstraint
 		{
+		public:
 			BulletPhysicsConstraint(btTypedConstraint *constraint)
-				: pConstraint(constraint), updaterEventType(Events::EventType::NONE) { }
+				: m_pConstraint(constraint), m_updaterEventType(Events::EventType::NONE) { }
 			BulletPhysicsConstraint(btTypedConstraint *constraint, Events::EventHandlerPtr handler, Events::EventType type)
-				: pConstraint(constraint), pConstraintUpdater(handler), updaterEventType(type) { }
+				: m_pConstraint(constraint), m_pConstraintUpdater(handler), m_updaterEventType(type) { }
 			~BulletPhysicsConstraint();
 			BulletPhysicsConstraint(BulletPhysicsConstraint&& other);
 			BulletPhysicsConstraint& operator=(BulletPhysicsConstraint&& other);
 
-			btTypedConstraint *pConstraint;
-			Events::EventHandlerPtr pConstraintUpdater;
-			Events::EventType updaterEventType;
+			Events::EventHandlerPtr GetConstraintUpdater()
+			{
+				return m_pConstraintUpdater;
+			}
+			Events::EventType GetHandlerEventType()
+			{
+				return m_updaterEventType;
+			}
+			btTypedConstraint *GetBulletConstraint()
+			{
+				return m_pConstraint;
+			}
+			void SetConstraintUpdater(Events::EventHandlerPtr updater, Events::EventType eventType)
+			{
+				m_pConstraintUpdater = updater;
+				m_updaterEventType = eventType;
+			}
 		private:
 			BulletPhysicsConstraint(BulletPhysicsConstraint& other);
 			BulletPhysicsConstraint& operator=(BulletPhysicsConstraint& other);
+			btTypedConstraint *m_pConstraint;
+			Events::EventHandlerPtr m_pConstraintUpdater;
+			Events::EventType m_updaterEventType;
 		};
 
 		class BulletPhysicsObject

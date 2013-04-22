@@ -6,20 +6,20 @@ namespace GameEngine
 	{
 		BulletPhysicsConstraint::~BulletPhysicsConstraint()
 		{
-			delete pConstraint;
+			delete m_pConstraint;
 		}
 
 		BulletPhysicsConstraint::BulletPhysicsConstraint(BulletPhysicsConstraint&& other)
 		{
 			if (this != &other)
 			{
-				this->pConstraint = other.pConstraint;
-				other.pConstraint = nullptr;
+				this->m_pConstraint = other.m_pConstraint;
+				other.m_pConstraint = nullptr;
 
-				this->pConstraintUpdater = other.pConstraintUpdater;
-				other.pConstraintUpdater.reset();
+				this->m_pConstraintUpdater = other.m_pConstraintUpdater;
+				other.m_pConstraintUpdater.reset();
 
-				this->updaterEventType = other.updaterEventType;
+				this->m_updaterEventType = other.m_updaterEventType;
 			}
 		}
 
@@ -27,13 +27,13 @@ namespace GameEngine
 		{
 			if (this != &other)
 			{
-				this->pConstraint = other.pConstraint;
-				other.pConstraint = nullptr;
+				this->m_pConstraint = other.m_pConstraint;
+				other.m_pConstraint = nullptr;
 
-				this->pConstraintUpdater = other.pConstraintUpdater;
-				other.pConstraintUpdater.reset();
+				this->m_pConstraintUpdater = other.m_pConstraintUpdater;
+				other.m_pConstraintUpdater.reset();
 
-				this->updaterEventType = other.updaterEventType;
+				this->m_updaterEventType = other.m_updaterEventType;
 			}
 			return *this;
 		}

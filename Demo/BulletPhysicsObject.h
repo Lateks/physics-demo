@@ -3,7 +3,9 @@
 
 #include "enginefwd.h"
 #include <btBulletCollisionCommon.h>
+#include <btBulletDynamicsCommon.h>
 #include <vector>
+#include <map>
 
 namespace GameEngine
 {
@@ -67,10 +69,20 @@ namespace GameEngine
 			{
 				return m_rigidBodies.size();
 			}
+
+			ConstraintID AddConstraint(btTypedConstraint *pConstraint);
+			void RemoveConstraint(ConstraintID id);
+			btTypedConstraint *GetConstraint(ConstraintID id);
+			unsigned int GetNumConstraints()
+			{
+				return m_pConstraints.size();
+			}
 		private:
+			static ConstraintID constraintId;
 			PhysicsType m_type;
 			ActorID m_actorId;
 			std::vector<btRigidBody*> m_rigidBodies;
+			std::map<ConstraintID, btTypedConstraint*> m_pConstraints;
 		};
 	}
 }

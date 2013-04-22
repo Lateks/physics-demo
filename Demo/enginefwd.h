@@ -25,6 +25,7 @@ namespace GameEngine
 		class BulletPhysics;
 		struct BulletPhysicsData;
 		class BulletDebugRenderer;
+		typedef unsigned int ConstraintID;
 	}
 
 	namespace Events

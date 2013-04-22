@@ -251,5 +251,8 @@
     <ClCompile Include="IGameInputHandler.cpp">
       <Filter>Source Files\BaseGameLogic</Filter>
     </ClCompile>
+    <ClCompile Include="BulletPhysicsObject.cpp">
+      <Filter>Source Files\Physics</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

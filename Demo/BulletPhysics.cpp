@@ -22,11 +22,6 @@
 using std::shared_ptr;
 using std::weak_ptr;
 
-namespace
-{
-	btTypedConstraint *pickConstraint;
-}
-
 namespace GameEngine
 {
 	namespace Physics
@@ -335,7 +330,7 @@ namespace GameEngine
 			dof6->setAngularUpperLimit(btVector3(0,0,0));
 
 			m_pData->m_pDynamicsWorld->addConstraint(dof6,true);
-			pickConstraint = dof6; // TODO: store in a map in BulletPhysicsData
+			ConstraintID pickConstraintId = pObject->AddConstraint(dof6);
 
 			dof6->setParam(BT_CONSTRAINT_STOP_CFM,0.8,0);
 			dof6->setParam(BT_CONSTRAINT_STOP_CFM,0.8,1);
@@ -351,18 +346,24 @@ namespace GameEngine
 			dof6->setParam(BT_CONSTRAINT_STOP_ERP,0.1,4);
 			dof6->setParam(BT_CONSTRAINT_STOP_ERP,0.1,5);
 
-			return 1; // TODO
+			return pickConstraintId;
 		}
 
 		void BulletPhysics::RemoveConstraint(ActorID actorId, unsigned int constraintId)
 		{
 			std::shared_ptr<BulletPhysicsObject> pObject = m_pData->GetPhysicsObject(actorId);
-			if (!pObject.get() || pObject->GetNumBodies() == 0)
+			if (!pObject.get() || pObject->GetNumBodies() != 1 || pObject->GetNumConstraints() == 0)
+				return;
+			btTypedConstraint *pPickConstraint = pObject->GetConstraint(constraintId);
+			assert(pPickConstraint);
+			if (!pPickConstraint)
 				return;
 
 			btRigidBody *pBody = pObject->GetRigidBodies()[0];
-			m_pData->m_pDynamicsWorld->removeConstraint(pickConstraint);
-			safe_delete(pickConstraint);
+			m_pData->m_pDynamicsWorld->removeConstraint(pPickConstraint);
+			pObject->RemoveConstraint(constraintId);
+			pPickConstraint = nullptr;
+
 			pBody->forceActivationState(ACTIVE_TAG);
 			pBody->setDeactivationTime( 0.f );
 		}

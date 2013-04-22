@@ -134,6 +134,7 @@
     <ClCompile Include="BulletDebugRenderer.cpp" />
     <ClCompile Include="BulletPhysics.cpp" />
     <ClCompile Include="BulletPhysicsData.cpp" />
+    <ClCompile Include="BulletPhysicsObject.cpp" />
     <ClCompile Include="DemoInputHandler.cpp" />
     <ClCompile Include="EventManager.cpp" />
     <ClCompile Include="GameActor.cpp" />

@@ -98,9 +98,9 @@ namespace GameEngine
 			m_rigidBodyToActorMap.clear();
 		}
 
-		// Removes the collision pairs that contain the given collision object.
 		void BulletPhysicsData::RemoveCollisionObject(btCollisionObject *obj)
 		{
+			// Remove the collision pairs that contain the given collision object.
 			for (auto it = m_previousTickCollisions.begin(); it != m_previousTickCollisions.end(); )
 			{
 				if ((*it).first == obj || (*it).second == obj)
@@ -118,14 +118,14 @@ namespace GameEngine
 			{
 				delete body->getMotionState();
 				delete body->getCollisionShape();
-				delete body->getUserPointer(); // deletes the scene node that uses this rigid body
+				delete body->getUserPointer();
 
 				// destroy related constraints
 				for (int i = body->getNumConstraintRefs()-1; i >= 0; i--)
 				{
-					auto constraintRef = body->getConstraintRef(i);
-					m_pDynamicsWorld->removeConstraint(constraintRef);
-					delete constraintRef;
+					btTypedConstraint *pConstraint = body->getConstraintRef(i);
+					m_pDynamicsWorld->removeConstraint(pConstraint);
+					delete pConstraint;
 				}
 			}
 

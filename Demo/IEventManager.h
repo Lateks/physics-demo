@@ -14,6 +14,7 @@ namespace GameEngine
 		// out game engine.
 		enum class EventType
 		{
+			NONE,
 			COLLISION_EVENT,
 			SEPARATION_EVENT,
 			ACTOR_MOVED,

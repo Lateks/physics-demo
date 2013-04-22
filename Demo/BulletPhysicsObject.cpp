@@ -4,6 +4,40 @@ namespace GameEngine
 {
 	namespace Physics
 	{
+		BulletPhysicsConstraint::~BulletPhysicsConstraint()
+		{
+			delete pConstraint;
+		}
+
+		BulletPhysicsConstraint::BulletPhysicsConstraint(BulletPhysicsConstraint&& other)
+		{
+			if (this != &other)
+			{
+				this->pConstraint = other.pConstraint;
+				other.pConstraint = nullptr;
+
+				this->pConstraintUpdater = other.pConstraintUpdater;
+				other.pConstraintUpdater.reset();
+
+				this->updaterEventType = other.updaterEventType;
+			}
+		}
+
+		BulletPhysicsConstraint& BulletPhysicsConstraint::operator=(BulletPhysicsConstraint&& other)
+		{
+			if (this != &other)
+			{
+				this->pConstraint = other.pConstraint;
+				other.pConstraint = nullptr;
+
+				this->pConstraintUpdater = other.pConstraintUpdater;
+				other.pConstraintUpdater.reset();
+
+				this->updaterEventType = other.updaterEventType;
+			}
+			return *this;
+		}
+
 		ConstraintID BulletPhysicsObject::constraintId = 0;
 
 		ConstraintID BulletPhysicsObject::AddConstraint(btTypedConstraint *pConstraint)
@@ -11,7 +45,7 @@ namespace GameEngine
 			if (IsDynamic())
 			{
 				ConstraintID id = ++constraintId;
-				m_pConstraints[id] = pConstraint;
+				m_pConstraints[id] = std::shared_ptr<BulletPhysicsConstraint>(new BulletPhysicsConstraint(pConstraint));
 				return id;
 			}
 			else
@@ -25,12 +59,11 @@ namespace GameEngine
 			auto it = m_pConstraints.find(id);
 			if (it != m_pConstraints.end())
 			{
-				delete it->second;
 				m_pConstraints.erase(it);
 			}
 		}
 
-		btTypedConstraint *BulletPhysicsObject::GetConstraint(ConstraintID id)
+		std::shared_ptr<BulletPhysicsConstraint> BulletPhysicsObject::GetConstraint(ConstraintID id)
 		{
 			auto it = m_pConstraints.find(id);
 			if (it != m_pConstraints.end())

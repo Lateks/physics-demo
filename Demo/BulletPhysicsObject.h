@@ -2,6 +2,7 @@
 #define BULLET_PHYSICS_OBJECT_H
 
 #include "enginefwd.h"
+#include "IEventManager.h"
 #include <btBulletCollisionCommon.h>
 #include <btBulletDynamicsCommon.h>
 #include <vector>
@@ -11,6 +12,24 @@ namespace GameEngine
 {
 	namespace Physics
 	{
+		struct BulletPhysicsConstraint
+		{
+			BulletPhysicsConstraint(btTypedConstraint *constraint)
+				: pConstraint(constraint), updaterEventType(Events::EventType::NONE) { }
+			BulletPhysicsConstraint(btTypedConstraint *constraint, Events::EventHandlerPtr handler, Events::EventType type)
+				: pConstraint(constraint), pConstraintUpdater(handler), updaterEventType(type) { }
+			~BulletPhysicsConstraint();
+			BulletPhysicsConstraint(BulletPhysicsConstraint&& other);
+			BulletPhysicsConstraint& operator=(BulletPhysicsConstraint&& other);
+
+			btTypedConstraint *pConstraint;
+			Events::EventHandlerPtr pConstraintUpdater;
+			Events::EventType updaterEventType;
+		private:
+			BulletPhysicsConstraint(BulletPhysicsConstraint& other);
+			BulletPhysicsConstraint& operator=(BulletPhysicsConstraint& other);
+		};
+
 		class BulletPhysicsObject
 		{
 		public:
@@ -72,7 +91,8 @@ namespace GameEngine
 
 			ConstraintID AddConstraint(btTypedConstraint *pConstraint);
 			void RemoveConstraint(ConstraintID id);
-			btTypedConstraint *GetConstraint(ConstraintID id);
+
+			std::shared_ptr<BulletPhysicsConstraint> GetConstraint(ConstraintID id);
 			unsigned int GetNumConstraints()
 			{
 				return m_pConstraints.size();
@@ -82,7 +102,7 @@ namespace GameEngine
 			PhysicsType m_type;
 			ActorID m_actorId;
 			std::vector<btRigidBody*> m_rigidBodies;
-			std::map<ConstraintID, btTypedConstraint*> m_pConstraints;
+			std::map<ConstraintID, std::shared_ptr<BulletPhysicsConstraint>> m_pConstraints;
 		};
 	}
 }

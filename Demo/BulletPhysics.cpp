@@ -22,11 +22,6 @@
 using std::shared_ptr;
 using std::weak_ptr;
 
-namespace
-{
-	GameEngine::Events::EventHandlerPtr pHandler;
-}
-
 namespace GameEngine
 {
 	namespace Physics
@@ -358,10 +353,14 @@ namespace GameEngine
 			dof6->setParam(BT_CONSTRAINT_STOP_ERP,0.1f,4);
 			dof6->setParam(BT_CONSTRAINT_STOP_ERP,0.1f,5);
 
-			pHandler.reset(new std::function<void(Events::EventPtr)>(
-				[this, pickConstraintId, actorId] (Events::EventPtr pEvent)
+			Events::EventType handledType = Events::EventType::CAMERA_MOVED;
+			Events::EventHandlerPtr pHandler(new std::function<void(Events::EventPtr)>(
+				[this, pickConstraintId, actorId, handledType] (Events::EventPtr pEvent)
 			{
-				assert(pEvent->GetEventType() == Events::EventType::CAMERA_MOVED);
+				assert(pEvent->GetEventType() == handledType);
+				if (pEvent->GetEventType() != handledType)
+					return;
+
 				Events::CameraMoveEvent *pMoveEvent =
 					dynamic_cast<Events::CameraMoveEvent*>(pEvent.get());
 
@@ -369,12 +368,19 @@ namespace GameEngine
 					pMoveEvent->GetRayFrom(), pMoveEvent->GetRayTo());
 			})
 			);
+
+			std::shared_ptr<BulletPhysicsConstraint> pPickConstraint =
+				pObject->GetConstraint(pickConstraintId);
+			assert(pPickConstraint.get() && pPickConstraint->pConstraint);
+			pPickConstraint->pConstraintUpdater = pHandler;
+			pPickConstraint->updaterEventType = handledType;
+
 			GameData *pGame = GameData::getInstance();
 			assert(pGame && pGame->GetEventManager());
 			Events::IEventManager *pEventMgr = pGame->GetEventManager();
 			if (pEventMgr)
 			{
-				pEventMgr->RegisterHandler(Events::EventType::CAMERA_MOVED, pHandler);
+				pEventMgr->RegisterHandler(handledType, pHandler);
 			}
 
 			return pickConstraintId;
@@ -386,14 +392,14 @@ namespace GameEngine
 			if (!pObject.get() || pObject->GetNumBodies() != 1 || pObject->GetNumConstraints() == 0)
 				return;
 
-			btTypedConstraint *pPickConstraint = pObject->GetConstraint(constraintId);
-			assert(pPickConstraint);
-			if (!pPickConstraint)
+			std::shared_ptr<BulletPhysicsConstraint> pPickConstraint = pObject->GetConstraint(constraintId);
+			assert(pPickConstraint.get() && pPickConstraint->pConstraint);
+			if (!pPickConstraint.get() || !pPickConstraint->pConstraint)
 				return;
 
-			if (pPickConstraint->getConstraintType() == D6_CONSTRAINT_TYPE)
+			if (pPickConstraint->pConstraint->getConstraintType() == D6_CONSTRAINT_TYPE)
 			{
-				btGeneric6DofConstraint* pDof6PickConstraint = static_cast<btGeneric6DofConstraint*>(pPickConstraint);
+				btGeneric6DofConstraint* pDof6PickConstraint = static_cast<btGeneric6DofConstraint*>(pPickConstraint->pConstraint);
 				if (pDof6PickConstraint)
 				{
 					btVector3 btRayFrom = Vec3_to_btVector3(rayFrom);
@@ -416,26 +422,25 @@ namespace GameEngine
 			std::shared_ptr<BulletPhysicsObject> pObject = m_pData->GetPhysicsObject(actorId);
 			if (!pObject.get() || pObject->GetNumBodies() != 1 || pObject->GetNumConstraints() == 0)
 				return;
-			btTypedConstraint *pPickConstraint = pObject->GetConstraint(constraintId);
-			assert(pPickConstraint);
-			if (!pPickConstraint)
+			std::shared_ptr<BulletPhysicsConstraint> pPickConstraint = pObject->GetConstraint(constraintId);
+			assert(pPickConstraint && pPickConstraint->pConstraint);
+			if (!pPickConstraint || !pPickConstraint->pConstraint)
 				return;
 
 			btRigidBody *pBody = pObject->GetRigidBodies()[0];
-			m_pData->m_pDynamicsWorld->removeConstraint(pPickConstraint);
-			pObject->RemoveConstraint(constraintId);
-			pPickConstraint = nullptr;
+			m_pData->m_pDynamicsWorld->removeConstraint(pPickConstraint->pConstraint);
 
 			pBody->forceActivationState(ACTIVE_TAG);
-			pBody->setDeactivationTime( 0.f );
+			pBody->setDeactivationTime(0.f);
 
 			GameData *pGame = GameData::getInstance();
 			assert(pGame && pGame->GetEventManager());
 			Events::IEventManager *pEventMgr = pGame->GetEventManager();
 			if (pEventMgr)
 			{
-				pEventMgr->DeregisterHandler(Events::EventType::CAMERA_MOVED, pHandler);
+				pEventMgr->DeregisterHandler(pPickConstraint->updaterEventType, pPickConstraint->pConstraintUpdater);
 			}
+			pObject->RemoveConstraint(constraintId);
 		}
 	}
 }

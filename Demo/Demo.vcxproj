@@ -46,7 +46,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)\lib\rapidxml-1.13\;$(SolutionDir)\lib\bullet-2.81\src\;$(SolutionDir)\lib\irrlicht-1.8\include\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\lib\eigen\;$(SolutionDir)\lib\rapidxml-1.13\;$(SolutionDir)\lib\bullet-2.81\src\;$(SolutionDir)\lib\irrlicht-1.8\include\;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)\lib\bullet-2.81\lib\;$(SolutionDir)\lib\irrlicht-1.8\lib\Win32-visualstudio\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

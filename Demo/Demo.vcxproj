@@ -93,6 +93,7 @@
     <ClInclude Include="BulletConversions.h" />
     <ClInclude Include="BulletDebugRenderer.h" />
     <ClInclude Include="BulletPhysics.h" />
+    <ClInclude Include="BulletPhysicsConstraint.h" />
     <ClInclude Include="BulletPhysicsData.h" />
     <ClInclude Include="BulletPhysicsObject.h" />
     <ClInclude Include="DemoInputHandler.h" />

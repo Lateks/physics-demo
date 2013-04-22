@@ -186,6 +186,9 @@
     <ClInclude Include="BulletPhysicsObject.h">
       <Filter>Header Files\Physics\BulletPhysics</Filter>
     </ClInclude>
+    <ClInclude Include="BulletPhysicsConstraint.h">
+      <Filter>Header Files\Physics\BulletPhysics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Demo.cpp">

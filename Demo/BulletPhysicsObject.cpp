@@ -1,51 +1,35 @@
 #include "BulletPhysicsObject.h"
+#include "BulletPhysicsConstraint.h"
+#include <btBulletCollisionCommon.h>
+#include <btBulletDynamicsCommon.h>
+#include <iostream>
 
 namespace GameEngine
 {
 	namespace Physics
 	{
-		BulletPhysicsConstraint::~BulletPhysicsConstraint()
-		{
-			delete m_pConstraint;
-		}
-
-		BulletPhysicsConstraint::BulletPhysicsConstraint(BulletPhysicsConstraint&& other)
-		{
-			if (this != &other)
-			{
-				this->m_pConstraint = other.m_pConstraint;
-				other.m_pConstraint = nullptr;
-
-				this->m_pConstraintUpdater = other.m_pConstraintUpdater;
-				other.m_pConstraintUpdater.reset();
-
-				this->m_updaterEventType = other.m_updaterEventType;
-			}
-		}
-
-		BulletPhysicsConstraint& BulletPhysicsConstraint::operator=(BulletPhysicsConstraint&& other)
-		{
-			if (this != &other)
-			{
-				this->m_pConstraint = other.m_pConstraint;
-				other.m_pConstraint = nullptr;
-
-				this->m_pConstraintUpdater = other.m_pConstraintUpdater;
-				other.m_pConstraintUpdater.reset();
-
-				this->m_updaterEventType = other.m_updaterEventType;
-			}
-			return *this;
-		}
-
 		ConstraintID BulletPhysicsObject::constraintId = 0;
 
-		ConstraintID BulletPhysicsObject::AddConstraint(btTypedConstraint *pConstraint)
+		ConstraintID BulletPhysicsObject::AddConstraint(btTypedConstraint *pConstraint,
+			BulletPhysicsConstraint::ConstraintType constraintType)
 		{
 			if (IsDynamic())
 			{
+				std::shared_ptr<BulletPhysicsConstraint> constraint;
+				switch (constraintType)
+				{
+				case BulletPhysicsConstraint::ConstraintType::BASIC_CONSTRAINT:
+					constraint.reset(new BulletPhysicsConstraint(pConstraint));
+					break;
+				case BulletPhysicsConstraint::ConstraintType::PICK_CONSTRAINT:
+					constraint.reset(new BulletPickConstraint(pConstraint));
+					break;
+				default:
+					std::cerr << "Unknown constraint type." << std::endl;
+					return 0;
+				}
 				ConstraintID id = ++constraintId;
-				m_pConstraints[id] = std::shared_ptr<BulletPhysicsConstraint>(new BulletPhysicsConstraint(pConstraint));
+				m_pConstraints[id] = constraint;
 				return id;
 			}
 			else

@@ -60,7 +60,7 @@ namespace GameEngine
 			 * the actor. Only dynamic bodies are picked by this method.
 			 */
 			virtual ActorID GetClosestActorHit(Vec3& rayFrom, Vec3& rayTo, Vec3& pickPosition) const = 0;
-			virtual unsigned int AddPickConstraint(ActorID actorID, Vec3& pickPosition) = 0;
+			virtual unsigned int AddPickConstraint(ActorID actorID, Vec3& pickPosition, Vec3& cameraPosition) = 0;
 			virtual void UpdatePickConstraint(ActorID actorId, ConstraintID constraintId, Vec3& rayFrom, Vec3& rayTo) = 0;
 			virtual void RemoveConstraint(ActorID actorID, unsigned int constraintId) = 0;
 		};

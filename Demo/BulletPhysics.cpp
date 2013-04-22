@@ -1,6 +1,7 @@
 #include "BulletPhysics.h"
 #include "BulletPhysicsData.h"
 #include "BulletPhysicsObject.h"
+#include "BulletPhysicsConstraint.h"
 #include "GameActor.h"
 #include "WorldTransformComponent.h"
 #include "GameData.h"
@@ -18,6 +19,7 @@
 #include <vector>
 #include <memory>
 #include <algorithm>
+#include <cmath>
 
 using std::shared_ptr;
 using std::weak_ptr;
@@ -314,13 +316,16 @@ namespace GameEngine
 		 * picking up items. In general, a physics SDK wrapper should possibly
 		 * define more generic methods for setting up constraints (?).
 		 */
-		unsigned int BulletPhysics::AddPickConstraint(ActorID actorId, Vec3& pickPosition)
+		unsigned int BulletPhysics::AddPickConstraint(ActorID actorId, Vec3& pickPosition, Vec3& cameraPosition)
 		{
 			std::shared_ptr<BulletPhysicsObject> pObject = m_pData->GetPhysicsObject(actorId);
 			if (!pObject.get() || pObject->IsStatic() || pObject->IsKinematic())
 				return 0;
 
 			btVector3 btPickPosition = Vec3_to_btVector3(pickPosition);
+			btVector3 btCameraPosition = Vec3_to_btVector3(cameraPosition);
+			float pickDistance = (btPickPosition - btCameraPosition).length();
+
 			btRigidBody *pBody = pObject->GetRigidBodies()[0];
 			pBody->setActivationState(DISABLE_DEACTIVATION);
 
@@ -337,7 +342,8 @@ namespace GameEngine
 			dof6->setAngularUpperLimit(btVector3(0,0,0));
 
 			m_pData->m_pDynamicsWorld->addConstraint(dof6,true);
-			ConstraintID pickConstraintId = pObject->AddConstraint(dof6);
+			ConstraintID pickConstraintId = pObject->AddConstraint(dof6,
+				BulletPhysicsConstraint::ConstraintType::PICK_CONSTRAINT);
 
 			dof6->setParam(BT_CONSTRAINT_STOP_CFM,0.8f,0);
 			dof6->setParam(BT_CONSTRAINT_STOP_CFM,0.8f,1);
@@ -371,8 +377,12 @@ namespace GameEngine
 
 			std::shared_ptr<BulletPhysicsConstraint> pPickConstraint =
 				pObject->GetConstraint(pickConstraintId);
-			assert(pPickConstraint.get() && pPickConstraint->GetBulletConstraint());
-			pPickConstraint->SetConstraintUpdater(pHandler, handledType);
+			assert(pPickConstraint.get() && pPickConstraint->GetBulletConstraint() &&
+				pPickConstraint->GetConstraintType() == BulletPhysicsConstraint::ConstraintType::PICK_CONSTRAINT);
+
+			BulletPickConstraint *pConstraint = dynamic_cast<BulletPickConstraint*>(pPickConstraint.get());
+			pConstraint->SetConstraintUpdater(pHandler, handledType);
+			pConstraint->SetPickDistance(pickDistance);
 
 			GameData *pGame = GameData::getInstance();
 			assert(pGame && pGame->GetEventManager());
@@ -393,8 +403,13 @@ namespace GameEngine
 
 			std::shared_ptr<BulletPhysicsConstraint> pPickConstraint = pObject->GetConstraint(constraintId);
 			assert(pPickConstraint.get() && pPickConstraint->GetBulletConstraint());
-			if (!pPickConstraint.get() || !pPickConstraint->GetBulletConstraint())
+
+			bool isPickConstraint = pPickConstraint->GetConstraintType() == BulletPhysicsConstraint::ConstraintType::PICK_CONSTRAINT;
+			assert(isPickConstraint);
+			if (!pPickConstraint.get() || !pPickConstraint->GetBulletConstraint() || !isPickConstraint)
 				return;
+
+			BulletPickConstraint *pConstraint = dynamic_cast<BulletPickConstraint*>(pPickConstraint.get());
 
 			btTypedConstraint *btConstraint = pPickConstraint->GetBulletConstraint();
 			if (btConstraint->getConstraintType() == D6_CONSTRAINT_TYPE)
@@ -407,9 +422,8 @@ namespace GameEngine
 
 					btVector3 newPivot;
 					btVector3 dir = btRayTo - btRayFrom;
-					// TODO:
-					// dir.normalize();
-					// dir *= gOldPickingDist;
+					dir.normalize();
+					dir *= pConstraint->GetPickDistance();
 
 					newPivot = btRayFrom + dir;
 					pDof6PickConstraint->getFrameOffsetA().setOrigin(newPivot);

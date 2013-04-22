@@ -41,7 +41,7 @@ namespace GameEngine
 			virtual void VSetGlobalGravity(Vec3& gravity) override;
 
 			virtual ActorID GetClosestActorHit(Vec3& rayFrom, Vec3& rayTo, Vec3& pickPosition) const override;
-			virtual ConstraintID AddPickConstraint(ActorID actorID, Vec3& pickPosition) override;
+			virtual ConstraintID AddPickConstraint(ActorID actorID, Vec3& pickPosition, Vec3& cameraPosition) override;
 			virtual void UpdatePickConstraint(ActorID actorId, ConstraintID constraintId, Vec3& rayFrom, Vec3& rayTo) override;
 			virtual void RemoveConstraint(ActorID actorID, unsigned int constraintId) override;
 		private:

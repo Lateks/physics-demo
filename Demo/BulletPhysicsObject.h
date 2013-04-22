@@ -2,7 +2,7 @@
 #define BULLET_PHYSICS_OBJECT_H
 
 #include "enginefwd.h"
-#include "IEventManager.h"
+#include "BulletPhysicsConstraint.h"
 #include <btBulletCollisionCommon.h>
 #include <btBulletDynamicsCommon.h>
 #include <vector>
@@ -12,42 +12,6 @@ namespace GameEngine
 {
 	namespace Physics
 	{
-		class BulletPhysicsConstraint
-		{
-		public:
-			BulletPhysicsConstraint(btTypedConstraint *constraint)
-				: m_pConstraint(constraint), m_updaterEventType(Events::EventType::NONE) { }
-			BulletPhysicsConstraint(btTypedConstraint *constraint, Events::EventHandlerPtr handler, Events::EventType type)
-				: m_pConstraint(constraint), m_pConstraintUpdater(handler), m_updaterEventType(type) { }
-			~BulletPhysicsConstraint();
-			BulletPhysicsConstraint(BulletPhysicsConstraint&& other);
-			BulletPhysicsConstraint& operator=(BulletPhysicsConstraint&& other);
-
-			Events::EventHandlerPtr GetConstraintUpdater()
-			{
-				return m_pConstraintUpdater;
-			}
-			Events::EventType GetHandlerEventType()
-			{
-				return m_updaterEventType;
-			}
-			btTypedConstraint *GetBulletConstraint()
-			{
-				return m_pConstraint;
-			}
-			void SetConstraintUpdater(Events::EventHandlerPtr updater, Events::EventType eventType)
-			{
-				m_pConstraintUpdater = updater;
-				m_updaterEventType = eventType;
-			}
-		private:
-			BulletPhysicsConstraint(BulletPhysicsConstraint& other);
-			BulletPhysicsConstraint& operator=(BulletPhysicsConstraint& other);
-			btTypedConstraint *m_pConstraint;
-			Events::EventHandlerPtr m_pConstraintUpdater;
-			Events::EventType m_updaterEventType;
-		};
-
 		class BulletPhysicsObject
 		{
 		public:
@@ -107,7 +71,9 @@ namespace GameEngine
 				return m_rigidBodies.size();
 			}
 
-			ConstraintID AddConstraint(btTypedConstraint *pConstraint);
+			ConstraintID AddConstraint(btTypedConstraint *pConstraint,
+				BulletPhysicsConstraint::ConstraintType constraintType =
+				BulletPhysicsConstraint::ConstraintType::BASIC_CONSTRAINT);
 			void RemoveConstraint(ConstraintID id);
 
 			std::shared_ptr<BulletPhysicsConstraint> GetConstraint(ConstraintID id);

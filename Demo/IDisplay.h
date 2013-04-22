@@ -39,10 +39,12 @@ namespace GameEngine
 			virtual void SetCameraPosition(Vec3& newPosition) = 0;
 			virtual void SetCameraTarget(Vec3& newTarget) = 0;
 			virtual void SetCameraProjection(Mat4& newProjection) = 0;
+
 			virtual Vec3 GetCameraPosition() const = 0;
 			virtual Vec3 GetCameraTarget() const = 0;
 			virtual Vec3 GetCameraUpVector() const = 0;
 			virtual Vec3 GetCameraRightVector() const = 0;
+			virtual Quaternion GetCameraRotation() const = 0;
 
 			// Returns a unique id that can be used to refer to the texture.
 			// Returns 0 if loading fails.

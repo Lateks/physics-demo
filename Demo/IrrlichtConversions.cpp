@@ -32,6 +32,11 @@ namespace GameEngine
 			return quaternion(quat.x(), quat.y(), quat.z(), quat.w());
 		}
 
+		Quaternion ConvertQuaternion(irr::core::quaternion& quat)
+		{
+			return Quaternion(quat.X, quat.Y, quat.Z, quat.W);
+		}
+
 		// TODO: handedness
 		matrix4 ConvertProjectionMatrix(Mat4& matrix)
 		{

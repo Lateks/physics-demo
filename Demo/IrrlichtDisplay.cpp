@@ -266,5 +266,12 @@ namespace GameEngine
 
 			return ConvertVector(rightVector);
 		}
+
+		Quaternion IrrlichtDisplay::GetCameraRotation() const
+		{
+			vector3df cameraRotEuler = m_pData->m_pCamera->getRotation();
+			quaternion quaternionRot(cameraRotEuler * irr::core::DEGTORAD);
+			return ConvertQuaternion(quaternionRot);
+		}
 	}
 }

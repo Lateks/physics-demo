@@ -1,4 +1,5 @@
 #include "DemoInputHandler.h"
+#include "WorldTransformComponent.h"
 #include "IPhysicsEngine.h"
 #include "GameData.h"
 #include "GameActor.h"
@@ -105,6 +106,12 @@ namespace GameEngine
 		Vec3 cameraPos = pGame->GetRenderer()->GetCameraPosition();
 
 		StrongActorPtr cube(new GameActor(cameraPos));
+		std::weak_ptr<WorldTransformComponent> pWeakTransform = cube->GetWorldTransform();
+		if (!pWeakTransform.expired())
+		{
+			std::shared_ptr<WorldTransformComponent> pTransform(pWeakTransform);
+			pTransform->SetRotation(pGame->GetRenderer()->GetCameraRotation());
+		}
 		pGame->AddActor(cube);
 
 		auto renderer = pGame->GetRenderer();

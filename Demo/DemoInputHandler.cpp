@@ -34,7 +34,7 @@ namespace GameEngine
 		// Create an actor for the world map to be able to refer to the associated
 		// rigid bodies. Note: now that the map itself has an actor and a
 		// world transform, the renderer could also use it to determine the
-		// position of the map.
+		// position of the map. (TODO?)
 		Vec3 mapPosition(-1350, -130, 1400);
 		StrongActorPtr world(new GameActor(mapPosition));
 		game->AddActor(world);

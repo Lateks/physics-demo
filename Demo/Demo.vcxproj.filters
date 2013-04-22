@@ -61,6 +61,12 @@
     <Filter Include="Source Files\BaseGameLogic">
       <UniqueIdentifier>{6a1d097c-88b1-4fea-b9f3-aaf5e350d497}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Physics\BulletPhysics">
+      <UniqueIdentifier>{96f402fc-7bc3-4f80-a443-a71c11a0bf29}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Physics\BulletPhysics">
+      <UniqueIdentifier>{fcd475f6-5ec1-4534-aab6-6160a90a0438}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -86,15 +92,6 @@
     </ClInclude>
     <ClInclude Include="Mat4.h">
       <Filter>Header Files\LinearAlgebra</Filter>
-    </ClInclude>
-    <ClInclude Include="BulletPhysics.h">
-      <Filter>Header Files\Physics</Filter>
-    </ClInclude>
-    <ClInclude Include="BulletPhysicsData.h">
-      <Filter>Header Files\Physics</Filter>
-    </ClInclude>
-    <ClInclude Include="BulletDebugRenderer.h">
-      <Filter>Header Files\Physics</Filter>
     </ClInclude>
     <ClInclude Include="utils.h">
       <Filter>Header Files</Filter>
@@ -135,9 +132,6 @@
     <ClInclude Include="Events.h">
       <Filter>Header Files\Events</Filter>
     </ClInclude>
-    <ClInclude Include="BulletConversions.h">
-      <Filter>Header Files\Physics</Filter>
-    </ClInclude>
     <ClInclude Include="BSPLoader.h">
       <Filter>Header Files\3rdParty_BSPTools</Filter>
     </ClInclude>
@@ -165,9 +159,6 @@
     <ClInclude Include="IrrlichtConversions.h">
       <Filter>Header Files\Display</Filter>
     </ClInclude>
-    <ClInclude Include="BulletPhysicsObject.h">
-      <Filter>Header Files\Physics</Filter>
-    </ClInclude>
     <ClInclude Include="Game.h">
       <Filter>Header Files\BaseGameLogic</Filter>
     </ClInclude>
@@ -179,6 +170,21 @@
     </ClInclude>
     <ClInclude Include="IGameInputHandler.h">
       <Filter>Header Files\BaseGameLogic</Filter>
+    </ClInclude>
+    <ClInclude Include="BulletConversions.h">
+      <Filter>Header Files\Physics\BulletPhysics</Filter>
+    </ClInclude>
+    <ClInclude Include="BulletDebugRenderer.h">
+      <Filter>Header Files\Physics\BulletPhysics</Filter>
+    </ClInclude>
+    <ClInclude Include="BulletPhysics.h">
+      <Filter>Header Files\Physics\BulletPhysics</Filter>
+    </ClInclude>
+    <ClInclude Include="BulletPhysicsData.h">
+      <Filter>Header Files\Physics\BulletPhysics</Filter>
+    </ClInclude>
+    <ClInclude Include="BulletPhysicsObject.h">
+      <Filter>Header Files\Physics\BulletPhysics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -197,12 +203,6 @@
     <ClCompile Include="Mat4.cpp">
       <Filter>Source Files\LinearAlgebra</Filter>
     </ClCompile>
-    <ClCompile Include="BulletPhysics.cpp">
-      <Filter>Source Files\Physics</Filter>
-    </ClCompile>
-    <ClCompile Include="BulletPhysicsData.cpp">
-      <Filter>Source Files\Physics</Filter>
-    </ClCompile>
     <ClCompile Include="XMLPhysicsData.cpp">
       <Filter>Source Files\Physics</Filter>
     </ClCompile>
@@ -214,12 +214,6 @@
     </ClCompile>
     <ClCompile Include="EventManager.cpp">
       <Filter>Source Files\Events</Filter>
-    </ClCompile>
-    <ClCompile Include="BulletConversions.cpp">
-      <Filter>Source Files\Physics</Filter>
-    </ClCompile>
-    <ClCompile Include="BulletDebugRenderer.cpp">
-      <Filter>Source Files\Physics</Filter>
     </ClCompile>
     <ClCompile Include="BSPLoader.cpp">
       <Filter>Source Files\3rdParty_BSPTools</Filter>
@@ -252,7 +246,19 @@
       <Filter>Source Files\BaseGameLogic</Filter>
     </ClCompile>
     <ClCompile Include="BulletPhysicsObject.cpp">
-      <Filter>Source Files\Physics</Filter>
+      <Filter>Source Files\Physics\BulletPhysics</Filter>
+    </ClCompile>
+    <ClCompile Include="BulletConversions.cpp">
+      <Filter>Source Files\Physics\BulletPhysics</Filter>
+    </ClCompile>
+    <ClCompile Include="BulletDebugRenderer.cpp">
+      <Filter>Source Files\Physics\BulletPhysics</Filter>
+    </ClCompile>
+    <ClCompile Include="BulletPhysics.cpp">
+      <Filter>Source Files\Physics\BulletPhysics</Filter>
+    </ClCompile>
+    <ClCompile Include="BulletPhysicsData.cpp">
+      <Filter>Source Files\Physics\BulletPhysics</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

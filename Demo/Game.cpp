@@ -33,7 +33,7 @@ namespace GameEngine
 			return;
 		}
 
-		if (!renderer->SetupAndOpenWindow(800, 600,
+		if (!renderer->SetupAndOpenWindow(1024, 800,
 			Display::DRIVER_TYPE::OPEN_GL, Display::CAMERA_TYPE::FPS))
 		{
 			std::cerr << "Failed to open OpenGL device." << std::cerr;

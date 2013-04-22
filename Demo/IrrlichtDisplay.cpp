@@ -126,6 +126,7 @@ namespace GameEngine
 			default:
 				m_pData->m_pCamera = m_pData->m_pSmgr->addCameraSceneNodeFPS();
 			}
+			m_pData->m_pCamera->setFOV(irr::core::degToRad(75.f));
 			m_pData->m_pDebugSmgr->setActiveCamera(m_pData->m_pCamera);
 			m_pData->m_pDevice->getCursorControl()->setVisible(false);
 

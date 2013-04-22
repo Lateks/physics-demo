@@ -15,6 +15,7 @@ namespace
 {
 	unsigned int WOODBOX_TEXTURE;
 	unsigned int MUD_TEXTURE;
+	unsigned int BEACHBALL_TEXTURE;
 }
 
 namespace GameEngine
@@ -53,7 +54,7 @@ namespace GameEngine
 		StrongActorPtr ball(new GameActor(Vec3(0, 50, 60)));
 		game->AddActor(ball);
 		pRenderer->AddSphereSceneNode(10.f, ball, MUD_TEXTURE);
-		pPhysics->VAddSphere(10.f, ball, "Vinyl", "Bouncy");
+		pPhysics->VAddSphere(10.f, ball, "Titanium", "Bouncy");
 
 		StrongActorPtr cube(new GameActor(Vec3(0, 80, 60)));
 		game->AddActor(cube);

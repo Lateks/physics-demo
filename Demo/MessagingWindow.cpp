@@ -29,13 +29,13 @@ namespace GameEngine
 			delete pImpl;
 		}
 
-		void MessagingWindow::AddMessage(const irr::core::stringw message)
+		void MessagingWindow::AddMessage(const std::wstring& message)
 		{
 			if (pImpl->messageBuffer.size() == pImpl->maxMessages)
 			{
 				pImpl->messageBuffer.erase(pImpl->messageBuffer.begin());
 			}
-			pImpl->messageBuffer.push_back(message);
+			pImpl->messageBuffer.push_back(irr::core::stringw(message.c_str()));
 		}
 
 		void MessagingWindow::SetPosition(unsigned int minX, unsigned int minY)
@@ -44,9 +44,9 @@ namespace GameEngine
 			pImpl->posY = minY;
 		}
 
-		void MessagingWindow::SetFont(irr::gui::IGUIFont *font)
+		void MessagingWindow::SetFont(const std::string& fontFileName)
 		{
-			pImpl->font = font;
+			// TODO
 		}
 
 		void MessagingWindow::Render()

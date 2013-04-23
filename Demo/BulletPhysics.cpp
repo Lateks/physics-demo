@@ -217,8 +217,9 @@ namespace GameEngine
 			// be any convex shape. The common functionality associated with
 			// adding immovable colliders or triggers of any shape is in
 			// BulletPhysicsData::AddStaticColliderShape.
+			btVector3 boxDimensions = Vec3_to_btVector3(Vec3(dim, dim, dim), m_pData->m_worldScaleConst);
 			btBoxShape * const boxShape =
-				new btBoxShape(Vec3_to_btVector3(Vec3(dim, dim, dim), m_pData->m_worldScaleConst));
+				new btBoxShape(0.5f * boxDimensions);
 			m_pData->AddStaticColliderShape(pStrongActor, boxShape, true);
 		}
 		

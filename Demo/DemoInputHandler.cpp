@@ -30,6 +30,7 @@ namespace GameEngine
 	{
 		Display::IDisplay *pRenderer = game->GetRenderer();
 		Physics::IPhysicsEngine *pPhysics = game->GetPhysicsEngine();
+		Events::IEventManager *pEventMgr = game->GetEventManager();
 
 		// Create an actor for the world map to be able to refer to the associated
 		// rigid bodies. Note: now that the map itself has an actor and a
@@ -59,6 +60,30 @@ namespace GameEngine
 		game->AddActor(cube);
 		pRenderer->AddCubeSceneNode(25.f, cube, WOODBOX_TEXTURE);
 		pPhysics->VAddBox(Vec3(25.f, 25.f, 25.f), cube, "Titanium", "Bouncy");
+
+		// Add a trigger node, rendered as a wireframe cube. (The IrrlichtDisplay
+		// assumes you want a wireframe when no texture is given.)
+		StrongActorPtr trigger(new GameActor(Vec3(-100.f, 125.f, 450.f)));
+		game->AddActor(trigger);
+		pRenderer->AddCubeSceneNode(125.f, trigger, 0);
+		pPhysics->VCreateTrigger(trigger, 125.f);
+		Events::EventHandlerPtr eventPrinter(new std::function<void(Events::EventPtr)>
+			([] (Events::EventPtr event)
+		{
+			Events::TriggerEvent *pEvent = dynamic_cast<Events::TriggerEvent*>(event.get());
+			std::cout << "Actor " << pEvent->GetActorId();
+			if (event->GetEventType() == Events::EventType::ENTER_TRIGGER)
+			{
+				 std::cout << " entered the trigger.";
+			}
+			else if (event->GetEventType() == Events::EventType::EXIT_TRIGGER)
+			{
+				std::cout << " exited the trigger.";
+			}
+			std::cout << std::endl;
+		}));
+		pEventMgr->RegisterHandler(Events::EventType::ENTER_TRIGGER, eventPrinter);
+		pEventMgr->RegisterHandler(Events::EventType::EXIT_TRIGGER, eventPrinter);
 	}
 
 	void DemoInputHandler::HandleInputs()

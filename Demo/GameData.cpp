@@ -14,11 +14,8 @@ namespace GameEngine
 	{
 		delete m_pRenderer;
 		delete m_pPhysicsEngine;
-		std::for_each (m_actors.begin(), m_actors.end(),
-			[] (std::pair<unsigned int, StrongActorPtr> actor)
-		{
-			actor.second.reset();
-		});
+		delete m_pEvents;
+		m_actors.clear();
 		GameData::instance = nullptr;
 	}
 

@@ -54,6 +54,11 @@ namespace GameEngine
 			{
 				pNode->setMaterialTexture(0, (*texturePos).second);
 			}
+			else
+			{
+				pNode->setMaterialFlag(irr::video::EMF_WIREFRAME, true);
+				pNode->setMaterialFlag(irr::video::EMF_BACK_FACE_CULLING, false);
+			}
 			pNode->setMaterialFlag(irr::video::EMF_LIGHTING, false);
 
 			weak_ptr<WorldTransformComponent> pWeakTransform = pStrongActor->GetWorldTransform();

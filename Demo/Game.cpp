@@ -84,6 +84,7 @@ namespace GameEngine
 	Game::~Game()
 	{
 		delete m_pData;
+		m_pData = nullptr;
 	}
 
 	Game::Game(Game& game)

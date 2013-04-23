@@ -14,9 +14,9 @@ namespace GameEngine
 		public:
 			MessagingWindow(unsigned int width, unsigned int height);
 			~MessagingWindow();
-			void AddMessage(const irr::core::stringw message);
+			void AddMessage(const std::wstring& message);
 			void SetPosition(unsigned int minX, unsigned int minY);
-			void SetFont(irr::gui::IGUIFont *font);
+			void SetFont(const std::string& fontFileName);
 			void Render();
 		private:
 			MessagingWindowImpl *pImpl;

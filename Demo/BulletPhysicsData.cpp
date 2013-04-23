@@ -133,7 +133,6 @@ namespace GameEngine
 			{
 				delete body->getMotionState();
 				delete body->getCollisionShape();
-				delete body->getUserPointer();
 
 				// destroy related constraints
 				for (int i = body->getNumConstraintRefs()-1; i >= 0; i--)
@@ -287,7 +286,6 @@ namespace GameEngine
 
 				if (isTrigger) // triggers may intersect with other objects (this causes a trigger related event, not a collision event)
 				{
-					body->setUserPointer(pActor.get());
 					body->setCollisionFlags(
 						body->getCollisionFlags() | btRigidBody::CF_NO_CONTACT_RESPONSE);
 				}

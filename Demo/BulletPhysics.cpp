@@ -400,9 +400,11 @@ namespace GameEngine
 
 			// Disable rotations to avoid jitter when rigid body is
 			// pushed against e.g. a wall. Store the current angular
-			// factor to restore it later.
+			// factor to restore it later. Set angular velocity to zero
+			// to stop ongoing rotations at the moment of picking.
 			pConstraint->SetOriginalAngularFactor(btVector3_to_Vec3(pBody->getAngularFactor()));
 			pBody->setAngularFactor(0);
+			pBody->setAngularVelocity(btVector3(0, 0, 0));
 
 			GameData *pGame = GameData::getInstance();
 			assert(pGame && pGame->GetEventManager());

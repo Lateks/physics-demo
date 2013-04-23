@@ -114,11 +114,13 @@ namespace GameEngine
 		{
 			ThrowCube(pGame->GetRenderer()->GetCameraTarget());
 		}
-		else if (LeftMousePressed())
+
+		if (LeftMousePressed())
 		{
 			Vec3 pickPoint;
 			ActorID pickedActorId = pGame->GetPhysicsEngine()->GetClosestActorHit(
 				m_currentCameraState.cameraPos, m_currentCameraState.cameraTarget, pickPoint);
+			std::cerr << pickedActorId << std::endl;
 			if (pickedActorId != 0)
 			{
 				m_pickConstraintId = pPhysics->AddPickConstraint(pickedActorId, pickPoint,
@@ -132,7 +134,8 @@ namespace GameEngine
 			m_pickedActor = 0;
 			m_pickConstraintId = 0;
 		}
-		else if (CameraMoved())
+
+		if (CameraMoved())
 		{
 			auto pEventMgr = pGame->GetEventManager();
 			if (pEventMgr)

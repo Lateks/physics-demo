@@ -64,7 +64,7 @@ namespace GameEngine
 		StrongActorPtr cube(new GameActor(Vec3(0, 80, 60)));
 		game->AddActor(cube);
 		pRenderer->AddCubeSceneNode(25.f, cube, WOODBOX_TEXTURE);
-		pPhysics->VAddBox(Vec3(25.f, 25.f, 25.f), cube, "Titanium", "Bouncy");
+		pPhysics->VAddBox(Vec3(25.f, 25.f, 25.f), cube, "manganese", "Normal");
 
 		// Add a trigger node, rendered as a wireframe cube. (The IrrlichtDisplay
 		// assumes you want a wireframe when no texture is given.)
@@ -173,7 +173,7 @@ namespace GameEngine
 		rotationAxis[2] = -rotationAxis[2];
 
 		physics->VSetLinearVelocity(cube->GetID(), throwDirection, 25.f);
-		physics->VSetAngularVelocity(cube->GetID(), rotationAxis, 0.25f);
+		physics->VSetAngularVelocity(cube->GetID(), rotationAxis, 2.5f);
 	}
 
 	bool DemoInputHandler::CameraMoved()

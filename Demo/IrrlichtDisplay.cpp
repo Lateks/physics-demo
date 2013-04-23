@@ -87,8 +87,6 @@ namespace GameEngine
 		{
 			switch (type)
 			{
-			case DRIVER_TYPE::DIRECT_3D8:
-				return E_DRIVER_TYPE::EDT_DIRECT3D8;
 			case DRIVER_TYPE::DIRECT_3D9:
 				return E_DRIVER_TYPE::EDT_DIRECT3D9;
 			case DRIVER_TYPE::OPEN_GL:

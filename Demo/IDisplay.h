@@ -11,7 +11,6 @@ namespace GameEngine
 		enum class DRIVER_TYPE
 		{
 			OPEN_GL,
-			DIRECT_3D8,
 			DIRECT_3D9,
 			SOFTWARE
 		};

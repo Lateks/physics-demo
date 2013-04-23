@@ -23,13 +23,14 @@ namespace GameEngine
 		struct BulletPhysicsData
 		{
 		public:
-			BulletPhysicsData()
+			BulletPhysicsData(float worldScale)
 				: m_pDynamicsWorld(nullptr), m_pCollisionBroadPhase(nullptr),
 				m_pCollisionDispatcher(nullptr), m_pCollisionConfig(nullptr),
-				m_pConstraintSolver(nullptr), m_pDebugRenderer(nullptr) { }
+				m_pConstraintSolver(nullptr), m_pDebugRenderer(nullptr), m_worldScaleConst(worldScale) { }
 			virtual bool VInitializeSystems();
 			virtual ~BulletPhysicsData();
 
+			float m_worldScaleConst;
 			btDynamicsWorld *m_pDynamicsWorld;             // - manages the other required components
 			btBroadphaseInterface *m_pCollisionBroadPhase; // - manages the first (rough) phase of collision detection
 			btCollisionDispatcher *m_pCollisionDispatcher; // - manages the more accurate second phase of collision detection
@@ -58,9 +59,10 @@ namespace GameEngine
 				const btRigidBody * pBody1, const btRigidBody * pBody2);
 			void SendSeparationEvent(const btRigidBody * pBody1, const btRigidBody * pBody2);
 
-			void AddShape(StrongActorPtr pActor, btCollisionShape *shape,
+			std::shared_ptr<BulletPhysicsObject> AddShape(StrongActorPtr pActor, btCollisionShape *shape,
 				float mass, const std::string& physicsMaterial);
-			void AddStaticColliderShape(StrongActorPtr pActor, btCollisionShape *shape, bool trigger = false);
+			std::shared_ptr<BulletPhysicsObject> AddStaticColliderShape(StrongActorPtr pActor,
+				btCollisionShape *shape, bool trigger = false);
 
 			void RemoveCollisionObject(btCollisionObject *obj);
 

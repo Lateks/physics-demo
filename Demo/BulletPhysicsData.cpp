@@ -214,7 +214,7 @@ namespace GameEngine
 			}
 		}
 
-		void BulletPhysicsData::AddShape(StrongActorPtr pActor, btCollisionShape *shape,
+		std::shared_ptr<BulletPhysicsObject> BulletPhysicsData::AddShape(StrongActorPtr pActor, btCollisionShape *shape,
 			float mass, const std::string& material)
 		{
 			assert(pActor.get());
@@ -248,9 +248,11 @@ namespace GameEngine
 				m_actorToBulletPhysicsObjectMap[id]->AddRigidBody(body);
 				m_rigidBodyToActorMap[body] = id;
 			}
+
+			return m_actorToBulletPhysicsObjectMap[id];
 		}
 
-		void BulletPhysicsData::AddStaticColliderShape(StrongActorPtr pActor, btCollisionShape *shape, bool isTrigger)
+		std::shared_ptr<BulletPhysicsObject> BulletPhysicsData::AddStaticColliderShape(StrongActorPtr pActor, btCollisionShape *shape, bool isTrigger)
 		{
 			assert(pActor.get());
 			ActorID id = pActor->GetID();
@@ -291,22 +293,24 @@ namespace GameEngine
 				}
 				else
 				{
-					// Set the same restitution and friction for all static objects.
+					// Set the same restitution, friction and rolling friction for all static objects.
 					// This could possibly be based on the the material of the static object.
 					// (Can this data be parsed from the bsp file?)
 					body->setRestitution(0.2f);
 					body->setFriction(0.6f);
+					body->setRollingFriction(0.8f);
 				}
 
 				m_actorToBulletPhysicsObjectMap[id]->AddRigidBody(body);
 				m_rigidBodyToActorMap[body] = id;
 			}
+			return m_actorToBulletPhysicsObjectMap[id];
 		}
 
 		btMotionState *BulletPhysicsData::GetMotionStateFrom(std::shared_ptr<WorldTransformComponent> pWorldTransform)
 		{
 			btQuaternion rotation(Quaternion_to_btQuaternion(pWorldTransform->GetRotation()));
-			btVector3 translation(Vec3_to_btVector3(pWorldTransform->GetPosition()));
+			btVector3 translation(Vec3_to_btVector3(pWorldTransform->GetPosition(), m_worldScaleConst));
 			btTransform transform(rotation, translation);
 			return new btDefaultMotionState(transform);
 		}
@@ -343,14 +347,14 @@ namespace GameEngine
 				for (int i = 1; i < manifold->getNumContacts(); ++i)
 				{
 					const btManifoldPoint &point = manifold->getContactPoint(i);
-					collisionPoints.push_back(btVector3_to_Vec3(point.getPositionWorldOnB()));
+					collisionPoints.push_back(btVector3_to_Vec3(point.getPositionWorldOnB(), m_worldScaleConst));
 
 					sumNormalForce += point.m_combinedRestitution * point.m_normalWorldOnB;
 					sumFrictionForce += point.m_combinedFriction * point.m_lateralFrictionDir1;
 				}
 				event.reset(new Events::ActorCollideEvent(pGameData->CurrentTimeSec(),
-					id1, id2, collisionPoints, btVector3_to_Vec3(sumNormalForce),
-					btVector3_to_Vec3(sumFrictionForce)));
+					id1, id2, collisionPoints, btVector3_to_Vec3(sumNormalForce, m_worldScaleConst),
+					btVector3_to_Vec3(sumFrictionForce, m_worldScaleConst)));
 				pEventManager->QueueEvent(event);
 			}
 		}

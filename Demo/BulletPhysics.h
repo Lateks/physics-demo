@@ -11,7 +11,7 @@ namespace GameEngine
 		class BulletPhysics : public IPhysicsEngine
 		{
 		public:
-			BulletPhysics();
+			BulletPhysics(float worldScale = 1.f);
 			virtual ~BulletPhysics();
 			
 			virtual bool VInitEngine() override;
@@ -25,7 +25,7 @@ namespace GameEngine
 			virtual void VAddConvexMesh(std::vector<Vec3>& vertices,
 				WeakActorPtr pActor, const std::string& density, const std::string& material) override;
 			virtual void VAddConvexStaticColliderMesh(std::vector<Vec3>& vertices, WeakActorPtr pActor) override;
-			virtual void VAddConvexStaticColliderMesh(std::vector<Vec4>& planeEquations, WeakActorPtr pActor) override;
+			virtual void VAddConvexStaticColliderMesh(std::vector<Vec4>& planeEquations, WeakActorPtr pActor, bool scale = true) override;
 			virtual void VCreateTrigger(WeakActorPtr pActor, const float dim) override;
 
 			virtual void VLoadBspMap(BspLoader& bspLoad, WeakActorPtr pActor) override;

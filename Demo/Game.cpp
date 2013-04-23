@@ -72,7 +72,7 @@ namespace GameEngine
 
 		// Setup physics.
 		std::unique_ptr<Physics::IPhysicsEngine> physics(
-			Physics::CreatePhysicsEngine());
+			Physics::CreatePhysicsEngine(0.1f));
 		if (!physics.get())
 		{
 			std::cerr << "Failed to initialize physics engine." << std::endl;

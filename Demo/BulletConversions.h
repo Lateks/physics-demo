@@ -9,8 +9,8 @@ namespace GameEngine
 {
 	namespace Physics
 	{
-		Vec3 btVector3_to_Vec3(const btVector3& vec);
-		btVector3 Vec3_to_btVector3(const Vec3& vec);
+		Vec3 btVector3_to_Vec3(const btVector3& vec, float worldScale = 1.f);
+		btVector3 Vec3_to_btVector3(const Vec3& vec, float worldScale = 1.f);
 		btVector3 Vec4_to_btVector3(const Vec4& vec);
 
 		Quaternion btQuaternion_to_Quaternion(const btQuaternion& quat);

@@ -30,7 +30,6 @@ namespace GameEngine
 	{
 		Display::IDisplay *pRenderer = game->GetRenderer();
 		Physics::IPhysicsEngine *pPhysics = game->GetPhysicsEngine();
-		pPhysics->VSetGlobalGravity(Vec3(0, -100.f, 0));
 
 		// Create an actor for the world map to be able to refer to the associated
 		// rigid bodies. Note: now that the map itself has an actor and a
@@ -43,7 +42,7 @@ namespace GameEngine
 		std::unique_ptr<BspLoader> pBspLoader = CreateBspLoader("..\\assets\\20kdm2.bsp");
 		pPhysics->VLoadBspMap(*pBspLoader, world);
 
-		pRenderer->SetCameraPosition(Vec3(50,50,60));
+		pRenderer->SetCameraPosition(Vec3(80,50,60));
 		pRenderer->SetCameraTarget(Vec3(-70,30,60));
 
 		// Load textures.
@@ -134,8 +133,8 @@ namespace GameEngine
 		Vec3 rotationAxis = pGame->GetRenderer()->GetCameraRightVector();
 		rotationAxis[2] = -rotationAxis[2];
 
-		physics->VSetLinearVelocity(cube->GetID(), throwDirection, 250.f);
-		physics->VSetAngularVelocity(cube->GetID(), rotationAxis, 2.5f);
+		physics->VSetLinearVelocity(cube->GetID(), throwDirection, 25.f);
+		physics->VSetAngularVelocity(cube->GetID(), rotationAxis, 0.25f);
 	}
 
 	bool DemoInputHandler::CameraMoved()

@@ -9,10 +9,10 @@ namespace GameEngine
 {
 	namespace Physics
 	{
-		std::unique_ptr<IPhysicsEngine> CreatePhysicsEngine()
+		std::unique_ptr<IPhysicsEngine> CreatePhysicsEngine(float worldScale = 1.f)
 		{
 			std::unique_ptr<IPhysicsEngine> physics;
-			physics.reset(new BulletPhysics());
+			physics.reset(new BulletPhysics(worldScale));
 			if (!physics.get() || !physics->VInitEngine())
 			{
 				physics.reset();

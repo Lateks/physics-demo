@@ -4,14 +4,14 @@ namespace GameEngine
 {
 	namespace Physics
 	{
-		Vec3 btVector3_to_Vec3(const btVector3& vec)
+		Vec3 btVector3_to_Vec3(const btVector3& vec, float bulletWorldScale)
 		{
-			return Vec3(vec.x(), vec.y(), vec.z());
+			return Vec3(vec.x(), vec.y(), vec.z()) / bulletWorldScale;
 		}
 
-		btVector3 Vec3_to_btVector3(const Vec3& vec)
+		btVector3 Vec3_to_btVector3(const Vec3& vec, float bulletWorldScale)
 		{
-			return btVector3(vec.x(), vec.y(), vec.z());
+			return btVector3(vec.x(), vec.y(), vec.z()) * bulletWorldScale;
 		}
 
 		btVector3 Vec4_to_btVector3(const Vec4& vec)

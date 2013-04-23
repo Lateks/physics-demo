@@ -28,7 +28,7 @@ namespace GameEngine
 {
 	namespace Physics
 	{
-		BulletPhysics::BulletPhysics() : m_pData(new BulletPhysicsData()) { }
+		BulletPhysics::BulletPhysics(float worldScale) : m_pData(new BulletPhysicsData(worldScale)) { }
 
 		BulletPhysics::~BulletPhysics()
 		{
@@ -56,7 +56,7 @@ namespace GameEngine
 
 				const btRigidBody *body = pObject->GetRigidBodies()[0];
 				const Quaternion rot = btQuaternion_to_Quaternion(body->getOrientation());
-				const Vec3 pos = btVector3_to_Vec3(body->getCenterOfMassPosition());
+				const Vec3 pos = btVector3_to_Vec3(body->getCenterOfMassPosition(), m_pData->m_worldScaleConst);
 
 				WeakActorPtr pWeakActor = game->GetActor(id);
 				if (!pWeakActor.expired())
@@ -102,13 +102,16 @@ namespace GameEngine
 				return;
 			StrongActorPtr pStrongActor(pActor);
 
-			btSphereShape * const collisionShape = new btSphereShape(radius);
+			float btRadius = m_pData->m_worldScaleConst * radius;
+			btSphereShape * const collisionShape = new btSphereShape(btRadius);
 
 			float matDensity = m_pData->m_physicsMaterialData->LookupDensity(density);
-			const float sphereVolume = (4.f/3.f) * 3.14159f * radius * radius * radius;
+			const float sphereVolume = (4.f/3.f) * 3.14159f * btRadius * btRadius * btRadius;
 			const float mass = sphereVolume * matDensity;
 
-			m_pData->AddShape(pStrongActor, collisionShape, mass, material);
+			std::shared_ptr<BulletPhysicsObject> pObject =
+				m_pData->AddShape(pStrongActor, collisionShape, mass, material);
+			pObject->GetRigidBodies()[0]->setRollingFriction(0.8f);
 		}
 
 		void BulletPhysics::VAddBox(const Vec3& dimensions, WeakActorPtr pActor,
@@ -118,11 +121,11 @@ namespace GameEngine
 				return;
 			StrongActorPtr pStrongActor(pActor);
 
-			Vec3 boxHalfExtents = 0.5f * dimensions;
-			btBoxShape * const boxShape = new btBoxShape(Vec3_to_btVector3(boxHalfExtents));
+			btVector3 btDimensions = Vec3_to_btVector3(dimensions, m_pData->m_worldScaleConst);
+			btBoxShape * const boxShape = new btBoxShape(0.5f * btDimensions);
 
 			float matDensity = m_pData->m_physicsMaterialData->LookupDensity(density);
-			const float boxVolume = dimensions.x() * dimensions.y() * dimensions.z();
+			const float boxVolume = btDimensions.x() * btDimensions.y() * btDimensions.z();
 			const float mass = boxVolume * matDensity;
 
 			m_pData->AddShape(pStrongActor, boxShape, mass, material);
@@ -138,7 +141,8 @@ namespace GameEngine
 			btConvexHullShape * const convexShape = new btConvexHullShape();
 
 			std::for_each(vertices.begin(), vertices.end(),
-				[&convexShape] (Vec3& vertex) { convexShape->addPoint(Vec3_to_btVector3(vertex)); });
+				[&convexShape, this] (Vec3& vertex) { convexShape->addPoint(
+				Vec3_to_btVector3(vertex, this->m_pData->m_worldScaleConst)); });
 
 			// Approximate mass using an axis-aligned bounding box.
 			btVector3 aabbMin, aabbMax;
@@ -160,11 +164,14 @@ namespace GameEngine
 
 			btConvexHullShape* convexShape = new btConvexHullShape();
 			std::for_each(vertices.begin(), vertices.end(),
-				[&convexShape] (Vec3& vertex) { convexShape->addPoint(Vec3_to_btVector3(vertex)); });
+				[&convexShape, this] (Vec3& vertex) { convexShape->addPoint(
+				Vec3_to_btVector3(vertex, this->m_pData->m_worldScaleConst)); });
+			float scaling = m_pData->m_worldScaleConst;
+
 			m_pData->AddStaticColliderShape(pStrongActor, convexShape);
 		}
 
-		void BulletPhysics::VAddConvexStaticColliderMesh(std::vector<Vec4>& planeEquations, WeakActorPtr pActor)
+		void BulletPhysics::VAddConvexStaticColliderMesh(std::vector<Vec4>& planeEquations, WeakActorPtr pActor, bool scale)
 		{
 			if (pActor.expired())
 				return;
@@ -178,6 +185,11 @@ namespace GameEngine
 			btGeometryUtil::getVerticesFromPlaneEquations(btPlaneEquations, vertices);
 
 			btConvexHullShape *convexShape = new btConvexHullShape(&(vertices[0].getX()), vertices.size());
+			if (scale)
+			{
+				float scaling = m_pData->m_worldScaleConst;
+				convexShape->setLocalScaling(btVector3(scaling, scaling, scaling));
+			}
 			m_pData->AddStaticColliderShape(pStrongActor, convexShape);
 		}
 
@@ -190,8 +202,8 @@ namespace GameEngine
 			bspConv.convertBsp(bspLoad,
 				[this, pActor] (std::vector<Vec4> planeEquations)
 			{
-				this->VAddConvexStaticColliderMesh(planeEquations, pActor);
-			});
+				this->VAddConvexStaticColliderMesh(planeEquations, pActor, false);
+			}, m_pData->m_worldScaleConst);
 		}
 
 		void BulletPhysics::VCreateTrigger(WeakActorPtr pActor, const float dim)
@@ -205,7 +217,7 @@ namespace GameEngine
 			// adding immovable colliders or triggers of any shape is in
 			// BulletPhysicsData::AddStaticColliderShape.
 			btBoxShape * const boxShape =
-				new btBoxShape(Vec3_to_btVector3(Vec3(dim, dim, dim)));
+				new btBoxShape(Vec3_to_btVector3(Vec3(dim, dim, dim), m_pData->m_worldScaleConst));
 			m_pData->AddStaticColliderShape(pStrongActor, boxShape, true);
 		}
 		
@@ -292,8 +304,8 @@ namespace GameEngine
 
 		ActorID BulletPhysics::GetClosestActorHit(Vec3& rayFrom, Vec3& rayTo, Vec3& pickPosition) const
 		{
-			btVector3 btRayFrom = Vec3_to_btVector3(rayFrom);
-			btVector3 btRayTo = Vec3_to_btVector3(rayTo);
+			btVector3 btRayFrom = Vec3_to_btVector3(rayFrom, m_pData->m_worldScaleConst);
+			btVector3 btRayTo = Vec3_to_btVector3(rayTo, m_pData->m_worldScaleConst);
 			btCollisionWorld::ClosestRayResultCallback rayCallback(btRayFrom, btRayTo);
 
 			m_pData->m_pDynamicsWorld->rayTest(btRayFrom, btRayTo, rayCallback);
@@ -305,7 +317,7 @@ namespace GameEngine
 				if (pBody && !pBody->isStaticOrKinematicObject())
 				{
 					actorHit = m_pData->m_rigidBodyToActorMap[pBody];
-					pickPosition = btVector3_to_Vec3(rayCallback.m_hitPointWorld);
+					pickPosition = btVector3_to_Vec3(rayCallback.m_hitPointWorld, m_pData->m_worldScaleConst);
 				}
 			}
 			return actorHit;
@@ -322,8 +334,8 @@ namespace GameEngine
 			if (!pObject.get() || pObject->IsStatic() || pObject->IsKinematic())
 				return 0;
 
-			btVector3 btPickPosition = Vec3_to_btVector3(pickPosition);
-			btVector3 btCameraPosition = Vec3_to_btVector3(cameraPosition);
+			btVector3 btPickPosition = Vec3_to_btVector3(pickPosition, m_pData->m_worldScaleConst);
+			btVector3 btCameraPosition = Vec3_to_btVector3(cameraPosition, m_pData->m_worldScaleConst);
 			float pickDistance = (btPickPosition - btCameraPosition).length();
 
 			btRigidBody *pBody = pObject->GetRigidBodies()[0];
@@ -423,8 +435,8 @@ namespace GameEngine
 				btGeneric6DofConstraint* pDof6PickConstraint = static_cast<btGeneric6DofConstraint*>(btConstraint);
 				if (pDof6PickConstraint)
 				{
-					btVector3 btRayFrom = Vec3_to_btVector3(rayFrom);
-					btVector3 btRayTo = Vec3_to_btVector3(rayTo);
+					btVector3 btRayFrom = Vec3_to_btVector3(rayFrom, m_pData->m_worldScaleConst);
+					btVector3 btRayTo = Vec3_to_btVector3(rayTo, m_pData->m_worldScaleConst);
 
 					btVector3 newPivot;
 					btVector3 dir = btRayTo - btRayFrom;

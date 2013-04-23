@@ -296,7 +296,7 @@ namespace GameEngine
 					// (Can this data be parsed from the bsp file?)
 					body->setRestitution(0.2f);
 					body->setFriction(0.6f);
-					body->setRollingFriction(0.8f);
+					body->setRollingFriction(0.4f);
 				}
 
 				m_actorToBulletPhysicsObjectMap[id]->AddRigidBody(body);

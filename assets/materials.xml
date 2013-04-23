@@ -2,7 +2,7 @@
     <PhysicsMaterials>
         <PlayDough restitution="0.05" friction="0.9"/>
         <Normal restitution="0.25" friction="0.5"/>
-        <Bouncy restitution = "0.95" friction = "0.5"/>
+        <Bouncy restitution = "0.95" friction = "0.7"/>
         <Slippery restitution = "0.25" friction = "0.0"/>
     </PhysicsMaterials>
 

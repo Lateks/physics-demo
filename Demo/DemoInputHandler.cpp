@@ -118,8 +118,10 @@ namespace GameEngine
 		if (LeftMousePressed())
 		{
 			Vec3 pickPoint;
+			Vec3 rayFrom = m_currentCameraState.cameraPos;
+			Vec3 rayTo = rayFrom + (m_currentCameraState.cameraTarget-rayFrom).normalized() * 500.f;
 			ActorID pickedActorId = pGame->GetPhysicsEngine()->GetClosestActorHit(
-				m_currentCameraState.cameraPos, m_currentCameraState.cameraTarget, pickPoint);
+				rayFrom, rayTo, pickPoint);
 			std::cerr << pickedActorId << std::endl;
 			if (pickedActorId != 0)
 			{
@@ -175,7 +177,7 @@ namespace GameEngine
 		Vec3 rotationAxis = pGame->GetRenderer()->GetCameraRightVector();
 		rotationAxis[2] = -rotationAxis[2];
 
-		physics->VSetLinearVelocity(cube->GetID(), throwDirection, 25.f);
+		physics->VSetLinearVelocity(cube->GetID(), throwDirection, 10.f);
 		physics->VSetAngularVelocity(cube->GetID(), rotationAxis, 2.5f);
 	}
 

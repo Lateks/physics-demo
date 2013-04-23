@@ -112,7 +112,7 @@ namespace GameEngine
 			std::shared_ptr<BulletPhysicsObject> pObject =
 				m_pData->AddShape(pStrongActor, collisionShape, mass, material);
 			pObject->GetRigidBodies()[0]->setRollingFriction(
-				m_pData->m_physicsMaterialData->LookupMaterial(material).m_friction);
+				m_pData->m_physicsMaterialData->LookupMaterial(material).m_friction / 2.f);
 		}
 
 		void BulletPhysics::VAddBox(const Vec3& dimensions, WeakActorPtr pActor,
@@ -402,7 +402,7 @@ namespace GameEngine
 			// pushed against e.g. a wall. Store the current angular
 			// factor to restore it later. Set angular velocity to zero
 			// to stop ongoing rotations at the moment of picking.
-			pConstraint->SetOriginalAngularFactor(btVector3_to_Vec3(pBody->getAngularFactor()));
+			pConstraint->SetOriginalAngularFactor(pBody->getAngularFactor());
 			pBody->setAngularFactor(0);
 			pBody->setAngularVelocity(btVector3(0, 0, 0));
 
@@ -470,7 +470,7 @@ namespace GameEngine
 			if (pConstraint->GetConstraintType() == BulletPhysicsConstraint::ConstraintType::PICK_CONSTRAINT)
 			{
 				BulletPickConstraint *pPickConstraint = dynamic_cast<BulletPickConstraint*>(pConstraint.get());
-				pBody->setAngularFactor(Vec3_to_btVector3(pPickConstraint->GetOriginalAngularFactor()));
+				pBody->setAngularFactor(pPickConstraint->GetOriginalAngularFactor());
 			}
 
 			pBody->forceActivationState(ACTIVE_TAG);

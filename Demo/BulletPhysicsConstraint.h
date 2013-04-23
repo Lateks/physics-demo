@@ -81,11 +81,11 @@ namespace GameEngine
 			{
 				m_pickDistance = pickDistance;
 			}
-			Vec3 GetOriginalAngularFactor()
+			btVector3 GetOriginalAngularFactor()
 			{
 				return m_angularFactor;
 			}
-			void SetOriginalAngularFactor(Vec3& angularFactor)
+			void SetOriginalAngularFactor(const btVector3& angularFactor)
 			{
 				m_angularFactor = angularFactor;
 			}
@@ -98,7 +98,7 @@ namespace GameEngine
 			BulletPickConstraint(BulletPickConstraint& other);
 			BulletPickConstraint& operator=(BulletPickConstraint& other);
 
-			Vec3 m_angularFactor;
+			btVector3 m_angularFactor;
 			float m_pickDistance;
 			const static ConstraintType constraintType = ConstraintType::PICK_CONSTRAINT;
 		};

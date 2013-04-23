@@ -297,6 +297,8 @@ namespace GameEngine
 					body->setRestitution(0.2f);
 					body->setFriction(0.6f);
 					body->setRollingFriction(0.4f);
+					body->setAnisotropicFriction(shape->getAnisotropicRollingFrictionDirection(),
+						btCollisionObject::CF_ANISOTROPIC_ROLLING_FRICTION);
 				}
 
 				m_actorToBulletPhysicsObjectMap[id]->AddRigidBody(body);

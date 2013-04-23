@@ -111,8 +111,11 @@ namespace GameEngine
 
 			std::shared_ptr<BulletPhysicsObject> pObject =
 				m_pData->AddShape(pStrongActor, collisionShape, mass, material);
-			pObject->GetRigidBodies()[0]->setRollingFriction(
+			auto pBody = pObject->GetRigidBodies()[0];
+			pBody->setRollingFriction(
 				m_pData->m_physicsMaterialData->LookupMaterial(material).m_friction / 2.f);
+			pBody->setAnisotropicFriction(collisionShape->getAnisotropicRollingFrictionDirection(),
+				btCollisionObject::CF_ANISOTROPIC_ROLLING_FRICTION);
 		}
 
 		void BulletPhysics::VAddBox(const Vec3& dimensions, WeakActorPtr pActor,

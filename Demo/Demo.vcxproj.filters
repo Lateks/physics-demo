@@ -75,9 +75,6 @@
     <ClInclude Include="MessagingWindow.h">
       <Filter>Header Files\Display</Filter>
     </ClInclude>
-    <ClInclude Include="MessagingWindowImpl.h">
-      <Filter>Header Files\Display</Filter>
-    </ClInclude>
     <ClInclude Include="GameActor.h">
       <Filter>Header Files\GameObject</Filter>
     </ClInclude>
@@ -189,13 +186,13 @@
     <ClInclude Include="BulletPhysicsConstraint.h">
       <Filter>Header Files\Physics\BulletPhysics</Filter>
     </ClInclude>
+    <ClInclude Include="IrrlichtMessagingWindow.h">
+      <Filter>Header Files\Display</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Demo.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MessagingWindow.cpp">
-      <Filter>Source Files\Display</Filter>
     </ClCompile>
     <ClCompile Include="GameActor.cpp">
       <Filter>Source Files\GameObject</Filter>
@@ -262,6 +259,9 @@
     </ClCompile>
     <ClCompile Include="BulletPhysicsData.cpp">
       <Filter>Source Files\Physics\BulletPhysics</Filter>
+    </ClCompile>
+    <ClCompile Include="IrrlichtMessagingWindow.cpp">
+      <Filter>Source Files\Display</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

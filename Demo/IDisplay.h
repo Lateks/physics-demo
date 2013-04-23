@@ -35,6 +35,8 @@ namespace GameEngine
 				DRIVER_TYPE driverType, CAMERA_TYPE cameraType) = 0;
 			virtual void DrawScene() = 0;
 
+			virtual std::shared_ptr<MessagingWindow> GetMessageWindow() = 0;
+
 			virtual void SetCameraPosition(Vec3& newPosition) = 0;
 			virtual void SetCameraTarget(Vec3& newTarget) = 0;
 			virtual void SetCameraProjection(Mat4& newProjection) = 0;

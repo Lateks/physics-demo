@@ -1,6 +1,7 @@
 #include "DemoInputHandler.h"
 #include "WorldTransformComponent.h"
 #include "IPhysicsEngine.h"
+#include "MessagingWindow.h"
 #include "IEventManager.h"
 #include "Events.h"
 #include "GameData.h"
@@ -31,6 +32,10 @@ namespace GameEngine
 		Display::IDisplay *pRenderer = game->GetRenderer();
 		Physics::IPhysicsEngine *pPhysics = game->GetPhysicsEngine();
 		Events::IEventManager *pEventMgr = game->GetEventManager();
+		std::shared_ptr<Display::MessagingWindow> pMessages = pRenderer->GetMessageWindow();
+		pMessages->SetFont("..\\assets\\fontlucida.png");
+		pMessages->SetVisible(true);
+		pMessages->SetWidth(600);
 
 		// Create an actor for the world map to be able to refer to the associated
 		// rigid bodies. Note: now that the map itself has an actor and a
@@ -67,23 +72,32 @@ namespace GameEngine
 		game->AddActor(trigger);
 		pRenderer->AddCubeSceneNode(125.f, trigger, 0);
 		pPhysics->VCreateTrigger(trigger, 125.f);
+
+		// Create an event handler to print out messages when a trigger event is detected.
 		Events::EventHandlerPtr eventPrinter(new std::function<void(Events::EventPtr)>
-			([] (Events::EventPtr event)
+			([pMessages, this] (Events::EventPtr event)
 		{
-			Events::TriggerEvent *pEvent = dynamic_cast<Events::TriggerEvent*>(event.get());
-			std::cout << "Actor " << pEvent->GetActorId();
-			if (event->GetEventType() == Events::EventType::ENTER_TRIGGER)
-			{
-				 std::cout << " entered the trigger.";
-			}
-			else if (event->GetEventType() == Events::EventType::EXIT_TRIGGER)
-			{
-				std::cout << " exited the trigger.";
-			}
-			std::cout << std::endl;
+			this->PrintTriggerEvent(pMessages, event);
 		}));
 		pEventMgr->RegisterHandler(Events::EventType::ENTER_TRIGGER, eventPrinter);
 		pEventMgr->RegisterHandler(Events::EventType::EXIT_TRIGGER, eventPrinter);
+	}
+
+	void DemoInputHandler::PrintTriggerEvent(std::shared_ptr<Display::MessagingWindow> pMessages,
+		Events::EventPtr event)
+	{
+		Events::TriggerEvent *pEvent = dynamic_cast<Events::TriggerEvent*>(event.get());
+		std::wstringstream message;
+		message << L"Actor " << pEvent->GetActorId();
+		if (event->GetEventType() == Events::EventType::ENTER_TRIGGER)
+		{
+				message << L" entered the trigger.";
+		}
+		else if (event->GetEventType() == Events::EventType::EXIT_TRIGGER)
+		{
+			message << L" exited the trigger.";
+		}
+		pMessages->AddMessage(message.str());
 	}
 
 	void DemoInputHandler::HandleInputs()

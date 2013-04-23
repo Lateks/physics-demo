@@ -2,12 +2,12 @@
 #include "IrrlichtDisplayImpl.h"
 #include "IrrlichtInputState.h"
 #include "IrrlichtConversions.h"
+#include "IrrlichtMessagingWindow.h"
 #include "GameActor.h"
 #include "WorldTransformComponent.h"
 #include "GameData.h"
 #include "EventManager.h"
 #include "Events.h"
-#include "MessagingWindow.h"
 #include "Vec3.h"
 #include "Mat4.h"
 #include "Vec4.h"
@@ -79,6 +79,7 @@ namespace GameEngine
 			m_pData->m_pDebugSmgr->drawAll();
 
 			m_pData->m_pGui->drawAll();
+			m_pData->m_messageWindow->Render();
 
 			m_pData->m_pDriver->endScene();
 		}
@@ -114,7 +115,8 @@ namespace GameEngine
 			m_pData->m_pGui = m_pData->m_pDevice->getGUIEnvironment();
 			m_pData->m_pDebugSmgr = m_pData->m_pSmgr->createNewSceneManager(false);
 
-			irr::gui::IGUIFont *font = m_pData->m_pGui->getFont("..\\assets\\fontlucida.png");
+			m_pData->m_messageWindow.reset(new IrrlichtMessagingWindow(10, m_pData->m_pGui));
+			m_pData->m_messageWindow->SetPosition(10, 10);
 
 			switch (cameraType)
 			{
@@ -129,6 +131,11 @@ namespace GameEngine
 			m_pData->m_pDevice->getCursorControl()->setVisible(false);
 
 			return true;
+		}
+
+		std::shared_ptr<MessagingWindow> IrrlichtDisplay::GetMessageWindow()
+		{
+			return m_pData->m_messageWindow;
 		}
 
 		IrrlichtDisplay::~IrrlichtDisplay()

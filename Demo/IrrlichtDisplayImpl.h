@@ -33,6 +33,7 @@ namespace GameEngine
 			Events::EventHandlerPtr m_pMoveEventHandler;
 
 			std::shared_ptr<IrrlichtInputState> m_pInputState;
+			std::shared_ptr<MessagingWindow> m_messageWindow;
 
 			void AddSceneNode(WeakActorPtr pActor, irr::scene::ISceneNode *pNode, unsigned int texture);
 			void UpdateActorPosition(Events::EventPtr pEvent);

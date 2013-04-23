@@ -2,6 +2,7 @@
 #include "GameActor.h"
 #include "IDisplay.h"
 #include "IPhysicsEngine.h"
+#include "IEventManager.h"
 #include "ITimer.h"
 #include <algorithm>
 #include <map>

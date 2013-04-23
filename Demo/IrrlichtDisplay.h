@@ -27,6 +27,8 @@ namespace GameEngine
 				DRIVER_TYPE driverType, CAMERA_TYPE cameraType) override;
 			virtual void DrawScene() override;
 
+			virtual std::shared_ptr<MessagingWindow> GetMessageWindow() override;
+
 			virtual void SetCameraPosition(Vec3& newPosition) override;
 			virtual void SetCameraTarget(Vec3& newTarget) override;
 			virtual void SetCameraProjection(Mat4& newProjection) override;

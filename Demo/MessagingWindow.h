@@ -3,7 +3,6 @@
 
 #include "enginefwd.h"
 #include <string>
-#include <irrlicht.h>
 
 namespace GameEngine
 {
@@ -12,14 +11,13 @@ namespace GameEngine
 		class MessagingWindow
 		{
 		public:
-			MessagingWindow(unsigned int width, unsigned int height);
-			~MessagingWindow();
-			void AddMessage(const std::wstring& message);
-			void SetPosition(unsigned int minX, unsigned int minY);
-			void SetFont(const std::string& fontFileName);
-			void Render();
-		private:
-			MessagingWindowImpl *pImpl;
+			~MessagingWindow() { };
+			virtual void AddMessage(const std::wstring& message) = 0;
+			virtual void SetPosition(unsigned int minX, unsigned int minY) = 0;
+			virtual void SetWidth(unsigned int width) = 0;
+			virtual void SetFont(const std::string& fontFileName) = 0;
+			virtual void SetVisible(bool visible) = 0;
+			virtual void Render() const = 0;
 		};
 	}
 }

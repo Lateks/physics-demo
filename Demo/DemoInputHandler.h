@@ -4,6 +4,7 @@
 #include "enginefwd.h"
 #include "IGameInputHandler.h"
 #include "IInputState.h"
+#include "IEventManager.h"
 #include "Vec3.h"
 
 namespace GameEngine
@@ -40,6 +41,7 @@ namespace GameEngine
 		bool RightMouseDown();
 		bool RightMouseReleased();
 
+		void PrintTriggerEvent(std::shared_ptr<Display::MessagingWindow> pMessages, Events::EventPtr event);
 		void ThrowCube(Vec3& throwTowards);
 	};
 }

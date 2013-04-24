@@ -120,19 +120,19 @@ namespace GameEngine
 			Vec3 pickPoint;
 			Vec3 rayFrom = m_currentCameraState.cameraPos;
 			Vec3 rayTo = rayFrom + (m_currentCameraState.cameraTarget-rayFrom).normalized() * 500.f;
-			ActorID pickedActorId = pGame->GetPhysicsEngine()->GetClosestActorHit(
+			ActorID pickedActorId = pGame->GetPhysicsEngine()->VGetClosestActorHit(
 				rayFrom, rayTo, pickPoint);
 			std::cerr << pickedActorId << std::endl;
 			if (pickedActorId != 0)
 			{
-				m_pickConstraintId = pPhysics->AddPickConstraint(pickedActorId, pickPoint,
+				m_pickConstraintId = pPhysics->VAddPickConstraint(pickedActorId, pickPoint,
 					m_currentCameraState.cameraPos);
 				m_pickedActor = pickedActorId;
 			}
 		}
 		else if (LeftMouseReleased() && m_pickedActor != 0)
 		{
-			pPhysics->RemoveConstraint(m_pickedActor, m_pickConstraintId);
+			pPhysics->VRemoveConstraint(m_pickedActor, m_pickConstraintId);
 			m_pickedActor = 0;
 			m_pickConstraintId = 0;
 		}

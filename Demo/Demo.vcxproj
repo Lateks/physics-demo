@@ -94,7 +94,6 @@
     <ClInclude Include="BulletDebugRenderer.h" />
     <ClInclude Include="BulletPhysics.h" />
     <ClInclude Include="BulletPhysicsConstraint.h" />
-    <ClInclude Include="BulletPhysicsData.h" />
     <ClInclude Include="BulletPhysicsObject.h" />
     <ClInclude Include="DemoInputHandler.h" />
     <ClInclude Include="enginefwd.h" />
@@ -123,7 +122,6 @@
     <ClInclude Include="PhysicsEngineFactories.h" />
     <ClInclude Include="RenderingEngineFactories.h" />
     <ClInclude Include="TimerFactories.h" />
-    <ClInclude Include="utils.h" />
     <ClInclude Include="Vec3.h" />
     <ClInclude Include="XMLPhysicsData.h" />
   </ItemGroup>
@@ -134,7 +132,6 @@
     <ClCompile Include="BulletConversions.cpp" />
     <ClCompile Include="BulletDebugRenderer.cpp" />
     <ClCompile Include="BulletPhysics.cpp" />
-    <ClCompile Include="BulletPhysicsData.cpp" />
     <ClCompile Include="BulletPhysicsObject.cpp" />
     <ClCompile Include="DemoInputHandler.cpp" />
     <ClCompile Include="EventManager.cpp" />

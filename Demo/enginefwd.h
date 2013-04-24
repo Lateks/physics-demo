@@ -23,8 +23,6 @@ namespace GameEngine
 		struct XMLPhysicsData;
 
 		class BulletPhysics;
-		struct BulletPhysicsData;
-		class BulletDebugRenderer;
 		class BulletPhysicsConstraint;
 		typedef unsigned int ConstraintID;
 	}

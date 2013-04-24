@@ -8,6 +8,8 @@ namespace GameEngine
 {
 	namespace Physics
 	{
+		struct BulletPhysicsData;
+
 		class BulletPhysics : public IPhysicsEngine
 		{
 		public:
@@ -40,16 +42,17 @@ namespace GameEngine
 
 			virtual void VSetGlobalGravity(Vec3& gravity) override;
 
-			virtual ActorID GetClosestActorHit(Vec3& rayFrom, Vec3& rayTo, Vec3& pickPosition) const override;
-			virtual ConstraintID AddPickConstraint(ActorID actorID, Vec3& pickPosition, Vec3& cameraPosition) override;
-			virtual void UpdatePickConstraint(ActorID actorId, ConstraintID constraintId, Vec3& rayFrom, Vec3& rayTo) override;
-			virtual void RemoveConstraint(ActorID actorID, unsigned int constraintId) override;
+			virtual ActorID VGetClosestActorHit(Vec3& rayFrom, Vec3& rayTo, Vec3& pickPosition) const override;
+			virtual ConstraintID VAddPickConstraint(ActorID actorID, Vec3& pickPosition, Vec3& cameraPosition) override;
+			virtual void VUpdatePickConstraint(ActorID actorId, ConstraintID constraintId, Vec3& rayFrom, Vec3& rayTo) override;
+			virtual void VRemoveConstraint(ActorID actorID, unsigned int constraintId) override;
 		private:
 			// The VS11 C++ compiler does not yet support deleting
 			// constructors, so make these private to make the class
 			// "non-copyable".
 			BulletPhysics(const BulletPhysics& other);
 			BulletPhysics& operator=(const BulletPhysics& other);
+
 			BulletPhysicsData *m_pData;
 		};
 	}

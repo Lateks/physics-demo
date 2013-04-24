@@ -90,9 +90,6 @@
     <ClInclude Include="Mat4.h">
       <Filter>Header Files\LinearAlgebra</Filter>
     </ClInclude>
-    <ClInclude Include="utils.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="XMLPhysicsData.h">
       <Filter>Header Files\Physics</Filter>
     </ClInclude>
@@ -177,9 +174,6 @@
     <ClInclude Include="BulletPhysics.h">
       <Filter>Header Files\Physics\BulletPhysics</Filter>
     </ClInclude>
-    <ClInclude Include="BulletPhysicsData.h">
-      <Filter>Header Files\Physics\BulletPhysics</Filter>
-    </ClInclude>
     <ClInclude Include="BulletPhysicsObject.h">
       <Filter>Header Files\Physics\BulletPhysics</Filter>
     </ClInclude>
@@ -255,9 +249,6 @@
       <Filter>Source Files\Physics\BulletPhysics</Filter>
     </ClCompile>
     <ClCompile Include="BulletPhysics.cpp">
-      <Filter>Source Files\Physics\BulletPhysics</Filter>
-    </ClCompile>
-    <ClCompile Include="BulletPhysicsData.cpp">
       <Filter>Source Files\Physics\BulletPhysics</Filter>
     </ClCompile>
     <ClCompile Include="IrrlichtMessagingWindow.cpp">

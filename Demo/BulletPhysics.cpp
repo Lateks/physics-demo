@@ -1,5 +1,4 @@
 #include "BulletPhysics.h"
-#include "BulletPhysicsData.h"
 #include "BulletPhysicsObject.h"
 #include "BulletPhysicsConstraint.h"
 #include "GameActor.h"
@@ -10,7 +9,6 @@
 #include "Events.h"
 #include "BulletConversions.h"
 #include "BSPConverter.h"
-#include "utils.h"
 
 #include <btBulletCollisionCommon.h>
 #include <btBulletDynamicsCommon.h>
@@ -20,14 +18,70 @@
 #include <memory>
 #include <algorithm>
 #include <cmath>
+#include <set>
 
 using std::shared_ptr;
 using std::weak_ptr;
+using std::unique_ptr;
 
 namespace GameEngine
 {
 	namespace Physics
 	{
+		typedef std::pair<const btRigidBody *, const btRigidBody *> CollisionPair;
+		typedef std::set<CollisionPair> CollisionPairs;
+
+		struct BulletPhysicsData
+		{
+			// CONSTRUCTORS / DESTRUCTORS:
+			BulletPhysicsData(float worldScale)
+				: m_worldScaleConst(worldScale) { }
+			virtual ~BulletPhysicsData();
+
+			// MEMBERS:
+			float m_worldScaleConst;
+
+			// Bullet-related:
+			unique_ptr<btDynamicsWorld> m_pDynamicsWorld;                   // - manages the other required components
+			unique_ptr<btBroadphaseInterface> m_pCollisionBroadPhase;       // - manages the first (rough) phase of collision detection
+			unique_ptr<btCollisionDispatcher> m_pCollisionDispatcher;       // - manages the more accurate second phase of collision detection
+			unique_ptr<btConstraintSolver> m_pConstraintSolver;             // - manages objects' freedom of motion
+			unique_ptr<btDefaultCollisionConfiguration> m_pCollisionConfig; // - memory usage configuration
+
+			unique_ptr<XMLPhysicsData> m_physicsMaterialData;
+
+			/* Store the rigid bodies related to game actors.
+			 * Several rigid bodies can be related to a single actor, but only
+			 * a single actor may be related to any rigid body. At the moment
+			 * only "static" actors (basically map elements) can own several
+			 * rigid bodies.
+			 */
+			std::map<ActorID, std::shared_ptr<BulletPhysicsObject>> m_actorToBulletPhysicsObjectMap;
+			std::map<const btRigidBody*, ActorID> m_rigidBodyToActorMap;
+
+			std::shared_ptr<BulletPhysicsObject> GetPhysicsObject(ActorID id) const;
+			ActorID GetActorID(const btRigidBody *pBody) const;
+
+			CollisionPairs m_previousTickCollisions;
+
+			// METHODS:
+			virtual bool VInitializeSystems();
+			std::shared_ptr<BulletPhysicsObject> AddShape(StrongActorPtr pActor, btCollisionShape *shape,
+				float mass, const std::string& physicsMaterial);
+			std::shared_ptr<BulletPhysicsObject> AddStaticColliderShape(StrongActorPtr pActor,
+				btCollisionShape *shape, bool trigger = false);
+			void SendNewCollisionEvent(const btPersistentManifold * manifold,
+			const btRigidBody * pBody1, const btRigidBody * pBody2);
+			void SendSeparationEvent(const btRigidBody * pBody1, const btRigidBody * pBody2);
+			void RemoveCollisionObject(btCollisionObject *obj);
+			void HandleCallback();
+			void SetupSystems();
+			void CleanUpRigidBodies();
+			void HandleNewCollisions(CollisionPairs& currentTickCollisions);
+			btMotionState *GetMotionStateFrom(std::shared_ptr<WorldTransformComponent> transform);
+			static void BulletInternalTickCallback(btDynamicsWorld * const pWorld, const btScalar timeStep);
+		};
+
 		BulletPhysics::BulletPhysics(float worldScale) : m_pData(new BulletPhysicsData(worldScale)) { }
 
 		BulletPhysics::~BulletPhysics()
@@ -39,6 +93,8 @@ namespace GameEngine
 		{
 			return m_pData->VInitializeSystems();
 		}
+
+		void UpdateWorldTransform(StrongActorPtr, const Vec3&, const Quaternion& rot);
 
 		// Update the locations of all actors involved in the physics
 		// simulation and signal changes in location with events.
@@ -61,31 +117,36 @@ namespace GameEngine
 				WeakActorPtr pWeakActor = game->GetActor(id);
 				if (!pWeakActor.expired())
 				{
-					StrongActorPtr pActor(pWeakActor);
-					weak_ptr<WorldTransformComponent> pWeakWorldTrans =
-						pActor->GetWorldTransform();
+					UpdateWorldTransform(StrongActorPtr(pWeakActor), pos, rot);
+				}
+			}
+		}
 
-					if (!pWeakWorldTrans.expired())
-					{
-						bool changed = false;
-						shared_ptr<WorldTransformComponent> pWorldTrans(pWeakWorldTrans);
-						if (pWorldTrans->GetRotation() != rot)
-						{
-							pWorldTrans->SetRotation(rot);
-							changed = true;
-						}
-						if (pWorldTrans->GetPosition() != pos)
-						{
-							pWorldTrans->SetPosition(pos);
-							changed = true;
-						}
-						if (changed)
-						{
-							Events::EventPtr event;
-							event.reset(new Events::ActorMoveEvent(game->CurrentTimeSec(), id));
-							game->GetEventManager()->QueueEvent(event);
-						}
-					}
+		void UpdateWorldTransform(StrongActorPtr pActor, const Vec3& pos, const Quaternion& rot)
+		{
+			GameData *game = GameData::getInstance();
+			weak_ptr<WorldTransformComponent> pWeakWorldTrans =
+				pActor->GetWorldTransform();
+
+			if (!pWeakWorldTrans.expired())
+			{
+				bool changed = false;
+				shared_ptr<WorldTransformComponent> pWorldTrans(pWeakWorldTrans);
+				if (pWorldTrans->GetRotation() != rot)
+				{
+					pWorldTrans->SetRotation(rot);
+					changed = true;
+				}
+				if (pWorldTrans->GetPosition() != pos)
+				{
+					pWorldTrans->SetPosition(pos);
+					changed = true;
+				}
+				if (changed)
+				{
+					Events::EventPtr event;
+					event.reset(new Events::ActorMoveEvent(game->CurrentTimeSec(), pActor->GetID()));
+					game->GetEventManager()->QueueEvent(event);
 				}
 			}
 		}
@@ -112,6 +173,7 @@ namespace GameEngine
 			std::shared_ptr<BulletPhysicsObject> pObject =
 				m_pData->AddShape(pStrongActor, collisionShape, mass, material);
 			auto pBody = pObject->GetRigidBodies()[0];
+
 			pBody->setRollingFriction(
 				m_pData->m_physicsMaterialData->LookupMaterial(material).m_friction / 2.f);
 			pBody->setAnisotropicFriction(collisionShape->getAnisotropicRollingFrictionDirection(),
@@ -160,6 +222,7 @@ namespace GameEngine
 			m_pData->AddShape(pStrongActor, convexShape, mass, material);
 		}
 
+		// Builds a convex static collision object from the convex hull of a set of vertices.
 		void BulletPhysics::VAddConvexStaticColliderMesh(std::vector<Vec3>& vertices, WeakActorPtr pActor)
 		{
 			if (pActor.expired())
@@ -175,6 +238,7 @@ namespace GameEngine
 			m_pData->AddStaticColliderShape(pStrongActor, convexShape);
 		}
 
+		// Builds a convex static collision object from the convex hull defined by a set of plane equations.
 		void BulletPhysics::VAddConvexStaticColliderMesh(std::vector<Vec4>& planeEquations, WeakActorPtr pActor, bool scale)
 		{
 			if (pActor.expired())
@@ -307,7 +371,7 @@ namespace GameEngine
 			m_pData->m_pDynamicsWorld->setGravity(Vec3_to_btVector3(gravity));
 		}
 
-		ActorID BulletPhysics::GetClosestActorHit(Vec3& rayFrom, Vec3& rayTo, Vec3& pickPosition) const
+		ActorID BulletPhysics::VGetClosestActorHit(Vec3& rayFrom, Vec3& rayTo, Vec3& pickPosition) const
 		{
 			btVector3 btRayFrom = Vec3_to_btVector3(rayFrom, m_pData->m_worldScaleConst);
 			btVector3 btRayTo = Vec3_to_btVector3(rayTo, m_pData->m_worldScaleConst);
@@ -333,7 +397,7 @@ namespace GameEngine
 		 * picking up items. In general, a physics SDK wrapper should possibly
 		 * define more generic methods for setting up constraints (?).
 		 */
-		unsigned int BulletPhysics::AddPickConstraint(ActorID actorId, Vec3& pickPosition, Vec3& cameraPosition)
+		unsigned int BulletPhysics::VAddPickConstraint(ActorID actorId, Vec3& pickPosition, Vec3& cameraPosition)
 		{
 			std::shared_ptr<BulletPhysicsObject> pObject = m_pData->GetPhysicsObject(actorId);
 			if (!pObject.get() || pObject->IsStatic() || pObject->IsKinematic())
@@ -387,7 +451,7 @@ namespace GameEngine
 				Events::CameraMoveEvent *pMoveEvent =
 					dynamic_cast<Events::CameraMoveEvent*>(pEvent.get());
 
-				this->UpdatePickConstraint(actorId, pickConstraintId,
+				this->VUpdatePickConstraint(actorId, pickConstraintId,
 					pMoveEvent->GetRayFrom(), pMoveEvent->GetRayTo());
 			})
 			);
@@ -420,7 +484,7 @@ namespace GameEngine
 			return pickConstraintId;
 		}
 
-		void BulletPhysics::UpdatePickConstraint(ActorID actorId, ConstraintID constraintId, Vec3& rayFrom, Vec3& rayTo)
+		void BulletPhysics::VUpdatePickConstraint(ActorID actorId, ConstraintID constraintId, Vec3& rayFrom, Vec3& rayTo)
 		{
 			std::shared_ptr<BulletPhysicsObject> pObject = m_pData->GetPhysicsObject(actorId);
 			if (!pObject.get() || pObject->GetNumBodies() != 1 || pObject->GetNumConstraints() == 0)
@@ -456,7 +520,7 @@ namespace GameEngine
 			}
 		}
 
-		void BulletPhysics::RemoveConstraint(ActorID actorId, unsigned int constraintId)
+		void BulletPhysics::VRemoveConstraint(ActorID actorId, unsigned int constraintId)
 		{
 			std::shared_ptr<BulletPhysicsObject> pObject = m_pData->GetPhysicsObject(actorId);
 			if (!pObject.get() || pObject->GetNumBodies() != 1 || pObject->GetNumConstraints() == 0)
@@ -487,6 +551,348 @@ namespace GameEngine
 				pEventMgr->DeregisterHandler(pConstraint->GetHandlerEventType(), pConstraint->GetConstraintUpdater());
 			}
 			pObject->RemoveConstraint(constraintId);
+		}
+
+		std::shared_ptr<BulletPhysicsObject> BulletPhysicsData::GetPhysicsObject(ActorID id) const
+		{
+			auto it = m_actorToBulletPhysicsObjectMap.find(id);
+			if (it != m_actorToBulletPhysicsObjectMap.end())
+				return it->second;
+			return std::shared_ptr<BulletPhysicsObject>();
+		}
+
+		ActorID BulletPhysicsData::GetActorID(const btRigidBody *pBody) const
+		{
+			auto it = m_rigidBodyToActorMap.find(pBody);
+			assert(it != m_rigidBodyToActorMap.end());
+			if (it != m_rigidBodyToActorMap.end())
+				return it->second;
+			return 0;
+		}
+
+		bool BulletPhysicsData::VInitializeSystems()
+		{
+			m_physicsMaterialData.reset(new XMLPhysicsData());
+			m_physicsMaterialData->LoadDataFromXML("..\\assets\\materials.xml");
+
+			SetupSystems();
+
+			if (!m_pCollisionConfig || !m_pCollisionDispatcher ||
+				!m_pCollisionBroadPhase || !m_pConstraintSolver ||
+				!m_pDynamicsWorld)
+			{
+				return false;
+			}
+
+			m_pDynamicsWorld->setInternalTickCallback(BulletInternalTickCallback);
+			m_pDynamicsWorld->setWorldUserInfo(this);
+
+			return true;
+		}
+
+		BulletPhysicsData::~BulletPhysicsData()
+		{
+			CleanUpRigidBodies();
+		}
+
+		void BulletPhysicsData::SetupSystems()
+		{
+			m_pCollisionConfig.reset(new btDefaultCollisionConfiguration());
+			m_pCollisionDispatcher.reset(new btCollisionDispatcher(m_pCollisionConfig.get()));
+			m_pCollisionBroadPhase.reset(new btDbvtBroadphase());
+			m_pConstraintSolver.reset(new btSequentialImpulseConstraintSolver());
+
+			m_pDynamicsWorld.reset(new btDiscreteDynamicsWorld(
+				m_pCollisionDispatcher.get(), m_pCollisionBroadPhase.get(),
+				m_pConstraintSolver.get(), m_pCollisionConfig.get()));
+		}
+
+		void BulletPhysicsData::CleanUpRigidBodies()
+		{
+			// Iterate backwards to avoid linear-time deletes.
+			auto collisionObjects = m_pDynamicsWorld->getCollisionObjectArray();
+			int idx = m_pDynamicsWorld->getNumCollisionObjects() - 1;
+			while (idx >= 0)
+			{
+				RemoveCollisionObject(collisionObjects[idx]);
+				--idx;
+			}
+		}
+
+		void BulletPhysicsData::RemoveCollisionObject(btCollisionObject *obj)
+		{
+			// Remove the collision pairs that contain the given collision object.
+			for (auto it = m_previousTickCollisions.begin(); it != m_previousTickCollisions.end(); )
+			{
+				if ((*it).first == obj || (*it).second == obj)
+				{
+					m_previousTickCollisions.erase(it++);
+				}
+				else
+				{
+					++it;
+				}
+			}
+
+			btRigidBody* body = btRigidBody::upcast(obj);
+			if (body)
+			{
+				delete body->getMotionState();
+				delete body->getCollisionShape();
+
+				// destroy related constraints
+				for (int i = body->getNumConstraintRefs()-1; i >= 0; i--)
+				{
+					btTypedConstraint *pConstraint = body->getConstraintRef(i);
+					m_pDynamicsWorld->removeConstraint(pConstraint);
+					delete pConstraint;
+				}
+			}
+
+			m_pDynamicsWorld->removeCollisionObject(obj);
+
+			delete obj;
+		}
+
+		void BulletPhysicsData::BulletInternalTickCallback(
+			btDynamicsWorld * const pWorld, const btScalar timeStep)
+		{
+			assert(pWorld);
+			assert(pWorld->getWorldUserInfo());
+			BulletPhysicsData * const pBulletPhysics =
+				static_cast<BulletPhysicsData*>(pWorld->getWorldUserInfo());
+			pBulletPhysics->HandleCallback();
+		}
+
+		void BulletPhysicsData::HandleCallback()
+		{
+			CollisionPairs currentTickCollisions;
+			HandleNewCollisions(currentTickCollisions);
+
+			// Get collisions that existed on the last tick but not on this tick.
+			CollisionPairs removedCollisions;
+			std::set_difference(m_previousTickCollisions.begin(),
+								m_previousTickCollisions.end(),
+								currentTickCollisions.begin(), currentTickCollisions.end(),
+								std::inserter(removedCollisions, removedCollisions.end()));
+
+			std::for_each(removedCollisions.begin(), removedCollisions.end(),
+				[this] (const CollisionPair& pair)
+			{
+				const btRigidBody * const body1 = pair.first;
+				const btRigidBody * const body2 = pair.second;
+
+				this->SendSeparationEvent(body1, body2);
+			});
+
+			m_previousTickCollisions = currentTickCollisions;
+		}
+
+		void BulletPhysicsData::HandleNewCollisions(CollisionPairs& currentTickCollisions)
+		{
+			for (int manifoldIdx = 0; manifoldIdx < m_pCollisionDispatcher->getNumManifolds(); ++manifoldIdx)
+			{
+				const btPersistentManifold * const pContactPoint =
+					m_pCollisionDispatcher->getManifoldByIndexInternal(manifoldIdx);
+				assert(pContactPoint);
+				if (!pContactPoint)
+					continue;
+
+				const btRigidBody * body1 =
+					static_cast<btRigidBody const *>(pContactPoint->getBody0());
+				const btRigidBody * body2 =
+					static_cast<btRigidBody const *>(pContactPoint->getBody1());
+
+				if (body1 > body2)
+				{
+					// TODO: does this work right? (swaps the pointers, not their contents)
+					std::swap(body1, body2);
+				}
+
+				const CollisionPair newPair = std::make_pair(body1, body2);
+				currentTickCollisions.insert(newPair);
+
+				if (m_previousTickCollisions.find(newPair) == m_previousTickCollisions.end())
+				{
+					SendNewCollisionEvent(pContactPoint, body1, body2);
+				}
+			}
+		}
+
+		std::shared_ptr<BulletPhysicsObject> BulletPhysicsData::AddShape(StrongActorPtr pActor, btCollisionShape *shape,
+			float mass, const std::string& material)
+		{
+			assert(pActor.get());
+			// There can be only one rigid body per (non-static) actor currently in this implementation.
+			ActorID id = pActor->GetID();
+			assert(m_actorToBulletPhysicsObjectMap.find(id) == m_actorToBulletPhysicsObjectMap.end());
+			m_actorToBulletPhysicsObjectMap[id].reset(new BulletPhysicsObject(id)); // creates a dynamic object
+
+			std::weak_ptr<WorldTransformComponent> pWeakWorldTransform
+				= pActor->GetWorldTransform();
+			if (!pWeakWorldTransform.expired())
+			{
+				std::shared_ptr<WorldTransformComponent> pWorldTransform(pWeakWorldTransform);
+				btMotionState *motionState = GetMotionStateFrom(pWorldTransform);
+
+				MaterialData matData(m_physicsMaterialData->LookupMaterial(material));
+
+				btVector3 localInertia(0, 0, 0);
+				if (mass > 0.f)
+					shape->calculateLocalInertia(mass, localInertia);
+
+				btRigidBody::btRigidBodyConstructionInfo rbInfo(
+					mass, motionState, shape, localInertia);
+
+				rbInfo.m_restitution = matData.m_restitution;
+				rbInfo.m_friction = matData.m_friction;
+
+				btRigidBody * const body = new btRigidBody(rbInfo);
+				m_pDynamicsWorld->addRigidBody(body);
+
+				m_actorToBulletPhysicsObjectMap[id]->AddRigidBody(body);
+				m_rigidBodyToActorMap[body] = id;
+			}
+
+			return m_actorToBulletPhysicsObjectMap[id];
+		}
+
+		std::shared_ptr<BulletPhysicsObject> BulletPhysicsData::AddStaticColliderShape(StrongActorPtr pActor, btCollisionShape *shape, bool isTrigger)
+		{
+			assert(pActor.get());
+			ActorID id = pActor->GetID();
+
+			// Triggers may have only one rigid body but other static actors may have several.
+			auto objectIt = m_actorToBulletPhysicsObjectMap.find(id);
+			assert(!isTrigger || objectIt == m_actorToBulletPhysicsObjectMap.end());
+
+			if (objectIt == m_actorToBulletPhysicsObjectMap.end())
+			{
+				m_actorToBulletPhysicsObjectMap[id].reset(new BulletPhysicsObject(id,
+					isTrigger
+					? BulletPhysicsObject::PhysicsType::TRIGGER
+					: BulletPhysicsObject::PhysicsType::STATIC));
+			}
+
+			std::weak_ptr<WorldTransformComponent> pWeakWorldTransform
+				= pActor->GetWorldTransform();
+			if (!pWeakWorldTransform.expired())
+			{
+				std::shared_ptr<WorldTransformComponent> pWorldTransform(pWeakWorldTransform);
+				btMotionState *motionState = GetMotionStateFrom(pWorldTransform);
+
+				// Objects that have 0 mass are regarded as immovable by Bullet.
+				btScalar const mass = 0;
+				btRigidBody::btRigidBodyConstructionInfo rbInfo(
+					mass, motionState, shape, btVector3(0, 0, 0));
+				btRigidBody * const body = new btRigidBody(rbInfo);
+
+				m_pDynamicsWorld->addRigidBody(body);
+				body->setCollisionFlags(body->getCollisionFlags() | btRigidBody::CF_STATIC_OBJECT);
+
+				if (isTrigger) // triggers may intersect with other objects (this causes a trigger related event, not a collision event)
+				{
+					body->setCollisionFlags(
+						body->getCollisionFlags() | btRigidBody::CF_NO_CONTACT_RESPONSE);
+				}
+				else
+				{
+					// Set the same restitution, friction and rolling friction for all static objects.
+					// This could possibly be based on the the material of the static object.
+					// (Can this data be parsed from the bsp file?)
+					body->setRestitution(0.2f);
+					body->setFriction(0.6f);
+					body->setRollingFriction(0.4f);
+					body->setAnisotropicFriction(shape->getAnisotropicRollingFrictionDirection(),
+						btCollisionObject::CF_ANISOTROPIC_ROLLING_FRICTION);
+				}
+
+				m_actorToBulletPhysicsObjectMap[id]->AddRigidBody(body);
+				m_rigidBodyToActorMap[body] = id;
+			}
+			return m_actorToBulletPhysicsObjectMap[id];
+		}
+
+		btMotionState *BulletPhysicsData::GetMotionStateFrom(std::shared_ptr<WorldTransformComponent> pWorldTransform)
+		{
+			btQuaternion rotation(Quaternion_to_btQuaternion(pWorldTransform->GetRotation()));
+			btVector3 translation(Vec3_to_btVector3(pWorldTransform->GetPosition(), m_worldScaleConst));
+			btTransform transform(rotation, translation);
+			return new btDefaultMotionState(transform);
+		}
+
+		void BulletPhysicsData::SendNewCollisionEvent(const btPersistentManifold * manifold,
+			const btRigidBody * pBody1, const btRigidBody * pBody2)
+		{
+			auto pGameData = GameData::getInstance();
+			auto pEventManager = pGameData->GetEventManager();
+			assert(pEventManager);
+
+			ActorID id1 = GetActorID(pBody1);
+			ActorID id2 = GetActorID(pBody2);
+			if (id1 == 0 || id2 == 0)
+				return;
+
+			std::shared_ptr<Events::IEventData> event;
+			bool firstIsTrigger;
+			if ((firstIsTrigger = m_actorToBulletPhysicsObjectMap[id1]->IsTrigger()) ||
+				m_actorToBulletPhysicsObjectMap[id2]->IsTrigger())
+			{
+				ActorID triggerId = firstIsTrigger ? GetActorID(pBody1) : GetActorID(pBody2);
+				ActorID actorId = firstIsTrigger ? GetActorID(pBody2) : GetActorID(pBody1);
+				event.reset(new Events::TriggerEntryEvent(pGameData->CurrentTimeSec(),
+					triggerId, actorId));
+				pEventManager->QueueEvent(event);
+			}
+			else // not a trigger event
+			{
+				std::vector<Vec3> collisionPoints;
+				btVector3 sumNormalForce;
+				btVector3 sumFrictionForce;
+
+				for (int i = 1; i < manifold->getNumContacts(); ++i)
+				{
+					const btManifoldPoint &point = manifold->getContactPoint(i);
+					collisionPoints.push_back(btVector3_to_Vec3(point.getPositionWorldOnB(), m_worldScaleConst));
+
+					sumNormalForce += point.m_combinedRestitution * point.m_normalWorldOnB;
+					sumFrictionForce += point.m_combinedFriction * point.m_lateralFrictionDir1;
+				}
+				event.reset(new Events::ActorCollideEvent(pGameData->CurrentTimeSec(),
+					id1, id2, collisionPoints, btVector3_to_Vec3(sumNormalForce, m_worldScaleConst),
+					btVector3_to_Vec3(sumFrictionForce, m_worldScaleConst)));
+				pEventManager->QueueEvent(event);
+			}
+		}
+
+		void BulletPhysicsData::SendSeparationEvent(const btRigidBody * pBody1, const btRigidBody * pBody2)
+		{
+			auto pGameData = GameData::getInstance();
+			auto pEventManager = pGameData->GetEventManager();
+			assert(pEventManager);
+
+			ActorID id1 = GetActorID(pBody1);
+			ActorID id2 = GetActorID(pBody2);
+			if (id1 == 0 || id2 == 0)
+				return;
+
+			std::shared_ptr<Events::IEventData> event;
+			bool firstIsTrigger;
+			if ((firstIsTrigger = m_actorToBulletPhysicsObjectMap[id1]->IsTrigger()) ||
+				m_actorToBulletPhysicsObjectMap[id2]->IsTrigger())
+			{
+				ActorID triggerId = firstIsTrigger ? GetActorID(pBody1) : GetActorID(pBody2);
+				ActorID actorId = firstIsTrigger ? GetActorID(pBody2) : GetActorID(pBody1);
+				event.reset(new Events::TriggerExitEvent(pGameData->CurrentTimeSec(),
+					triggerId, actorId));
+				pEventManager->QueueEvent(event);
+			}
+			else
+			{
+				event.reset(new Events::ActorSeparationEvent(
+					pGameData->CurrentTimeSec(), id1, id2));
+				pEventManager->QueueEvent(event);
+			}
 		}
 	}
 }

@@ -11,7 +11,7 @@ namespace GameEngine
 	public:
 		virtual ~IGameInputHandler() { };
 		virtual void HandleInputs() = 0;
-		virtual void SetupInitialScene(GameData *game) = 0;
+		virtual void SetupInitialScene() = 0;
 	};
 
 	std::unique_ptr<IGameInputHandler> CreateDemoInputHandler();

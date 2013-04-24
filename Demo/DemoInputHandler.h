@@ -14,7 +14,7 @@ namespace GameEngine
 	public:
 		virtual ~DemoInputHandler() { };
 		virtual void HandleInputs() override;
-		virtual void SetupInitialScene(GameData *game) override;
+		virtual void SetupInitialScene() override;
 	private:
 		struct CameraState
 		{

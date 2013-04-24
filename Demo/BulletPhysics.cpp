@@ -100,7 +100,7 @@ namespace GameEngine
 		// simulation and signal changes in location with events.
 		void BulletPhysics::VSyncScene()
 		{
-			GameData *game = GameData::getInstance();
+			std::shared_ptr<GameData> pGame = GameData::GetInstance();
 			for (auto it = m_pData->m_actorToBulletPhysicsObjectMap.begin();
 				it != m_pData->m_actorToBulletPhysicsObjectMap.end(); it++)
 			{
@@ -114,7 +114,7 @@ namespace GameEngine
 				const Quaternion rot = btQuaternion_to_Quaternion(body->getOrientation());
 				const Vec3 pos = btVector3_to_Vec3(body->getCenterOfMassPosition(), m_pData->m_worldScaleConst);
 
-				WeakActorPtr pWeakActor = game->GetActor(id);
+				WeakActorPtr pWeakActor = pGame->GetActor(id);
 				if (!pWeakActor.expired())
 				{
 					UpdateWorldTransform(StrongActorPtr(pWeakActor), pos, rot);
@@ -124,7 +124,7 @@ namespace GameEngine
 
 		void UpdateWorldTransform(StrongActorPtr pActor, const Vec3& pos, const Quaternion& rot)
 		{
-			GameData *game = GameData::getInstance();
+			shared_ptr<GameData> pGame = GameData::GetInstance();
 			weak_ptr<WorldTransformComponent> pWeakWorldTrans =
 				pActor->GetWorldTransform();
 
@@ -145,8 +145,8 @@ namespace GameEngine
 				if (changed)
 				{
 					Events::EventPtr event;
-					event.reset(new Events::ActorMoveEvent(game->CurrentTimeSec(), pActor->GetID()));
-					game->GetEventManager()->QueueEvent(event);
+					event.reset(new Events::ActorMoveEvent(pGame->CurrentTimeSec(), pActor->GetID()));
+					pGame->GetEventManager()->QueueEvent(event);
 				}
 			}
 		}
@@ -473,7 +473,7 @@ namespace GameEngine
 			pBody->setAngularFactor(0);
 			pBody->setAngularVelocity(btVector3(0, 0, 0));
 
-			GameData *pGame = GameData::getInstance();
+			auto pGame = GameData::GetInstance();
 			assert(pGame && pGame->GetEventManager());
 			Events::IEventManager *pEventMgr = pGame->GetEventManager();
 			if (pEventMgr)
@@ -543,7 +543,7 @@ namespace GameEngine
 			pBody->forceActivationState(ACTIVE_TAG);
 			pBody->setDeactivationTime(0.f);
 
-			GameData *pGame = GameData::getInstance();
+			auto pGame = GameData::GetInstance();
 			assert(pGame && pGame->GetEventManager());
 			Events::IEventManager *pEventMgr = pGame->GetEventManager();
 			if (pEventMgr)
@@ -824,7 +824,7 @@ namespace GameEngine
 		void BulletPhysicsData::SendNewCollisionEvent(const btPersistentManifold * manifold,
 			const btRigidBody * pBody1, const btRigidBody * pBody2)
 		{
-			auto pGameData = GameData::getInstance();
+			auto pGameData = GameData::GetInstance();
 			auto pEventManager = pGameData->GetEventManager();
 			assert(pEventManager);
 
@@ -867,7 +867,7 @@ namespace GameEngine
 
 		void BulletPhysicsData::SendSeparationEvent(const btRigidBody * pBody1, const btRigidBody * pBody2)
 		{
-			auto pGameData = GameData::getInstance();
+			auto pGameData = GameData::GetInstance();
 			auto pEventManager = pGameData->GetEventManager();
 			assert(pEventManager);
 

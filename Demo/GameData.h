@@ -10,7 +10,7 @@ namespace GameEngine
 	class GameData
 	{
 	private:
-		static GameData *instance;
+		static std::shared_ptr<GameData> pInstance;
 		GameData() : m_pRenderer(nullptr), m_pPhysicsEngine(nullptr) { }
 		Display::IDisplay *m_pRenderer;
 		ITimer *m_pTimer;
@@ -20,13 +20,13 @@ namespace GameEngine
 		std::shared_ptr<Display::IInputState> m_pInputState;
 		std::map<ActorID, std::shared_ptr<GameActor>> m_actors;
 	public:
-		static GameData *getInstance()
+		static std::shared_ptr<GameData> GetInstance()
 		{
-			if (!instance)
+			if (!pInstance)
 			{
-				instance = new GameData();
+				pInstance.reset(new GameData());
 			}
-			return instance;
+			return pInstance;
 		}
 		~GameData();
 

@@ -69,7 +69,7 @@ namespace GameEngine
 			}
 
 			sceneNodes[pStrongActor->GetID()] = pNode;
-			auto game = GameData::getInstance();
+			auto game = GameData::GetInstance();
 			game->GetEventManager()->RegisterHandler(EventType::ACTOR_MOVED,
 				m_pMoveEventHandler);
 		}
@@ -80,8 +80,8 @@ namespace GameEngine
 			ActorMoveEvent *pMoveEvent =
 				dynamic_cast<ActorMoveEvent*>(pEvent.get());
 
-			GameData *game = GameData::getInstance();
-			WeakActorPtr pWeakActor = game->GetActor(pMoveEvent->GetActorId());
+			std::shared_ptr<GameData> pGame = GameData::GetInstance();
+			WeakActorPtr pWeakActor = pGame->GetActor(pMoveEvent->GetActorId());
 			if (pWeakActor.expired())
 				return;
 

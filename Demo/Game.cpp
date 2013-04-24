@@ -40,7 +40,7 @@ namespace GameEngine
 			return;
 		}
 
-		m_pData = GameData::getInstance();
+		m_pData = GameData::GetInstance();
 		m_pData->SetInputStateHandler(renderer->GetInputState());
 		m_pData->SetRenderer(renderer.release());
 
@@ -81,17 +81,12 @@ namespace GameEngine
 		m_pData->SetPhysicsEngine(physics.release());
 	}
 
-	Game::~Game()
-	{
-		delete m_pData;
-		m_pData = nullptr;
-	}
+	Game::~Game() { }
 
 	Game::Game(Game& game)
 	{
 		if (this != &game)
 		{
-			delete m_pData;
 			m_pData = game.m_pData;
 			game.m_pData = nullptr;
 		}
@@ -106,7 +101,7 @@ namespace GameEngine
 		if (!renderer || !physics || !events || !gameLogic)
 			return 1;
 
-		gameLogic->SetupInitialScene(m_pData);
+		gameLogic->SetupInitialScene();
 
 		float timeBegin = m_pData->CurrentTimeSec();
 		float timeEnd;

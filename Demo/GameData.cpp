@@ -9,15 +9,13 @@
 
 namespace GameEngine
 {
-	GameData *GameData::instance = nullptr;
+	std::shared_ptr<GameData> GameData::pInstance;
 
 	GameData::~GameData()
 	{
 		delete m_pRenderer;
 		delete m_pPhysicsEngine;
 		delete m_pEvents;
-		m_actors.clear();
-		GameData::instance = nullptr;
 	}
 
 	float GameData::CurrentTimeSec()

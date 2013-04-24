@@ -13,7 +13,7 @@ namespace GameEngine
 		Game(Game& game);
 		int Run();
 	private:
-		GameData *m_pData;
+		std::shared_ptr<GameData> m_pData;
 		void HandleInputs();
 		void ThrowCube(Vec3& throwTowards);
 	};

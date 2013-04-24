@@ -27,11 +27,12 @@ namespace GameEngine
 	 * (Also note that the concept of handedness does not affect quaternions
 	 * used for handling rotations.)
 	 */
-	void DemoInputHandler::SetupInitialScene(GameData *game)
+	void DemoInputHandler::SetupInitialScene()
 	{
-		Display::IDisplay *pRenderer = game->GetRenderer();
-		Physics::IPhysicsEngine *pPhysics = game->GetPhysicsEngine();
-		Events::IEventManager *pEventMgr = game->GetEventManager();
+		auto pGame = GameData::GetInstance();
+		Display::IDisplay *pRenderer = pGame->GetRenderer();
+		Physics::IPhysicsEngine *pPhysics = pGame->GetPhysicsEngine();
+		Events::IEventManager *pEventMgr = pGame->GetEventManager();
 		std::shared_ptr<Display::MessagingWindow> pMessages = pRenderer->GetMessageWindow();
 		pMessages->SetFont("..\\assets\\fontlucida.png");
 		pMessages->SetVisible(true);
@@ -43,7 +44,7 @@ namespace GameEngine
 		// position of the map. (TODO?)
 		Vec3 mapPosition(-1350, -130, 1400);
 		StrongActorPtr world(new GameActor(mapPosition));
-		game->AddActor(world);
+		pGame->AddActor(world);
 		pRenderer->LoadMap("..\\assets\\map-20kdm2.pk3", "20kdm2.bsp", mapPosition);
 		std::unique_ptr<BspLoader> pBspLoader = CreateBspLoader("..\\assets\\20kdm2.bsp");
 		pPhysics->VLoadBspMap(*pBspLoader, world);
@@ -57,19 +58,19 @@ namespace GameEngine
 
 		// Setup actors and their graphical and physical representations.
 		StrongActorPtr ball(new GameActor(Vec3(0, 50, 60)));
-		game->AddActor(ball);
+		pGame->AddActor(ball);
 		pRenderer->AddSphereSceneNode(10.f, ball, MUD_TEXTURE);
 		pPhysics->VAddSphere(10.f, ball, "Titanium", "Bouncy");
 
 		StrongActorPtr cube(new GameActor(Vec3(0, 80, 60)));
-		game->AddActor(cube);
+		pGame->AddActor(cube);
 		pRenderer->AddCubeSceneNode(25.f, cube, WOODBOX_TEXTURE);
 		pPhysics->VAddBox(Vec3(25.f, 25.f, 25.f), cube, "manganese", "Normal");
 
 		// Add a trigger node, rendered as a wireframe cube. (The IrrlichtDisplay
 		// assumes you want a wireframe when no texture is given.)
 		StrongActorPtr trigger(new GameActor(Vec3(-100.f, 125.f, 450.f)));
-		game->AddActor(trigger);
+		pGame->AddActor(trigger);
 		pRenderer->AddCubeSceneNode(125.f, trigger, 0);
 		pPhysics->VCreateTrigger(trigger, 125.f);
 
@@ -102,7 +103,7 @@ namespace GameEngine
 
 	void DemoInputHandler::HandleInputs()
 	{
-		GameData *pGame = GameData::getInstance();
+		auto pGame = GameData::GetInstance();
 		assert(pGame && pGame->GetInputStateHandler());
 		m_currentMouseState = pGame->GetInputStateHandler()->GetMouseState();
 
@@ -154,7 +155,7 @@ namespace GameEngine
 
 	void DemoInputHandler::ThrowCube(Vec3& throwTowards)
 	{
-		GameData *pGame = GameData::getInstance();
+		auto pGame = GameData::GetInstance();
 		Vec3 cameraPos = pGame->GetRenderer()->GetCameraPosition();
 
 		StrongActorPtr cube(new GameActor(cameraPos));

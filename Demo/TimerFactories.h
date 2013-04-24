@@ -11,7 +11,7 @@ namespace GameEngine
 {
 	std::unique_ptr<ITimer> GetTimer()
 	{
-		Display::IDisplay *renderer = GameEngine::GameData::getInstance()->GetRenderer();
+		Display::IDisplay *renderer = GameEngine::GameData::GetInstance()->GetRenderer();
 		Display::IrrlichtDisplay *irrlicht = dynamic_cast<Display::IrrlichtDisplay*>(renderer);
 		std::unique_ptr<ITimer> timer;
 		if (irrlicht)

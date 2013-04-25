@@ -1,5 +1,4 @@
 #include "IrrlichtDisplay.h"
-#include "IrrlichtDisplayImpl.h"
 #include "IrrlichtInputState.h"
 #include "IrrlichtConversions.h"
 #include "IrrlichtMessagingWindow.h"
@@ -47,9 +46,47 @@ namespace GameEngine
 {
 	namespace Display
 	{
+		struct IrrlichtDisplayData
+		{
+			std::map<unsigned int, irr::video::ITexture*> textures;
+			std::map<ActorID, irr::scene::ISceneNode*> sceneNodes;
+
+			irr::scene::ISceneNode *GetSceneNode(ActorID actorId);
+
+			irr::IrrlichtDevice *m_pDevice;
+			irr::video::IVideoDriver *m_pDriver;
+			irr::scene::ISceneManager *m_pSmgr;
+
+			irr::scene::ICameraSceneNode *m_pCamera;
+			irr::gui::IGUIEnvironment *m_pGui;
+
+			Events::EventHandlerPtr m_pMoveEventHandler;
+
+			std::shared_ptr<IrrlichtInputState> m_pInputState;
+			std::shared_ptr<MessagingWindow> m_messageWindow;
+
+			void AddSceneNode(WeakActorPtr pActor, irr::scene::ISceneNode *pNode, unsigned int texture);
+			void UpdateActorPosition(Events::EventPtr pEvent);
+			void SetNodeTransform(irr::scene::ISceneNode *pNode, std::shared_ptr<WorldTransformComponent> pWorldTransform);
+			unsigned int GetTime();
+		};
+
+		IrrlichtTimer::IrrlichtTimer(IrrlichtDisplay *pDisplay)
+			: m_pDisplay(pDisplay) { }
+
+		unsigned int IrrlichtTimer::GetTimeMs()
+		{
+			return m_pDisplay->m_pData->GetTime();
+		}
+
+		unsigned int IrrlichtDisplayData::GetTime()
+		{
+			return m_pDevice->getTimer()->getTime();
+		}
+
 		IrrlichtDisplay::IrrlichtDisplay()
 		{
-			m_pData = new IrrlichtDisplayImpl();
+			m_pData = new IrrlichtDisplayData();
 			m_pData->m_pInputState.reset(new IrrlichtInputState());
 			m_pData->m_pMoveEventHandler =
 				Events::EventHandlerPtr(new std::function<void(EventPtr)>(
@@ -74,9 +111,6 @@ namespace GameEngine
 			m_pData->m_pDriver->beginScene(true, true, SColor(0,0,0,0));
 
 			m_pData->m_pSmgr->drawAll();
-
-			m_pData->m_pDriver->clearZBuffer();
-			m_pData->m_pDebugSmgr->drawAll();
 
 			m_pData->m_pGui->drawAll();
 			m_pData->m_messageWindow->Render();
@@ -113,7 +147,6 @@ namespace GameEngine
 			m_pData->m_pDriver = m_pData->m_pDevice->getVideoDriver();
 			m_pData->m_pSmgr = m_pData->m_pDevice->getSceneManager();
 			m_pData->m_pGui = m_pData->m_pDevice->getGUIEnvironment();
-			m_pData->m_pDebugSmgr = m_pData->m_pSmgr->createNewSceneManager(false);
 
 			m_pData->m_messageWindow.reset(new IrrlichtMessagingWindow(10, m_pData->m_pGui));
 			m_pData->m_messageWindow->SetPosition(10, 10);
@@ -127,7 +160,6 @@ namespace GameEngine
 				m_pData->m_pCamera = m_pData->m_pSmgr->addCameraSceneNodeFPS();
 			}
 			m_pData->m_pCamera->setFOV(irr::core::degToRad(75.f));
-			m_pData->m_pDebugSmgr->setActiveCamera(m_pData->m_pCamera);
 			m_pData->m_pDevice->getCursorControl()->setVisible(false);
 
 			return true;
@@ -196,32 +228,29 @@ namespace GameEngine
 			return TEXTURE_ID;
 		}
 
-		void IrrlichtDisplay::AddSphereSceneNode(float radius, WeakActorPtr pActor, unsigned int texture, bool debug)
+		void IrrlichtDisplay::AddSphereSceneNode(float radius, WeakActorPtr pActor, unsigned int texture)
 		{
-			ISceneManager *manager = debug ? m_pData->m_pDebugSmgr : m_pData->m_pSmgr;
-			auto node = manager->addSphereSceneNode(radius);
+			auto node = m_pData->m_pSmgr->addSphereSceneNode(radius);
 			m_pData->AddSceneNode(pActor, node, texture);
 		}
 
-		void IrrlichtDisplay::AddCubeSceneNode(float dim, WeakActorPtr pActor, unsigned int texture, bool debug)
+		void IrrlichtDisplay::AddCubeSceneNode(float dim, WeakActorPtr pActor, unsigned int texture)
 		{
-			ISceneManager *manager = debug ? m_pData->m_pDebugSmgr : m_pData->m_pSmgr;
-			auto node = manager->addCubeSceneNode(dim);
+			auto node = m_pData->m_pSmgr->addCubeSceneNode(dim);
 			m_pData->AddSceneNode(pActor, node, texture);
 		}
 
-		void IrrlichtDisplay::AddMeshSceneNode(const std::string& meshFilePath, WeakActorPtr pActor, unsigned int texture, bool debug)
+		void IrrlichtDisplay::AddMeshSceneNode(const std::string& meshFilePath, WeakActorPtr pActor, unsigned int texture)
 		{
-			ISceneManager *manager = debug ? m_pData->m_pDebugSmgr : m_pData->m_pSmgr;
-			auto mesh = manager->getMesh(meshFilePath.c_str());
+			auto mesh = m_pData->m_pSmgr->getMesh(meshFilePath.c_str());
 			if (mesh)
 			{
-				auto node = manager->addAnimatedMeshSceneNode(mesh);
+				auto node = m_pData->m_pSmgr->addAnimatedMeshSceneNode(mesh);
 				m_pData->AddSceneNode(pActor, node, texture);
 			}
 		}
 
-		void IrrlichtDisplay::RemoveSceneNode(ActorID actorId, bool debug)
+		void IrrlichtDisplay::RemoveSceneNode(ActorID actorId)
 		{
 			auto node = m_pData->sceneNodes[actorId];
 			if (node)
@@ -278,6 +307,88 @@ namespace GameEngine
 			vector3df cameraRotEuler = m_pData->m_pCamera->getRotation();
 			quaternion quaternionRot(cameraRotEuler * irr::core::DEGTORAD);
 			return ConvertQuaternion(quaternionRot);
+		}
+
+		ISceneNode *IrrlichtDisplayData::GetSceneNode(ActorID actorId)
+		{
+			auto it = sceneNodes.find(actorId);
+			assert(it != sceneNodes.end());
+			if (it != sceneNodes.end())
+				return it->second;
+			return nullptr;
+		}
+
+		void IrrlichtDisplayData::AddSceneNode(WeakActorPtr pActor, irr::scene::ISceneNode *pNode, unsigned int texture)
+		{
+			if (pActor.expired())
+			{
+				pNode->drop();
+				return;
+			}
+
+			StrongActorPtr pStrongActor(pActor);
+
+			auto texturePos = textures.find(texture);
+			if (texturePos != textures.end())
+			{
+				pNode->setMaterialTexture(0, (*texturePos).second);
+			}
+			else
+			{
+				pNode->setMaterialFlag(irr::video::EMF_WIREFRAME, true);
+				pNode->setMaterialFlag(irr::video::EMF_BACK_FACE_CULLING, false);
+			}
+			pNode->setMaterialFlag(irr::video::EMF_LIGHTING, false);
+
+			weak_ptr<WorldTransformComponent> pWeakTransform = pStrongActor->GetWorldTransform();
+			if (!pWeakTransform.expired())
+			{
+				shared_ptr<WorldTransformComponent> pWorldTransform(pWeakTransform);
+				SetNodeTransform(pNode, pWorldTransform);
+			}
+
+			sceneNodes[pStrongActor->GetID()] = pNode;
+			auto game = GameData::GetInstance();
+			game->GetEventManager()->RegisterHandler(EventType::ACTOR_MOVED,
+				m_pMoveEventHandler);
+		}
+
+		void IrrlichtDisplayData::UpdateActorPosition(EventPtr pEvent)
+		{
+			assert(pEvent->GetEventType() == EventType::ACTOR_MOVED);
+			ActorMoveEvent *pMoveEvent =
+				dynamic_cast<ActorMoveEvent*>(pEvent.get());
+
+			std::shared_ptr<GameData> pGame = GameData::GetInstance();
+			WeakActorPtr pWeakActor = pGame->GetActor(pMoveEvent->GetActorId());
+			if (pWeakActor.expired())
+				return;
+
+			StrongActorPtr pActor(pWeakActor);
+			ISceneNode *pNode = GetSceneNode(pActor->GetID());
+
+			if (pActor.get() && pNode)
+			{
+				weak_ptr<WorldTransformComponent> pWeakTransform = pActor->GetWorldTransform();
+				if (!pWeakTransform.expired())
+				{
+					shared_ptr<WorldTransformComponent> pWorldTransform(pWeakTransform);
+					SetNodeTransform(pNode, pWorldTransform);
+				}
+			}
+		}
+
+		void IrrlichtDisplayData::SetNodeTransform(
+			irr::scene::ISceneNode *pNode, std::shared_ptr<WorldTransformComponent> pWorldTransform)
+		{
+			quaternion rot = ConvertQuaternion(pWorldTransform->GetRotation());
+			vector3df eulerRot;
+			rot.toEuler(eulerRot);
+			eulerRot *= irr::core::RADTODEG;
+			pNode->setRotation(eulerRot);
+
+			pNode->setPosition(ConvertVector(pWorldTransform->GetPosition()));
+			pNode->setScale(ConvertVector(pWorldTransform->GetScale()));
 		}
 	}
 }

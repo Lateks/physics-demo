@@ -9,7 +9,6 @@ namespace GameEngine
 	{
 		class IDisplay;
 		class IrrlichtDisplay;
-		struct IrrlichtDisplayImpl;
 		class IrrlichtInputState;
 		class MessagingWindow;
 		class IrrlichtMessagingWindow;

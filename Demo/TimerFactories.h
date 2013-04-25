@@ -4,7 +4,6 @@
 #include "enginefwd.h"
 #include "ITimer.h"
 #include "IrrlichtDisplay.h"
-#include "IrrlichtTimer.h"
 #include "GameData.h"
 
 namespace GameEngine
@@ -16,11 +15,7 @@ namespace GameEngine
 		std::unique_ptr<ITimer> timer;
 		if (irrlicht)
 		{
-			timer.reset(new IrrlichtTimer(irrlicht));
-		}
-		else
-		{
-			timer.reset(nullptr);
+			timer.reset(new Display::IrrlichtTimer(irrlicht));
 		}
 		return timer;
 	}

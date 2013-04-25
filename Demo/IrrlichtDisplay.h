@@ -3,6 +3,7 @@
 
 #include "enginefwd.h"
 #include "IDisplay.h"
+#include "ITimer.h"
 #include "IEventManager.h"
 #include <memory>
 
@@ -10,6 +11,9 @@ namespace GameEngine
 {
 	namespace Display
 	{
+		struct IrrlichtDisplayData;
+		class IrrlichtTimer;
+
 		class IrrlichtDisplay : public IDisplay
 		{
 		public:
@@ -41,14 +45,23 @@ namespace GameEngine
 
 			virtual unsigned int LoadTexture(const std::string& filePath) override;
 
-			virtual void AddSphereSceneNode(float radius, WeakActorPtr pActor, unsigned int texture, bool debug = false) override;
-			virtual void AddCubeSceneNode(float dim, WeakActorPtr pActor, unsigned int texture, bool debug = false) override;
-			virtual void AddMeshSceneNode(const std::string& meshFilePath, WeakActorPtr pActor, unsigned int texture = 0, bool debug = false) override;
-			virtual void RemoveSceneNode(ActorID actorId, bool debug = false) override;
+			virtual void AddSphereSceneNode(float radius, WeakActorPtr pActor, unsigned int texture) override;
+			virtual void AddCubeSceneNode(float dim, WeakActorPtr pActor, unsigned int texture) override;
+			virtual void AddMeshSceneNode(const std::string& meshFilePath, WeakActorPtr pActor, unsigned int texture = 0) override;
+			virtual void RemoveSceneNode(ActorID actorId) override;
 
 			virtual void LoadMap(const std::string& mapFilePath, const std::string& meshName, Vec3& position) override;
 		private:
-			IrrlichtDisplayImpl *m_pData;
+			IrrlichtDisplayData *m_pData;
+		};
+
+		class IrrlichtTimer : public ITimer
+		{
+		public:
+			IrrlichtTimer(IrrlichtDisplay *pDisplay);
+			virtual unsigned int GetTimeMs() override;
+		private:
+			IrrlichtDisplay *m_pDisplay;
 		};
 	}
 }

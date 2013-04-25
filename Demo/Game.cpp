@@ -42,7 +42,7 @@ namespace GameEngine
 
 		m_pData = GameData::GetInstance();
 		m_pData->SetInputStateHandler(renderer->GetInputState());
-		m_pData->SetRenderer(renderer.release());
+		m_pData->SetDisplayComponent(std::shared_ptr<Display::IDisplay>(renderer.release()));
 
 		std::unique_ptr<IGameInputHandler> pInputHandler(CreateDemoInputHandler());
 		if (!pInputHandler.get())
@@ -94,11 +94,11 @@ namespace GameEngine
 
 	int Game::Run()
 	{
-		IDisplay *renderer = m_pData->GetRenderer();
+		auto pDisplay = m_pData->GetDisplayComponent();
 		IPhysicsEngine *physics = m_pData->GetPhysicsEngine();
 		IEventManager *events = m_pData->GetEventManager();
 		IGameInputHandler *gameLogic = m_pData->GetInputHandler();
-		if (!renderer || !physics || !events || !gameLogic)
+		if (!pDisplay || !physics || !events || !gameLogic)
 			return 1;
 
 		gameLogic->SetupInitialScene();
@@ -106,19 +106,19 @@ namespace GameEngine
 		float timeBegin = m_pData->CurrentTimeSec();
 		float timeEnd;
 		float frameDeltaSec = 1.0f/60;
-		while (renderer->Running())
+		while (pDisplay->Running())
 		{
-			if (renderer->WindowActive())
+			if (pDisplay->WindowActive())
 			{
 				gameLogic->HandleInputs();
 				events->DispatchEvents();
 				physics->VUpdateSimulation(frameDeltaSec);
 				physics->VSyncScene();
-				renderer->DrawScene();
+				pDisplay->DrawScene();
 			}
 			else
 			{
-				renderer->YieldDevice();
+				pDisplay->YieldDevice();
 			}
 			timeEnd = m_pData->CurrentTimeSec();
 			frameDeltaSec = timeEnd - timeBegin;

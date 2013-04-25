@@ -30,10 +30,10 @@ namespace GameEngine
 	void DemoInputHandler::SetupInitialScene()
 	{
 		auto pGame = GameData::GetInstance();
-		Display::IDisplay *pRenderer = pGame->GetRenderer();
+		auto pDisplay = pGame->GetDisplayComponent();
 		Physics::IPhysicsEngine *pPhysics = pGame->GetPhysicsEngine();
 		Events::IEventManager *pEventMgr = pGame->GetEventManager();
-		std::shared_ptr<Display::MessagingWindow> pMessages = pRenderer->GetMessageWindow();
+		std::shared_ptr<Display::MessagingWindow> pMessages = pDisplay->GetMessageWindow();
 		pMessages->SetFont("..\\assets\\fontlucida.png");
 		pMessages->SetVisible(true);
 		pMessages->SetWidth(600);
@@ -45,33 +45,33 @@ namespace GameEngine
 		Vec3 mapPosition(-1350, -130, 1400);
 		StrongActorPtr world(new GameActor(mapPosition));
 		pGame->AddActor(world);
-		pRenderer->LoadMap("..\\assets\\map-20kdm2.pk3", "20kdm2.bsp", mapPosition);
+		pDisplay->LoadMap("..\\assets\\map-20kdm2.pk3", "20kdm2.bsp", mapPosition);
 		std::unique_ptr<BspLoader> pBspLoader = CreateBspLoader("..\\assets\\20kdm2.bsp");
 		pPhysics->VLoadBspMap(*pBspLoader, world);
 
-		pRenderer->SetCameraPosition(Vec3(80,50,60));
-		pRenderer->SetCameraTarget(Vec3(-70,30,60));
+		pDisplay->SetCameraPosition(Vec3(80,50,60));
+		pDisplay->SetCameraTarget(Vec3(-70,30,60));
 
 		// Load textures.
-		MUD_TEXTURE = pRenderer->LoadTexture("..\\assets\\cracked_mud.jpg");
-		WOODBOX_TEXTURE = pRenderer->LoadTexture("..\\assets\\woodbox2.jpg");
+		MUD_TEXTURE = pDisplay->LoadTexture("..\\assets\\cracked_mud.jpg");
+		WOODBOX_TEXTURE = pDisplay->LoadTexture("..\\assets\\woodbox2.jpg");
 
 		// Setup actors and their graphical and physical representations.
 		StrongActorPtr ball(new GameActor(Vec3(0, 50, 60)));
 		pGame->AddActor(ball);
-		pRenderer->AddSphereSceneNode(10.f, ball, MUD_TEXTURE);
+		pDisplay->AddSphereSceneNode(10.f, ball, MUD_TEXTURE);
 		pPhysics->VAddSphere(10.f, ball, "Titanium", "Bouncy");
 
 		StrongActorPtr cube(new GameActor(Vec3(0, 80, 60)));
 		pGame->AddActor(cube);
-		pRenderer->AddCubeSceneNode(25.f, cube, WOODBOX_TEXTURE);
+		pDisplay->AddCubeSceneNode(25.f, cube, WOODBOX_TEXTURE);
 		pPhysics->VAddBox(Vec3(25.f, 25.f, 25.f), cube, "manganese", "Normal");
 
 		// Add a trigger node, rendered as a wireframe cube. (The IrrlichtDisplay
 		// assumes you want a wireframe when no texture is given.)
 		StrongActorPtr trigger(new GameActor(Vec3(-100.f, 125.f, 450.f)));
 		pGame->AddActor(trigger);
-		pRenderer->AddCubeSceneNode(125.f, trigger, 0);
+		pDisplay->AddCubeSceneNode(125.f, trigger, 0);
 		pPhysics->VCreateTrigger(trigger, 125.f);
 
 		// Create an event handler to print out messages when a trigger event is detected.
@@ -107,13 +107,13 @@ namespace GameEngine
 		assert(pGame && pGame->GetInputStateHandler());
 		m_currentMouseState = pGame->GetInputStateHandler()->GetMouseState();
 
-		auto pRenderer = pGame->GetRenderer();
+		auto pDisplay = pGame->GetDisplayComponent();
 		auto pPhysics = pGame->GetPhysicsEngine();
-		m_currentCameraState = CameraState(pRenderer->GetCameraPosition(), pRenderer->GetCameraTarget());
+		m_currentCameraState = CameraState(pDisplay->GetCameraPosition(), pDisplay->GetCameraTarget());
 
 		if (RightMouseReleased())
 		{
-			ThrowCube(pGame->GetRenderer()->GetCameraTarget());
+			ThrowCube(pDisplay->GetCameraTarget());
 		}
 
 		if (LeftMousePressed())
@@ -156,26 +156,26 @@ namespace GameEngine
 	void DemoInputHandler::ThrowCube(Vec3& throwTowards)
 	{
 		auto pGame = GameData::GetInstance();
-		Vec3 cameraPos = pGame->GetRenderer()->GetCameraPosition();
+		auto pDisplay = pGame->GetDisplayComponent();
+		Vec3 cameraPos = pDisplay->GetCameraPosition();
 
 		StrongActorPtr cube(new GameActor(cameraPos));
 		std::weak_ptr<WorldTransformComponent> pWeakTransform = cube->GetWorldTransform();
 		if (!pWeakTransform.expired())
 		{
 			std::shared_ptr<WorldTransformComponent> pTransform(pWeakTransform);
-			pTransform->SetRotation(pGame->GetRenderer()->GetCameraRotation());
+			pTransform->SetRotation(pDisplay->GetCameraRotation());
 		}
 		pGame->AddActor(cube);
 
-		auto renderer = pGame->GetRenderer();
-		renderer->AddCubeSceneNode(15.f, cube, WOODBOX_TEXTURE);
+		pDisplay->AddCubeSceneNode(15.f, cube, WOODBOX_TEXTURE);
 		auto physics = pGame->GetPhysicsEngine();
 		physics->VAddBox(Vec3(15.f, 15.f, 15.f), cube, "Titanium", "Bouncy");
 
 		Vec3 throwDirection = throwTowards - cameraPos;
 
 		// Also make the object rotate slightly "away from the camera".
-		Vec3 rotationAxis = pGame->GetRenderer()->GetCameraRightVector();
+		Vec3 rotationAxis = pDisplay->GetCameraRightVector();
 		rotationAxis[2] = -rotationAxis[2];
 
 		physics->VSetLinearVelocity(cube->GetID(), throwDirection, 10.f);

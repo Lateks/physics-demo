@@ -61,7 +61,6 @@ namespace GameEngine
 			irr::gui::IGUIEnvironment *m_pGui;
 
 			Events::EventHandlerPtr m_pMoveEventHandler;
-
 			std::shared_ptr<IrrlichtInputState> m_pInputState;
 			std::shared_ptr<MessagingWindow> m_messageWindow;
 
@@ -71,12 +70,15 @@ namespace GameEngine
 			unsigned int GetTime();
 		};
 
-		IrrlichtTimer::IrrlichtTimer(IrrlichtDisplay *pDisplay)
+		IrrlichtTimer::IrrlichtTimer(std::shared_ptr<IrrlichtDisplay> pDisplay)
 			: m_pDisplay(pDisplay) { }
 
 		unsigned int IrrlichtTimer::GetTimeMs()
 		{
-			return m_pDisplay->m_pData->GetTime();
+			if (m_pDisplay.expired())
+				return 0;
+
+			return std::shared_ptr<IrrlichtDisplay>(m_pDisplay)->m_pData->GetTime();
 		}
 
 		unsigned int IrrlichtDisplayData::GetTime()

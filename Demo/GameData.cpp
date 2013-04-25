@@ -13,7 +13,6 @@ namespace GameEngine
 
 	GameData::~GameData()
 	{
-		delete m_pRenderer;
 		delete m_pPhysicsEngine;
 		delete m_pEvents;
 	}

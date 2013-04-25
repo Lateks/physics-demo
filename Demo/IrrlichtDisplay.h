@@ -52,16 +52,18 @@ namespace GameEngine
 
 			virtual void LoadMap(const std::string& mapFilePath, const std::string& meshName, Vec3& position) override;
 		private:
+			IrrlichtDisplay(IrrlichtDisplay& other);
+			IrrlichtDisplay& operator=(IrrlichtDisplay& other);
 			IrrlichtDisplayData *m_pData;
 		};
 
 		class IrrlichtTimer : public ITimer
 		{
 		public:
-			IrrlichtTimer(IrrlichtDisplay *pDisplay);
+			IrrlichtTimer(std::shared_ptr<IrrlichtDisplay> pDisplay);
 			virtual unsigned int GetTimeMs() override;
 		private:
-			IrrlichtDisplay *m_pDisplay;
+			std::weak_ptr<IrrlichtDisplay> m_pDisplay;
 		};
 	}
 }

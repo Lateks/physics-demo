@@ -11,13 +11,15 @@ namespace GameEngine
 	{
 	private:
 		static std::shared_ptr<GameData> pInstance;
-		GameData() : m_pRenderer(nullptr), m_pPhysicsEngine(nullptr) { }
-		Display::IDisplay *m_pRenderer;
+		GameData() : m_pPhysicsEngine(nullptr) { }
 		ITimer *m_pTimer;
 		Events::IEventManager *m_pEvents;
 		Physics::IPhysicsEngine *m_pPhysicsEngine;
 		IGameInputHandler *m_pInputHandler;
+
+		std::shared_ptr<Display::IDisplay> m_pDisplay;
 		std::shared_ptr<Display::IInputState> m_pInputState;
+
 		std::map<ActorID, std::shared_ptr<GameActor>> m_actors;
 	public:
 		static std::shared_ptr<GameData> GetInstance()
@@ -53,24 +55,21 @@ namespace GameEngine
 		{
 			return m_pPhysicsEngine;
 		}
-		void SetInputStateHandler(std::weak_ptr<Display::IInputState> inputState)
+		void SetInputStateHandler(std::shared_ptr<Display::IInputState> inputState)
 		{
-			if (!inputState.expired())
-			{
-				m_pInputState = std::shared_ptr<Display::IInputState>(inputState);
-			}
+			m_pInputState = std::shared_ptr<Display::IInputState>(inputState);
 		}
 		std::shared_ptr<Display::IInputState> GetInputStateHandler() const
 		{
 			return m_pInputState;
 		}
-		void SetRenderer(Display::IDisplay *renderer)
+		void SetDisplayComponent(std::shared_ptr<Display::IDisplay> pDisplay)
 		{
-			m_pRenderer = renderer;
+			m_pDisplay = pDisplay;
 		}
-		Display::IDisplay * const GetRenderer() const
+		std::shared_ptr<Display::IDisplay> GetDisplayComponent() const
 		{
-			return m_pRenderer;
+			return m_pDisplay;
 		}
 		void setTimer(ITimer *timer)
 		{

@@ -171,9 +171,6 @@
     <ClInclude Include="BulletPhysicsConstraint.h">
       <Filter>Header Files\Physics\BulletPhysics</Filter>
     </ClInclude>
-    <ClInclude Include="IrrlichtMessagingWindow.h">
-      <Filter>Header Files\Display</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Demo.cpp">
@@ -232,9 +229,6 @@
     </ClCompile>
     <ClCompile Include="BulletPhysics.cpp">
       <Filter>Source Files\Physics\BulletPhysics</Filter>
-    </ClCompile>
-    <ClCompile Include="IrrlichtMessagingWindow.cpp">
-      <Filter>Source Files\Display</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -115,7 +115,6 @@
     <ClInclude Include="ITimer.h" />
     <ClInclude Include="Mat4.h" />
     <ClInclude Include="MessagingWindow.h" />
-    <ClInclude Include="IrrlichtMessagingWindow.h" />
     <ClInclude Include="PhysicsEngineFactories.h" />
     <ClInclude Include="RenderingEngineFactories.h" />
     <ClInclude Include="TimerFactories.h" />
@@ -139,7 +138,6 @@
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameData.cpp" />
     <ClCompile Include="Mat4.cpp" />
-    <ClCompile Include="IrrlichtMessagingWindow.cpp" />
     <ClCompile Include="Vec3.cpp" />
     <ClCompile Include="Vec4.cpp" />
     <ClCompile Include="XMLPhysicsData.cpp" />

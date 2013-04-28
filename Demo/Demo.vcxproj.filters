@@ -49,12 +49,6 @@
     <Filter Include="Source Files\Events">
       <UniqueIdentifier>{1ba4b2c2-70bd-4e59-b9fd-0b33697f5d9e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\3rdParty_BSPTools">
-      <UniqueIdentifier>{f209e22f-dc3e-4fd6-9b36-7d2b573033ba}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\3rdParty_BSPTools">
-      <UniqueIdentifier>{3a6d4dd1-d549-40f3-a483-7746f65fff59}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\BaseGameLogic">
       <UniqueIdentifier>{9429ec77-a942-4afe-9c32-8049ec61c050}</UniqueIdentifier>
     </Filter>
@@ -66,6 +60,12 @@
     </Filter>
     <Filter Include="Source Files\Physics\BulletPhysics">
       <UniqueIdentifier>{fcd475f6-5ec1-4534-aab6-6160a90a0438}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\BspUtils">
+      <UniqueIdentifier>{3a6d4dd1-d549-40f3-a483-7746f65fff59}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BspUtils">
+      <UniqueIdentifier>{f209e22f-dc3e-4fd6-9b36-7d2b573033ba}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -124,13 +124,13 @@
       <Filter>Header Files\Events</Filter>
     </ClInclude>
     <ClInclude Include="BSPLoader.h">
-      <Filter>Header Files\3rdParty_BSPTools</Filter>
+      <Filter>Header Files\BspUtils</Filter>
     </ClInclude>
     <ClInclude Include="BSPConverter.h">
-      <Filter>Header Files\3rdParty_BSPTools</Filter>
+      <Filter>Header Files\BspUtils</Filter>
     </ClInclude>
     <ClInclude Include="BspLoaderFactory.h">
-      <Filter>Header Files\3rdParty_BSPTools</Filter>
+      <Filter>Header Files\BspUtils</Filter>
     </ClInclude>
     <ClInclude Include="IInputState.h">
       <Filter>Header Files\Display</Filter>
@@ -189,13 +189,13 @@
       <Filter>Source Files\Events</Filter>
     </ClCompile>
     <ClCompile Include="BSPLoader.cpp">
-      <Filter>Source Files\3rdParty_BSPTools</Filter>
+      <Filter>Source Files\BspUtils</Filter>
     </ClCompile>
     <ClCompile Include="BSPConverter.cpp">
-      <Filter>Source Files\3rdParty_BSPTools</Filter>
+      <Filter>Source Files\BspUtils</Filter>
     </ClCompile>
     <ClCompile Include="BspLoaderFactory.cpp">
-      <Filter>Source Files\3rdParty_BSPTools</Filter>
+      <Filter>Source Files\BspUtils</Filter>
     </ClCompile>
     <ClCompile Include="IrrlichtDisplay.cpp">
       <Filter>Source Files\Display</Filter>

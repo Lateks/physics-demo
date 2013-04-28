@@ -11,10 +11,7 @@ namespace GameEngine
 {
 	std::shared_ptr<GameData> GameData::pInstance;
 
-	GameData::~GameData()
-	{
-		delete m_pPhysicsEngine;
-	}
+	GameData::~GameData() { }
 
 	float GameData::CurrentTimeSec()
 	{

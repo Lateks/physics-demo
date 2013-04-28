@@ -79,7 +79,7 @@ namespace GameEngine
 			std::cerr << "Failed to initialize physics engine." << std::endl;
 			return;
 		}
-		m_pData->SetPhysicsEngine(physics.release());
+		m_pData->SetPhysicsEngine(std::shared_ptr<Physics::IPhysicsEngine>(physics.release()));
 	}
 
 	Game::~Game() { }
@@ -96,8 +96,8 @@ namespace GameEngine
 	int Game::Run()
 	{
 		auto pDisplay = m_pData->GetDisplayComponent();
-		IPhysicsEngine *physics = m_pData->GetPhysicsEngine();
-		std::shared_ptr<IEventManager> events = m_pData->GetEventManager();
+		auto physics = m_pData->GetPhysicsEngine();
+		auto events = m_pData->GetEventManager();
 		IGameLogic *gameLogic = m_pData->GetInputHandler();
 		if (!pDisplay || !physics || !events || !gameLogic)
 			return 1;

@@ -31,9 +31,9 @@ namespace GameEngine
 	{
 		auto pGame = GameData::GetInstance();
 		auto pDisplay = pGame->GetDisplayComponent();
-		Physics::IPhysicsEngine *pPhysics = pGame->GetPhysicsEngine();
-		std::shared_ptr<Events::IEventManager> pEventMgr = pGame->GetEventManager();
-		std::shared_ptr<Display::MessagingWindow> pMessages = pDisplay->GetMessageWindow();
+		auto pPhysics = pGame->GetPhysicsEngine();
+		auto pEventMgr = pGame->GetEventManager();
+		auto pMessages = pDisplay->GetMessageWindow();
 		pMessages->SetFont("..\\assets\\fontlucida.png");
 		pMessages->SetVisible(true);
 		pMessages->SetWidth(600);

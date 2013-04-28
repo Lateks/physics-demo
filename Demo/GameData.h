@@ -13,12 +13,12 @@ namespace GameEngine
 		static std::shared_ptr<GameData> pInstance;
 		GameData() : m_pPhysicsEngine(nullptr) { }
 		ITimer *m_pTimer;
-		Physics::IPhysicsEngine *m_pPhysicsEngine;
 		IGameLogic *m_pInputHandler;
 
 		std::shared_ptr<Display::IDisplay> m_pDisplay;
 		std::shared_ptr<Display::IInputState> m_pInputState;
 		std::shared_ptr<Events::IEventManager> m_pEvents;
+		std::shared_ptr<Physics::IPhysicsEngine> m_pPhysicsEngine;
 
 		std::map<ActorID, std::shared_ptr<GameActor>> m_actors;
 	public:
@@ -47,11 +47,11 @@ namespace GameEngine
 		{
 			return m_pInputHandler;
 		}
-		void SetPhysicsEngine(Physics::IPhysicsEngine *physics)
+		void SetPhysicsEngine(std::shared_ptr<Physics::IPhysicsEngine> pPhysics)
 		{
-			m_pPhysicsEngine = physics;
+			m_pPhysicsEngine = pPhysics;
 		}
-		Physics::IPhysicsEngine * const GetPhysicsEngine() const
+		std::shared_ptr<Physics::IPhysicsEngine> GetPhysicsEngine() const
 		{
 			return m_pPhysicsEngine;
 		}

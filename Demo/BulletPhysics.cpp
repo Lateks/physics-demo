@@ -746,6 +746,7 @@ namespace GameEngine
 
 				rbInfo.m_restitution = matData.m_restitution;
 				rbInfo.m_friction = matData.m_friction;
+				rbInfo.m_rollingFriction = matData.m_friction;
 
 				btRigidBody * const body = new btRigidBody(rbInfo);
 				m_pDynamicsWorld->addRigidBody(body);
@@ -801,8 +802,8 @@ namespace GameEngine
 					// This could possibly be based on the the material of the static object.
 					// (Can this data be parsed from the bsp file?)
 					body->setRestitution(0.2f);
-					body->setFriction(0.6f);
-					body->setRollingFriction(0.4f);
+					body->setFriction(1.f);
+					body->setRollingFriction(0.2f);
 					body->setAnisotropicFriction(shape->getAnisotropicRollingFrictionDirection(),
 						btCollisionObject::CF_ANISOTROPIC_ROLLING_FRICTION);
 				}

@@ -70,7 +70,8 @@ namespace GameEngine
 		}
 		m_pData->SetEventManager(pEventManager.release());
 
-		// Setup physics.
+		// Setup physics. World is scaled by the constant given as parameter
+		// (compared to the size of the rendered world).
 		std::unique_ptr<Physics::IPhysicsEngine> physics(
 			Physics::CreatePhysicsEngine(0.05f));
 		if (!physics.get())

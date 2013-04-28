@@ -102,7 +102,6 @@
     <ClInclude Include="IGameInputHandler.h" />
     <ClInclude Include="IEventManager.h" />
     <ClInclude Include="IInputState.h" />
-    <ClInclude Include="IrrlichtInputState.h" />
     <ClInclude Include="Mat4Impl.h" />
     <ClInclude Include="Vec4.h" />
     <ClInclude Include="WorldTransformComponent.h" />

@@ -132,9 +132,6 @@
     <ClInclude Include="BspLoaderFactory.h">
       <Filter>Header Files\3rdParty_BSPTools</Filter>
     </ClInclude>
-    <ClInclude Include="IrrlichtInputState.h">
-      <Filter>Header Files\Display</Filter>
-    </ClInclude>
     <ClInclude Include="IInputState.h">
       <Filter>Header Files\Display</Filter>
     </ClInclude>

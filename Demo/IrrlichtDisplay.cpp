@@ -1,5 +1,5 @@
 #include "IrrlichtDisplay.h"
-#include "IrrlichtInputState.h"
+#include "IInputState.h"
 #include "MessagingWindow.h"
 #include "GameActor.h"
 #include "WorldTransformComponent.h"
@@ -92,6 +92,24 @@ namespace GameEngine
 			std::vector<irr::core::stringw> m_messageBuffer;
 			irr::video::SColor m_color;
 			void SetFontHeight();
+		};
+
+		class IrrlichtInputState : public IInputState, public irr::IEventReceiver
+		{
+		public:
+			virtual ~IrrlichtInputState() { }
+
+			virtual bool OnEvent(const irr::SEvent& event)
+			{
+				if (event.EventType == irr::EET_MOUSE_INPUT_EVENT)
+				{
+					m_mouseState.LeftMouseDown = event.MouseInput.isLeftPressed();
+					m_mouseState.RightMouseDown = event.MouseInput.isRightPressed();
+					m_mouseState.X = event.MouseInput.X;
+					m_mouseState.Y = event.MouseInput.Y;
+				}
+				return false;
+			}
 		};
 
 		// Conversions between Irrlicht linear algebra types and the game engine's

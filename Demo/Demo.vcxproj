@@ -91,7 +91,6 @@
     <ClInclude Include="BSPLoader.h" />
     <ClInclude Include="BspLoaderFactory.h" />
     <ClInclude Include="BulletConversions.h" />
-    <ClInclude Include="BulletDebugRenderer.h" />
     <ClInclude Include="BulletPhysics.h" />
     <ClInclude Include="BulletPhysicsConstraint.h" />
     <ClInclude Include="BulletPhysicsObject.h" />
@@ -125,7 +124,6 @@
     <ClCompile Include="BSPLoader.cpp" />
     <ClCompile Include="BspLoaderFactory.cpp" />
     <ClCompile Include="BulletConversions.cpp" />
-    <ClCompile Include="BulletDebugRenderer.cpp" />
     <ClCompile Include="BulletPhysics.cpp" />
     <ClCompile Include="BulletPhysicsObject.cpp" />
     <ClCompile Include="DemoGameLogic.cpp" />

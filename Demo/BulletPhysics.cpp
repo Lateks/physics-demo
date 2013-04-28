@@ -84,10 +84,7 @@ namespace GameEngine
 
 		BulletPhysics::BulletPhysics(float worldScale) : m_pData(new BulletPhysicsData(worldScale)) { }
 
-		BulletPhysics::~BulletPhysics()
-		{
-			delete m_pData;
-		}
+		BulletPhysics::~BulletPhysics() { }
 
 		bool BulletPhysics::VInitEngine()
 		{

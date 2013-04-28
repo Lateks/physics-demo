@@ -150,9 +150,6 @@
     <ClInclude Include="BulletConversions.h">
       <Filter>Header Files\Physics\BulletPhysics</Filter>
     </ClInclude>
-    <ClInclude Include="BulletDebugRenderer.h">
-      <Filter>Header Files\Physics\BulletPhysics</Filter>
-    </ClInclude>
     <ClInclude Include="BulletPhysics.h">
       <Filter>Header Files\Physics\BulletPhysics</Filter>
     </ClInclude>
@@ -213,9 +210,6 @@
       <Filter>Source Files\Physics\BulletPhysics</Filter>
     </ClCompile>
     <ClCompile Include="BulletConversions.cpp">
-      <Filter>Source Files\Physics\BulletPhysics</Filter>
-    </ClCompile>
-    <ClCompile Include="BulletDebugRenderer.cpp">
       <Filter>Source Files\Physics\BulletPhysics</Filter>
     </ClCompile>
     <ClCompile Include="BulletPhysics.cpp">

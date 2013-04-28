@@ -53,7 +53,7 @@ namespace GameEngine
 			BulletPhysics(const BulletPhysics& other);
 			BulletPhysics& operator=(const BulletPhysics& other);
 
-			BulletPhysicsData *m_pData;
+			std::unique_ptr<BulletPhysicsData> m_pData;
 		};
 	}
 }

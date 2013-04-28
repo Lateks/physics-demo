@@ -54,7 +54,7 @@ namespace GameEngine
 		private:
 			IrrlichtDisplay(IrrlichtDisplay& other);
 			IrrlichtDisplay& operator=(IrrlichtDisplay& other);
-			IrrlichtDisplayData *m_pData;
+			std::unique_ptr<IrrlichtDisplayData> m_pData;
 		};
 
 		class IrrlichtTimer : public ITimer

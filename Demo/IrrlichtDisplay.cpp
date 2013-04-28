@@ -171,8 +171,8 @@ namespace GameEngine
 		}
 
 		IrrlichtDisplay::IrrlichtDisplay()
+			: m_pData(new IrrlichtDisplayData())
 		{
-			m_pData = new IrrlichtDisplayData();
 			m_pData->m_pInputState.reset(new IrrlichtInputState());
 			m_pData->m_pMoveEventHandler =
 				Events::EventHandlerPtr(new std::function<void(EventPtr)>(
@@ -262,7 +262,6 @@ namespace GameEngine
 			{
 				m_pData->m_pDevice->drop();
 			}
-			delete m_pData;
 		}
 
 		void IrrlichtDisplay::SetCameraPosition(Vec3& newPosition)

@@ -26,14 +26,14 @@ namespace GameEngine
 	Game::Game()
 	{
 		// Setup the display component (rendering and input handling).
-		std::unique_ptr<IDisplay> renderer(Display::CreateRenderer());
-		if (!renderer.get())
+		std::unique_ptr<IDisplay> pRenderer(Display::CreateRenderer());
+		if (!pRenderer.get())
 		{
 			std::cerr << "Failed to create rendering device." << std::cerr;
 			return;
 		}
 
-		if (!renderer->SetupAndOpenWindow(1024, 800,
+		if (!pRenderer->SetupAndOpenWindow(1024, 800,
 			Display::DRIVER_TYPE::OPEN_GL, Display::CAMERA_TYPE::FPS))
 		{
 			std::cerr << "Failed to open OpenGL device." << std::cerr;
@@ -41,29 +41,29 @@ namespace GameEngine
 		}
 
 		m_pData = GameData::GetInstance();
-		m_pData->SetInputStateHandler(renderer->GetInputState());
-		m_pData->SetDisplayComponent(std::shared_ptr<Display::IDisplay>(renderer.release()));
+		m_pData->SetInputStateHandler(pRenderer->GetInputState());
+		m_pData->SetDisplayComponent(std::shared_ptr<Display::IDisplay>(pRenderer.release()));
 
-		std::unique_ptr<IGameLogic> pInputHandler(CreateDemoGameLogic());
-		if (!pInputHandler.get())
+		std::unique_ptr<IGameLogic> pGameLogic(CreateDemoGameLogic());
+		if (!pGameLogic)
 		{
 			std::cerr << "Failed to create demo input handler." << std::endl;
 			return;
 		}
-		m_pData->SetInputHandler(pInputHandler.release());
+		m_pData->SetInputHandler(std::shared_ptr<IGameLogic>(pGameLogic.release()));
 
 		// Setup timer.
-		std::unique_ptr<ITimer> timer(GetTimer());
-		if (!timer.get())
+		std::unique_ptr<ITimer> pTimer(GetTimer());
+		if (!pTimer)
 		{
 			std::cerr << "Failed to create a timer." << std::endl;
 			return;
 		}
-		m_pData->setTimer(timer.release());
+		m_pData->setTimer(std::shared_ptr<ITimer>(pTimer.release()));
 
 		// Setup event manager.
 		std::unique_ptr<IEventManager> pEventManager(new EventManager());
-		if (!pEventManager.get())
+		if (!pEventManager)
 		{
 			std::cerr << "Failed to create an event manager." << std::endl;
 			return;
@@ -74,7 +74,7 @@ namespace GameEngine
 		// (compared to the size of the rendered world).
 		std::unique_ptr<Physics::IPhysicsEngine> physics(
 			Physics::CreatePhysicsEngine(0.05f));
-		if (!physics.get())
+		if (!physics)
 		{
 			std::cerr << "Failed to initialize physics engine." << std::endl;
 			return;
@@ -98,7 +98,7 @@ namespace GameEngine
 		auto pDisplay = m_pData->GetDisplayComponent();
 		auto physics = m_pData->GetPhysicsEngine();
 		auto events = m_pData->GetEventManager();
-		IGameLogic *gameLogic = m_pData->GetInputHandler();
+		auto gameLogic = m_pData->GetInputHandler();
 		if (!pDisplay || !physics || !events || !gameLogic)
 			return 1;
 

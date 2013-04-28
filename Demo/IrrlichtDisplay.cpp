@@ -1,6 +1,5 @@
 #include "IrrlichtDisplay.h"
 #include "IrrlichtInputState.h"
-#include "IrrlichtConversions.h"
 #include "IrrlichtMessagingWindow.h"
 #include "GameActor.h"
 #include "WorldTransformComponent.h"
@@ -61,16 +60,58 @@ namespace GameEngine
 			irr::gui::IGUIEnvironment *m_pGui;
 
 			Events::EventHandlerPtr m_pMoveEventHandler;
-			std::shared_ptr<IrrlichtInputState> m_pInputState;
-			std::shared_ptr<MessagingWindow> m_messageWindow;
+			shared_ptr<IrrlichtInputState> m_pInputState;
+			shared_ptr<MessagingWindow> m_messageWindow;
 
 			void AddSceneNode(WeakActorPtr pActor, irr::scene::ISceneNode *pNode, unsigned int texture);
 			void UpdateActorPosition(Events::EventPtr pEvent);
-			void SetNodeTransform(irr::scene::ISceneNode *pNode, std::shared_ptr<WorldTransformComponent> pWorldTransform);
+			void SetNodeTransform(irr::scene::ISceneNode *pNode, shared_ptr<WorldTransformComponent> pWorldTransform);
 			unsigned int GetTime();
 		};
 
-		IrrlichtTimer::IrrlichtTimer(std::shared_ptr<IrrlichtDisplay> pDisplay)
+		// Conversions between Irrlicht linear algebra types and the game engine's
+		// corresponding types.
+
+		vector3df ConvertVector(Vec3& vector)
+		{
+			vector3df converted(vector.x(), vector.y(), vector.z());
+			if (vector.GetHandedness() == CSHandedness::RIGHT)
+			{
+				converted.Z = -converted.Z;
+			}
+			return converted;
+		}
+
+		// Assumes left-handed coordinate system for the input vector.
+		Vec3 ConvertVector(vector3df& vector)
+		{
+			return Vec3(vector.X, vector.Y, -vector.Z);
+		}
+
+		quaternion ConvertQuaternion(Quaternion& quat)
+		{
+			return quaternion(quat.x(), quat.y(), quat.z(), quat.w());
+		}
+
+		Quaternion ConvertQuaternion(irr::core::quaternion& quat)
+		{
+			return Quaternion(quat.X, quat.Y, quat.Z, quat.W);
+		}
+
+		// TODO: handedness
+		matrix4 ConvertProjectionMatrix(Mat4& matrix)
+		{
+			matrix4 newMatrix;
+			for (int i = 0; i < 4; i++)
+				for (int j = 0; j < 4; j++)
+				{
+					float value = matrix.index(i, j);
+					newMatrix[i*4 + j] = (float) matrix.index(i, j);
+				}
+			return newMatrix;
+		}
+
+		IrrlichtTimer::IrrlichtTimer(shared_ptr<IrrlichtDisplay> pDisplay)
 			: m_pDisplay(pDisplay) { }
 
 		unsigned int IrrlichtTimer::GetTimeMs()
@@ -78,7 +119,7 @@ namespace GameEngine
 			if (m_pDisplay.expired())
 				return 0;
 
-			return std::shared_ptr<IrrlichtDisplay>(m_pDisplay)->m_pData->GetTime();
+			return shared_ptr<IrrlichtDisplay>(m_pDisplay)->m_pData->GetTime();
 		}
 
 		unsigned int IrrlichtDisplayData::GetTime()
@@ -101,7 +142,7 @@ namespace GameEngine
 			return ConvertVector(pos);
 		}
 
-		std::shared_ptr<IInputState> IrrlichtDisplay::GetInputState() const
+		shared_ptr<IInputState> IrrlichtDisplay::GetInputState() const
 		{
 			return m_pData->m_pInputState;
 		}
@@ -167,7 +208,7 @@ namespace GameEngine
 			return true;
 		}
 
-		std::shared_ptr<MessagingWindow> IrrlichtDisplay::GetMessageWindow()
+		shared_ptr<MessagingWindow> IrrlichtDisplay::GetMessageWindow()
 		{
 			return m_pData->m_messageWindow;
 		}
@@ -361,7 +402,7 @@ namespace GameEngine
 			ActorMoveEvent *pMoveEvent =
 				dynamic_cast<ActorMoveEvent*>(pEvent.get());
 
-			std::shared_ptr<GameData> pGame = GameData::GetInstance();
+			shared_ptr<GameData> pGame = GameData::GetInstance();
 			WeakActorPtr pWeakActor = pGame->GetActor(pMoveEvent->GetActorId());
 			if (pWeakActor.expired())
 				return;
@@ -381,7 +422,7 @@ namespace GameEngine
 		}
 
 		void IrrlichtDisplayData::SetNodeTransform(
-			irr::scene::ISceneNode *pNode, std::shared_ptr<WorldTransformComponent> pWorldTransform)
+			irr::scene::ISceneNode *pNode, shared_ptr<WorldTransformComponent> pWorldTransform)
 		{
 			quaternion rot = ConvertQuaternion(pWorldTransform->GetRotation());
 			vector3df eulerRot;

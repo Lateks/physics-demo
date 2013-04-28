@@ -102,7 +102,6 @@
     <ClInclude Include="IGameInputHandler.h" />
     <ClInclude Include="IEventManager.h" />
     <ClInclude Include="IInputState.h" />
-    <ClInclude Include="IrrlichtConversions.h" />
     <ClInclude Include="IrrlichtInputState.h" />
     <ClInclude Include="Mat4Impl.h" />
     <ClInclude Include="Vec4.h" />
@@ -135,7 +134,6 @@
     <ClCompile Include="EventManager.cpp" />
     <ClCompile Include="GameActor.cpp" />
     <ClCompile Include="IGameInputHandler.cpp" />
-    <ClCompile Include="IrrlichtConversions.cpp" />
     <ClCompile Include="IrrlichtDisplay.cpp" />
     <ClCompile Include="Demo.cpp" />
     <ClCompile Include="Game.cpp" />

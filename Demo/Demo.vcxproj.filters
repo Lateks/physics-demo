@@ -144,9 +144,6 @@
     <ClInclude Include="IrrlichtDisplay.h">
       <Filter>Header Files\Display</Filter>
     </ClInclude>
-    <ClInclude Include="IrrlichtConversions.h">
-      <Filter>Header Files\Display</Filter>
-    </ClInclude>
     <ClInclude Include="Game.h">
       <Filter>Header Files\BaseGameLogic</Filter>
     </ClInclude>
@@ -210,9 +207,6 @@
       <Filter>Source Files\3rdParty_BSPTools</Filter>
     </ClCompile>
     <ClCompile Include="IrrlichtDisplay.cpp">
-      <Filter>Source Files\Display</Filter>
-    </ClCompile>
-    <ClCompile Include="IrrlichtConversions.cpp">
       <Filter>Source Files\Display</Filter>
     </ClCompile>
     <ClCompile Include="Game.cpp">

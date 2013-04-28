@@ -68,7 +68,7 @@ namespace GameEngine
 			std::cerr << "Failed to create an event manager." << std::endl;
 			return;
 		}
-		m_pData->SetEventManager(pEventManager.release());
+		m_pData->SetEventManager(std::shared_ptr<Events::IEventManager>(pEventManager.release()));
 
 		// Setup physics. World is scaled by the constant given as parameter
 		// (compared to the size of the rendered world).
@@ -97,7 +97,7 @@ namespace GameEngine
 	{
 		auto pDisplay = m_pData->GetDisplayComponent();
 		IPhysicsEngine *physics = m_pData->GetPhysicsEngine();
-		IEventManager *events = m_pData->GetEventManager();
+		std::shared_ptr<IEventManager> events = m_pData->GetEventManager();
 		IGameInputHandler *gameLogic = m_pData->GetInputHandler();
 		if (!pDisplay || !physics || !events || !gameLogic)
 			return 1;

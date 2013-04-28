@@ -14,7 +14,6 @@ namespace GameEngine
 	GameData::~GameData()
 	{
 		delete m_pPhysicsEngine;
-		delete m_pEvents;
 	}
 
 	float GameData::CurrentTimeSec()

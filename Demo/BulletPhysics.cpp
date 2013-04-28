@@ -486,7 +486,7 @@ namespace GameEngine
 
 			auto pGame = GameData::GetInstance();
 			assert(pGame && pGame->GetEventManager());
-			Events::IEventManager *pEventMgr = pGame->GetEventManager();
+			std::shared_ptr<Events::IEventManager> pEventMgr = pGame->GetEventManager();
 			if (pEventMgr)
 			{
 				pEventMgr->RegisterHandler(handledType, pHandler);
@@ -558,7 +558,7 @@ namespace GameEngine
 
 			auto pGame = GameData::GetInstance();
 			assert(pGame && pGame->GetEventManager());
-			Events::IEventManager *pEventMgr = pGame->GetEventManager();
+			std::shared_ptr<Events::IEventManager> pEventMgr = pGame->GetEventManager();
 			if (pEventMgr)
 			{
 				pEventMgr->DeregisterHandler(pConstraint->GetHandlerEventType(), pConstraint->GetConstraintUpdater());

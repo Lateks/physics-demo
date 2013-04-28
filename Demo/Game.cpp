@@ -3,7 +3,7 @@
 #include "GameData.h"
 #include "IDisplay.h"
 #include "TimerFactories.h"
-#include "IGameInputHandler.h"
+#include "IGameLogic.h"
 #include "IInputState.h"
 #include "IEventManager.h"
 #include "EventManager.h" // TODO: make a factory method for these.
@@ -44,7 +44,7 @@ namespace GameEngine
 		m_pData->SetInputStateHandler(renderer->GetInputState());
 		m_pData->SetDisplayComponent(std::shared_ptr<Display::IDisplay>(renderer.release()));
 
-		std::unique_ptr<IGameInputHandler> pInputHandler(CreateDemoInputHandler());
+		std::unique_ptr<IGameLogic> pInputHandler(CreateDemoGameLogic());
 		if (!pInputHandler.get())
 		{
 			std::cerr << "Failed to create demo input handler." << std::endl;
@@ -98,7 +98,7 @@ namespace GameEngine
 		auto pDisplay = m_pData->GetDisplayComponent();
 		IPhysicsEngine *physics = m_pData->GetPhysicsEngine();
 		std::shared_ptr<IEventManager> events = m_pData->GetEventManager();
-		IGameInputHandler *gameLogic = m_pData->GetInputHandler();
+		IGameLogic *gameLogic = m_pData->GetInputHandler();
 		if (!pDisplay || !physics || !events || !gameLogic)
 			return 1;
 

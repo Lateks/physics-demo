@@ -1,4 +1,4 @@
-#include "DemoInputHandler.h"
+#include "DemoGameLogic.h"
 #include "WorldTransformComponent.h"
 #include "IPhysicsEngine.h"
 #include "MessagingWindow.h"
@@ -27,7 +27,7 @@ namespace GameEngine
 	 * (Also note that the concept of handedness does not affect quaternions
 	 * used for handling rotations.)
 	 */
-	void DemoInputHandler::SetupInitialScene()
+	void DemoGameLogic::SetupInitialScene()
 	{
 		auto pGame = GameData::GetInstance();
 		auto pDisplay = pGame->GetDisplayComponent();
@@ -84,7 +84,7 @@ namespace GameEngine
 		pEventMgr->RegisterHandler(Events::EventType::EXIT_TRIGGER, eventPrinter);
 	}
 
-	void DemoInputHandler::PrintTriggerEvent(std::shared_ptr<Display::MessagingWindow> pMessages,
+	void DemoGameLogic::PrintTriggerEvent(std::shared_ptr<Display::MessagingWindow> pMessages,
 		Events::EventPtr event)
 	{
 		Events::TriggerEvent *pEvent = dynamic_cast<Events::TriggerEvent*>(event.get());
@@ -101,7 +101,7 @@ namespace GameEngine
 		pMessages->AddMessage(message.str());
 	}
 
-	void DemoInputHandler::HandleInputs()
+	void DemoGameLogic::HandleInputs()
 	{
 		auto pGame = GameData::GetInstance();
 		assert(pGame && pGame->GetInputStateHandler());
@@ -153,7 +153,7 @@ namespace GameEngine
 		m_previousCameraState = m_currentCameraState;
 	}
 
-	void DemoInputHandler::ThrowCube(Vec3& throwTowards)
+	void DemoGameLogic::ThrowCube(Vec3& throwTowards)
 	{
 		auto pGame = GameData::GetInstance();
 		auto pDisplay = pGame->GetDisplayComponent();
@@ -182,38 +182,38 @@ namespace GameEngine
 		physics->VSetAngularVelocity(cube->GetID(), rotationAxis, 2.5f);
 	}
 
-	bool DemoInputHandler::CameraMoved()
+	bool DemoGameLogic::CameraMoved()
 	{
 		return m_previousCameraState.cameraPos != m_currentCameraState.cameraPos ||
 			m_previousCameraState.cameraTarget != m_currentCameraState.cameraTarget;
 	}
 
-	bool DemoInputHandler::LeftMousePressed()
+	bool DemoGameLogic::LeftMousePressed()
 	{
 		return m_currentMouseState.LeftMouseDown && !m_previousMouseState.LeftMouseDown;
 	}
 
-	bool DemoInputHandler::LeftMouseDown()
+	bool DemoGameLogic::LeftMouseDown()
 	{
 		return m_currentMouseState.LeftMouseDown && m_previousMouseState.LeftMouseDown;
 	}
 
-	bool DemoInputHandler::LeftMouseReleased()
+	bool DemoGameLogic::LeftMouseReleased()
 	{
 		return !m_currentMouseState.LeftMouseDown && m_previousMouseState.LeftMouseDown;
 	}
 
-	bool DemoInputHandler::RightMousePressed()
+	bool DemoGameLogic::RightMousePressed()
 	{
 		return m_currentMouseState.RightMouseDown && !m_previousMouseState.RightMouseDown;
 	}
 
-	bool DemoInputHandler::RightMouseDown()
+	bool DemoGameLogic::RightMouseDown()
 	{
 		return m_currentMouseState.RightMouseDown && m_previousMouseState.RightMouseDown;
 	}
 
-	bool DemoInputHandler::RightMouseReleased()
+	bool DemoGameLogic::RightMouseReleased()
 	{
 		return !m_currentMouseState.RightMouseDown && m_previousMouseState.RightMouseDown;
 	}

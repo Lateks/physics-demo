@@ -14,7 +14,7 @@ namespace GameEngine
 		GameData() : m_pPhysicsEngine(nullptr) { }
 		ITimer *m_pTimer;
 		Physics::IPhysicsEngine *m_pPhysicsEngine;
-		IGameInputHandler *m_pInputHandler;
+		IGameLogic *m_pInputHandler;
 
 		std::shared_ptr<Display::IDisplay> m_pDisplay;
 		std::shared_ptr<Display::IInputState> m_pInputState;
@@ -39,11 +39,11 @@ namespace GameEngine
 		{
 			return m_actors[id];
 		}
-		void SetInputHandler(IGameInputHandler *inputHandler)
+		void SetInputHandler(IGameLogic *inputHandler)
 		{
 			m_pInputHandler = inputHandler;
 		}
-		IGameInputHandler *GetInputHandler()
+		IGameLogic *GetInputHandler()
 		{
 			return m_pInputHandler;
 		}

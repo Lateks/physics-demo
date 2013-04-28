@@ -50,7 +50,7 @@ namespace GameEngine
 
 	class Game;
 	class GameData;
-	class IGameInputHandler;
+	class IGameLogic;
 
 	class ITimer;
 	class IrrlichtTimer;

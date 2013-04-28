@@ -2,17 +2,17 @@
 #define DEMO_INPUT_HANDLER_H
 
 #include "enginefwd.h"
-#include "IGameInputHandler.h"
+#include "IGameLogic.h"
 #include "IInputState.h"
 #include "IEventManager.h"
 #include "Vec3.h"
 
 namespace GameEngine
 {
-	class DemoInputHandler : public IGameInputHandler
+	class DemoGameLogic : public IGameLogic
 	{
 	public:
-		virtual ~DemoInputHandler() { };
+		virtual ~DemoGameLogic() { };
 		virtual void HandleInputs() override;
 		virtual void SetupInitialScene() override;
 	private:

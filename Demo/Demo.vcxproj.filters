@@ -147,12 +147,6 @@
     <ClInclude Include="GameData.h">
       <Filter>Header Files\BaseGameLogic</Filter>
     </ClInclude>
-    <ClInclude Include="DemoInputHandler.h">
-      <Filter>Header Files\BaseGameLogic</Filter>
-    </ClInclude>
-    <ClInclude Include="IGameInputHandler.h">
-      <Filter>Header Files\BaseGameLogic</Filter>
-    </ClInclude>
     <ClInclude Include="BulletConversions.h">
       <Filter>Header Files\Physics\BulletPhysics</Filter>
     </ClInclude>
@@ -167,6 +161,12 @@
     </ClInclude>
     <ClInclude Include="BulletPhysicsConstraint.h">
       <Filter>Header Files\Physics\BulletPhysics</Filter>
+    </ClInclude>
+    <ClInclude Include="DemoGameLogic.h">
+      <Filter>Header Files\BaseGameLogic</Filter>
+    </ClInclude>
+    <ClInclude Include="IGameLogic.h">
+      <Filter>Header Files\BaseGameLogic</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -209,12 +209,6 @@
     <ClCompile Include="GameData.cpp">
       <Filter>Source Files\BaseGameLogic</Filter>
     </ClCompile>
-    <ClCompile Include="DemoInputHandler.cpp">
-      <Filter>Source Files\BaseGameLogic</Filter>
-    </ClCompile>
-    <ClCompile Include="IGameInputHandler.cpp">
-      <Filter>Source Files\BaseGameLogic</Filter>
-    </ClCompile>
     <ClCompile Include="BulletPhysicsObject.cpp">
       <Filter>Source Files\Physics\BulletPhysics</Filter>
     </ClCompile>
@@ -226,6 +220,12 @@
     </ClCompile>
     <ClCompile Include="BulletPhysics.cpp">
       <Filter>Source Files\Physics\BulletPhysics</Filter>
+    </ClCompile>
+    <ClCompile Include="DemoGameLogic.cpp">
+      <Filter>Source Files\BaseGameLogic</Filter>
+    </ClCompile>
+    <ClCompile Include="IGameLogic.cpp">
+      <Filter>Source Files\BaseGameLogic</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

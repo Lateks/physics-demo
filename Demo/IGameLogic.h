@@ -6,15 +6,15 @@
 
 namespace GameEngine
 {
-	class IGameInputHandler
+	class IGameLogic
 	{
 	public:
-		virtual ~IGameInputHandler() { };
+		virtual ~IGameLogic() { };
 		virtual void HandleInputs() = 0;
 		virtual void SetupInitialScene() = 0;
 	};
 
-	std::unique_ptr<IGameInputHandler> CreateDemoInputHandler();
+	std::unique_ptr<IGameLogic> CreateDemoGameLogic();
 }
 
 #endif

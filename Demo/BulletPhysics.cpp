@@ -392,39 +392,13 @@ namespace GameEngine
 			return actorHit;
 		}
 
-		/* Most of the constraint code is from Bullet tutorials (DemoApplication.cpp).
-		 * This is really a convenience method to allow adding constraints for
-		 * picking up items. In general, a physics SDK wrapper should possibly
-		 * define more generic methods for setting up constraints (?).
-		 */
-		unsigned int BulletPhysics::VAddPickConstraint(ActorID actorId, Vec3& pickPosition, Vec3& cameraPosition)
+		inline btGeneric6DofConstraint *CreatePickConstraint(btRigidBody* pBody, btTransform *pTransform)
 		{
-			std::shared_ptr<BulletPhysicsObject> pObject = m_pData->GetPhysicsObject(actorId);
-			if (!pObject.get() || pObject->IsStatic() || pObject->IsKinematic())
-				return 0;
-
-			btVector3 btPickPosition = Vec3_to_btVector3(pickPosition, m_pData->m_worldScaleConst);
-			btVector3 btCameraPosition = Vec3_to_btVector3(cameraPosition, m_pData->m_worldScaleConst);
-			float pickDistance = (btPickPosition - btCameraPosition).length();
-
-			btRigidBody *pBody = pObject->GetRigidBodies()[0];
-			pBody->setActivationState(DISABLE_DEACTIVATION);
-
-			btVector3 localPivot = pBody->getCenterOfMassTransform().inverse() * btPickPosition;
-
-			btTransform transform;
-			transform.setIdentity();
-			transform.setOrigin(localPivot);
-
-			btGeneric6DofConstraint* dof6 = new btGeneric6DofConstraint(*pBody, transform, false);
+			btGeneric6DofConstraint* dof6 = new btGeneric6DofConstraint(*pBody, *pTransform, false);
 			dof6->setLinearLowerLimit(btVector3(0,0,0));
 			dof6->setLinearUpperLimit(btVector3(0,0,0));
 			dof6->setAngularLowerLimit(btVector3(0,0,0));
 			dof6->setAngularUpperLimit(btVector3(0,0,0));
-
-			m_pData->m_pDynamicsWorld->addConstraint(dof6,true);
-			ConstraintID pickConstraintId = pObject->AddConstraint(dof6,
-				BulletPhysicsConstraint::ConstraintType::PICK_CONSTRAINT);
 
 			dof6->setParam(BT_CONSTRAINT_STOP_CFM,0.8f,0);
 			dof6->setParam(BT_CONSTRAINT_STOP_CFM,0.8f,1);
@@ -440,6 +414,42 @@ namespace GameEngine
 			dof6->setParam(BT_CONSTRAINT_STOP_ERP,0.1f,4);
 			dof6->setParam(BT_CONSTRAINT_STOP_ERP,0.1f,5);
 
+			return dof6;
+		}
+
+		/* Most of the constraint code is from Bullet tutorials (DemoApplication.cpp).
+		 * This is really a convenience method to allow adding constraints for
+		 * picking up items. In general, a physics SDK wrapper should possibly
+		 * define more generic methods for setting up constraints (?).
+		 */
+		unsigned int BulletPhysics::VAddPickConstraint(ActorID actorId, Vec3& pickPosition, Vec3& cameraPosition)
+		{
+			std::shared_ptr<BulletPhysicsObject> pObject = m_pData->GetPhysicsObject(actorId);
+			if (!pObject.get() || pObject->IsStatic() || pObject->IsKinematic())
+				return 0;
+
+			// Calculate parameters for the constraint.
+			btVector3 btPickPosition = Vec3_to_btVector3(pickPosition, m_pData->m_worldScaleConst);
+			btVector3 btCameraPosition = Vec3_to_btVector3(cameraPosition, m_pData->m_worldScaleConst);
+			float pickDistance = (btPickPosition - btCameraPosition).length();
+
+			btRigidBody *pBody = pObject->GetRigidBodies()[0];
+			pBody->setActivationState(DISABLE_DEACTIVATION);
+
+			btVector3 localPivot = pBody->getCenterOfMassTransform().inverse() * btPickPosition;
+
+			btTransform transform;
+			transform.setIdentity();
+			transform.setOrigin(localPivot);
+
+			// Create the constraint and store it.
+			btGeneric6DofConstraint* btPickConstraint = CreatePickConstraint(pBody, &transform);
+
+			m_pData->m_pDynamicsWorld->addConstraint(btPickConstraint,true);
+			ConstraintID pickConstraintId = pObject->AddConstraint(btPickConstraint,
+				BulletPhysicsConstraint::ConstraintType::PICK_CONSTRAINT);
+
+			// Create the event handler callback.
 			Events::EventType handledType = Events::EventType::CAMERA_MOVED;
 			Events::EventHandlerPtr pHandler(new std::function<void(Events::EventPtr)>(
 				[this, pickConstraintId, actorId, handledType] (Events::EventPtr pEvent)
@@ -461,6 +471,7 @@ namespace GameEngine
 			assert(pPickConstraint.get() && pPickConstraint->GetBulletConstraint() &&
 				pPickConstraint->GetConstraintType() == BulletPhysicsConstraint::ConstraintType::PICK_CONSTRAINT);
 
+			// Store the callback function and picking distance for later reference.
 			BulletPickConstraint *pConstraint = dynamic_cast<BulletPickConstraint*>(pPickConstraint.get());
 			pConstraint->SetConstraintUpdater(pHandler, handledType);
 			pConstraint->SetPickDistance(pickDistance);
@@ -500,6 +511,8 @@ namespace GameEngine
 
 			BulletPickConstraint *pConstraint = dynamic_cast<BulletPickConstraint*>(pPickConstraint.get());
 
+			// Update the pick constraint and keep it at the same picking distance as
+			// when it was picked up.
 			btTypedConstraint *btConstraint = pPickConstraint->GetBulletConstraint();
 			if (btConstraint->getConstraintType() == D6_CONSTRAINT_TYPE)
 			{

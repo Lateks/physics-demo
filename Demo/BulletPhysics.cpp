@@ -236,7 +236,7 @@ namespace GameEngine
 		}
 
 		// Builds a convex static collision object from the convex hull defined by a set of plane equations.
-		void BulletPhysics::VAddConvexStaticColliderMesh(std::vector<Vec4>& planeEquations, WeakActorPtr pActor, bool scale)
+		void BulletPhysics::VAddConvexStaticColliderMesh(std::vector<Vec4>& planeEquations, WeakActorPtr pActor)
 		{
 			if (pActor.expired())
 				return;
@@ -244,17 +244,18 @@ namespace GameEngine
 
 			btAlignedObjectArray<btVector3> vertices;
 			btAlignedObjectArray<btVector3> btPlaneEquations;
+			float scaling = m_pData->m_worldScaleConst;
 			std::for_each(planeEquations.begin(), planeEquations.end(),
-				[&btPlaneEquations] (Vec4& eq)
-			{ btPlaneEquations.push_back(Vec4_to_btVector3(eq)); });
+				[&btPlaneEquations, scaling] (Vec4& eq)
+			{
+				btVector3 btEq = Vec4_to_btVector3(eq);
+				btEq[3] *= scaling;
+				btPlaneEquations.push_back(btEq);
+			});
 			btGeometryUtil::getVerticesFromPlaneEquations(btPlaneEquations, vertices);
 
 			btConvexHullShape *convexShape = new btConvexHullShape(&(vertices[0].getX()), vertices.size());
-			if (scale)
-			{
-				float scaling = m_pData->m_worldScaleConst;
-				convexShape->setLocalScaling(btVector3(scaling, scaling, scaling));
-			}
+
 			m_pData->AddStaticColliderShape(pStrongActor, convexShape);
 		}
 
@@ -263,12 +264,11 @@ namespace GameEngine
 			if (pActor.expired())
 				return;
 
-			BspConverter bspConv;
-			bspConv.convertBsp(bspLoad,
+			Utils::ConvertBsp(bspLoad,
 				[this, pActor] (std::vector<Vec4> planeEquations)
 			{
-				this->VAddConvexStaticColliderMesh(planeEquations, pActor, false);
-			}, m_pData->m_worldScaleConst);
+				this->VAddConvexStaticColliderMesh(planeEquations, pActor);
+			});
 		}
 
 		void BulletPhysics::VCreateTrigger(WeakActorPtr pActor, const float dim)

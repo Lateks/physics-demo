@@ -36,7 +36,7 @@ namespace GameEngine
 
 			// These are used to add e.g. map parts and other static entities.
 			virtual void VAddConvexStaticColliderMesh(std::vector<Vec3>& vertices, WeakActorPtr pActor) = 0;
-			virtual void VAddConvexStaticColliderMesh(std::vector<Vec4>& planeEquations, WeakActorPtr pActor, bool scale = true) = 0;
+			virtual void VAddConvexStaticColliderMesh(std::vector<Vec4>& planeEquations, WeakActorPtr pActor) = 0;
 
 			virtual void VCreateTrigger(WeakActorPtr gameActor, const float dim) = 0;
 

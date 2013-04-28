@@ -33,7 +33,7 @@ namespace GameEngine
 		auto pDisplay = pGame->GetDisplayComponent();
 		auto pPhysics = pGame->GetPhysicsEngine();
 		auto pEventMgr = pGame->GetEventManager();
-		auto pMessages = pDisplay->GetMessageWindow();
+		auto pMessages = pDisplay->VGetMessageWindow();
 		pMessages->SetFont("..\\assets\\fontlucida.png");
 		pMessages->SetVisible(true);
 		pMessages->SetWidth(600);
@@ -45,33 +45,33 @@ namespace GameEngine
 		Vec3 mapPosition(-1350, -130, 1400);
 		StrongActorPtr world(new GameActor(mapPosition));
 		pGame->AddActor(world);
-		pDisplay->LoadMap("..\\assets\\map-20kdm2.pk3", "20kdm2.bsp", mapPosition);
+		pDisplay->VLoadMap("..\\assets\\map-20kdm2.pk3", "20kdm2.bsp", mapPosition);
 		std::unique_ptr<BspLoader> pBspLoader = CreateBspLoader("..\\assets\\20kdm2.bsp");
 		pPhysics->VLoadBspMap(*pBspLoader, world);
 
-		pDisplay->SetCameraPosition(Vec3(80,50,60));
-		pDisplay->SetCameraTarget(Vec3(-70,30,60));
+		pDisplay->VSetCameraPosition(Vec3(80,50,60));
+		pDisplay->VSetCameraTarget(Vec3(-70,30,60));
 
 		// Load textures.
-		MUD_TEXTURE = pDisplay->LoadTexture("..\\assets\\cracked_mud.jpg");
-		WOODBOX_TEXTURE = pDisplay->LoadTexture("..\\assets\\woodbox2.jpg");
+		MUD_TEXTURE = pDisplay->VLoadTexture("..\\assets\\cracked_mud.jpg");
+		WOODBOX_TEXTURE = pDisplay->VLoadTexture("..\\assets\\woodbox2.jpg");
 
 		// Setup actors and their graphical and physical representations.
 		StrongActorPtr ball(new GameActor(Vec3(0, 50, 60)));
 		pGame->AddActor(ball);
-		pDisplay->AddSphereSceneNode(10.f, ball, MUD_TEXTURE);
+		pDisplay->VAddSphereSceneNode(10.f, ball, MUD_TEXTURE);
 		pPhysics->VAddSphere(10.f, ball, "Titanium", "Bouncy");
 
 		StrongActorPtr cube(new GameActor(Vec3(0, 80, 60)));
 		pGame->AddActor(cube);
-		pDisplay->AddCubeSceneNode(25.f, cube, WOODBOX_TEXTURE);
+		pDisplay->VAddCubeSceneNode(25.f, cube, WOODBOX_TEXTURE);
 		pPhysics->VAddBox(Vec3(25.f, 25.f, 25.f), cube, "manganese", "Normal");
 
 		// Add a trigger node, rendered as a wireframe cube. (The IrrlichtDisplay
 		// assumes you want a wireframe when no texture is given.)
 		StrongActorPtr trigger(new GameActor(Vec3(-100.f, 125.f, 450.f)));
 		pGame->AddActor(trigger);
-		pDisplay->AddCubeSceneNode(125.f, trigger, 0);
+		pDisplay->VAddCubeSceneNode(125.f, trigger, 0);
 		pPhysics->VCreateTrigger(trigger, 125.f);
 
 		// Create an event handler to print out messages when a trigger event is detected.
@@ -109,11 +109,11 @@ namespace GameEngine
 
 		auto pDisplay = pGame->GetDisplayComponent();
 		auto pPhysics = pGame->GetPhysicsEngine();
-		m_currentCameraState = CameraState(pDisplay->GetCameraPosition(), pDisplay->GetCameraTarget());
+		m_currentCameraState = CameraState(pDisplay->VGetCameraPosition(), pDisplay->VGetCameraTarget());
 
 		if (RightMouseReleased())
 		{
-			ThrowCube(pDisplay->GetCameraTarget());
+			ThrowCube(pDisplay->VGetCameraTarget());
 		}
 
 		if (LeftMousePressed())
@@ -157,25 +157,25 @@ namespace GameEngine
 	{
 		auto pGame = GameData::GetInstance();
 		auto pDisplay = pGame->GetDisplayComponent();
-		Vec3 cameraPos = pDisplay->GetCameraPosition();
+		Vec3 cameraPos = pDisplay->VGetCameraPosition();
 
 		StrongActorPtr cube(new GameActor(cameraPos));
 		std::weak_ptr<WorldTransformComponent> pWeakTransform = cube->GetWorldTransform();
 		if (!pWeakTransform.expired())
 		{
 			std::shared_ptr<WorldTransformComponent> pTransform(pWeakTransform);
-			pTransform->SetRotation(pDisplay->GetCameraRotation());
+			pTransform->SetRotation(pDisplay->VGetCameraRotation());
 		}
 		pGame->AddActor(cube);
 
-		pDisplay->AddCubeSceneNode(15.f, cube, WOODBOX_TEXTURE);
+		pDisplay->VAddCubeSceneNode(15.f, cube, WOODBOX_TEXTURE);
 		auto physics = pGame->GetPhysicsEngine();
 		physics->VAddBox(Vec3(15.f, 15.f, 15.f), cube, "Titanium", "Bouncy");
 
 		Vec3 throwDirection = throwTowards - cameraPos;
 
 		// Also make the object rotate slightly "away from the camera".
-		Vec3 rotationAxis = pDisplay->GetCameraRightVector();
+		Vec3 rotationAxis = pDisplay->VGetCameraRightVector();
 		rotationAxis[2] = -rotationAxis[2];
 
 		physics->VSetLinearVelocity(cube->GetID(), throwDirection, 10.f);

@@ -33,7 +33,7 @@ namespace GameEngine
 			return;
 		}
 
-		if (!pRenderer->SetupAndOpenWindow(1024, 800,
+		if (!pRenderer->VSetupAndOpenWindow(1024, 800,
 			Display::DRIVER_TYPE::OPEN_GL, Display::CAMERA_TYPE::FPS))
 		{
 			std::cerr << "Failed to open OpenGL device." << std::cerr;
@@ -41,7 +41,7 @@ namespace GameEngine
 		}
 
 		m_pData = GameData::GetInstance();
-		m_pData->SetInputStateHandler(pRenderer->GetInputState());
+		m_pData->SetInputStateHandler(pRenderer->VGetInputState());
 		m_pData->SetDisplayComponent(std::shared_ptr<Display::IDisplay>(pRenderer.release()));
 
 		std::unique_ptr<IGameLogic> pGameLogic(CreateDemoGameLogic());
@@ -107,19 +107,19 @@ namespace GameEngine
 		float timeBegin = m_pData->CurrentTimeSec();
 		float timeEnd;
 		float frameDeltaSec = 1.0f/60;
-		while (pDisplay->Running())
+		while (pDisplay->VRunning())
 		{
-			if (pDisplay->WindowActive())
+			if (pDisplay->VWindowActive())
 			{
 				gameLogic->HandleInputs();
 				events->DispatchEvents();
 				physics->VUpdateSimulation(frameDeltaSec);
 				physics->VSyncScene();
-				pDisplay->DrawScene();
+				pDisplay->VDrawScene();
 			}
 			else
 			{
-				pDisplay->YieldDevice();
+				pDisplay->VYieldDevice();
 			}
 			timeEnd = m_pData->CurrentTimeSec();
 			frameDeltaSec = timeEnd - timeBegin;

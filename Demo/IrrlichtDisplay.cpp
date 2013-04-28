@@ -179,18 +179,18 @@ namespace GameEngine
 				[this] (EventPtr event) { this->m_pData->UpdateActorPosition(event); }));
 		}
 
-		Vec3 IrrlichtDisplay::GetCameraPosition() const
+		Vec3 IrrlichtDisplay::VGetCameraPosition() const
 		{
 			vector3df pos = m_pData->m_pCamera->getAbsolutePosition();
 			return ConvertVector(pos);
 		}
 
-		shared_ptr<IInputState> IrrlichtDisplay::GetInputState() const
+		shared_ptr<IInputState> IrrlichtDisplay::VGetInputState() const
 		{
 			return m_pData->m_pInputState;
 		}
 
-		void IrrlichtDisplay::DrawScene()
+		void IrrlichtDisplay::VDrawScene()
 		{
 			assert(m_pData->m_pDriver);
 
@@ -204,7 +204,7 @@ namespace GameEngine
 			m_pData->m_pDriver->endScene();
 		}
 
-		E_DRIVER_TYPE GetDriverType(DRIVER_TYPE type)
+		inline E_DRIVER_TYPE GetDriverType(DRIVER_TYPE type)
 		{
 			switch (type)
 			{
@@ -219,7 +219,7 @@ namespace GameEngine
 			}
 		}
 
-		bool IrrlichtDisplay::SetupAndOpenWindow(unsigned int width, unsigned int height,
+		bool IrrlichtDisplay::VSetupAndOpenWindow(unsigned int width, unsigned int height,
 			DRIVER_TYPE driverType, CAMERA_TYPE cameraType)
 		{
 			m_pData->m_pDevice = irr::createDevice(GetDriverType(driverType),
@@ -251,7 +251,7 @@ namespace GameEngine
 			return true;
 		}
 
-		shared_ptr<MessagingWindow> IrrlichtDisplay::GetMessageWindow()
+		shared_ptr<MessagingWindow> IrrlichtDisplay::VGetMessageWindow()
 		{
 			return m_pData->m_messageWindow;
 		}
@@ -264,46 +264,46 @@ namespace GameEngine
 			}
 		}
 
-		void IrrlichtDisplay::SetCameraPosition(Vec3& newPosition)
+		void IrrlichtDisplay::VSetCameraPosition(Vec3& newPosition)
 		{
 			assert(m_pData->m_pCamera);
 			m_pData->m_pCamera->setPosition(ConvertVector(newPosition));
 			m_pData->m_pCamera->updateAbsolutePosition();
 		}
 
-		void IrrlichtDisplay::SetCameraTarget(Vec3& newTarget)
+		void IrrlichtDisplay::VSetCameraTarget(Vec3& newTarget)
 		{
 			assert(m_pData->m_pCamera);
 			m_pData->m_pCamera->setTarget(ConvertVector(newTarget));
 		}
 
-		void IrrlichtDisplay::SetCameraProjection(Mat4& newProjection)
+		void IrrlichtDisplay::VSetCameraProjection(Mat4& newProjection)
 		{
 			assert(m_pData->m_pCamera);
 			m_pData->m_pCamera->setProjectionMatrix(ConvertProjectionMatrix(newProjection));
 		}
 
-		bool IrrlichtDisplay::Running()
+		bool IrrlichtDisplay::VRunning()
 		{
 			if (!m_pData->m_pDevice)
 				return false;
 			return m_pData->m_pDevice->run();
 		}
 
-		bool IrrlichtDisplay::WindowActive()
+		bool IrrlichtDisplay::VWindowActive()
 		{
 			if (!m_pData->m_pDevice)
 				return false;
 			return m_pData->m_pDevice->isWindowActive();
 		}
 
-		void IrrlichtDisplay::YieldDevice()
+		void IrrlichtDisplay::VYieldDevice()
 		{
 			assert(m_pData->m_pDevice);
 			m_pData->m_pDevice->yield();
 		}
 
-		unsigned int IrrlichtDisplay::LoadTexture(const std::string& filePath)
+		unsigned int IrrlichtDisplay::VLoadTexture(const std::string& filePath)
 		{
 			assert(m_pData->m_pDriver);
 			auto texture = m_pData->m_pDriver->getTexture(filePath.c_str());
@@ -313,19 +313,19 @@ namespace GameEngine
 			return TEXTURE_ID;
 		}
 
-		void IrrlichtDisplay::AddSphereSceneNode(float radius, WeakActorPtr pActor, unsigned int texture)
+		void IrrlichtDisplay::VAddSphereSceneNode(float radius, WeakActorPtr pActor, unsigned int texture)
 		{
 			auto node = m_pData->m_pSmgr->addSphereSceneNode(radius);
 			m_pData->AddSceneNode(pActor, node, texture);
 		}
 
-		void IrrlichtDisplay::AddCubeSceneNode(float dim, WeakActorPtr pActor, unsigned int texture)
+		void IrrlichtDisplay::VAddCubeSceneNode(float dim, WeakActorPtr pActor, unsigned int texture)
 		{
 			auto node = m_pData->m_pSmgr->addCubeSceneNode(dim);
 			m_pData->AddSceneNode(pActor, node, texture);
 		}
 
-		void IrrlichtDisplay::AddMeshSceneNode(const std::string& meshFilePath, WeakActorPtr pActor, unsigned int texture)
+		void IrrlichtDisplay::VAddMeshSceneNode(const std::string& meshFilePath, WeakActorPtr pActor, unsigned int texture)
 		{
 			auto mesh = m_pData->m_pSmgr->getMesh(meshFilePath.c_str());
 			if (mesh)
@@ -335,7 +335,7 @@ namespace GameEngine
 			}
 		}
 
-		void IrrlichtDisplay::RemoveSceneNode(ActorID actorId)
+		void IrrlichtDisplay::VRemoveSceneNode(ActorID actorId)
 		{
 			auto node = m_pData->sceneNodes[actorId];
 			if (node)
@@ -344,7 +344,7 @@ namespace GameEngine
 			}
 		}
 
-		void IrrlichtDisplay::LoadMap(const std::string& mapFilePath,
+		void IrrlichtDisplay::VLoadMap(const std::string& mapFilePath,
 			const std::string& meshName, Vec3& position)
 		{
 			if (!m_pData->m_pDevice || !m_pData->m_pSmgr)
@@ -365,19 +365,19 @@ namespace GameEngine
 			}
 		}
 
-		Vec3 IrrlichtDisplay::GetCameraTarget() const
+		Vec3 IrrlichtDisplay::VGetCameraTarget() const
 		{
 			auto cameraLookAt = m_pData->m_pCamera->getTarget();
 			return ConvertVector(cameraLookAt);
 		}
 
-		Vec3 IrrlichtDisplay::GetCameraUpVector() const
+		Vec3 IrrlichtDisplay::VGetCameraUpVector() const
 		{
 			auto cameraUp = m_pData->m_pCamera->getUpVector();
 			return ConvertVector(cameraUp);
 		}
 
-		Vec3 IrrlichtDisplay::GetCameraRightVector() const
+		Vec3 IrrlichtDisplay::VGetCameraRightVector() const
 		{
 			auto camera = m_pData->m_pCamera;
 			auto up = camera->getUpVector();
@@ -387,7 +387,7 @@ namespace GameEngine
 			return ConvertVector(rightVector);
 		}
 
-		Quaternion IrrlichtDisplay::GetCameraRotation() const
+		Quaternion IrrlichtDisplay::VGetCameraRotation() const
 		{
 			vector3df cameraRotEuler = m_pData->m_pCamera->getRotation();
 			quaternion quaternionRot(cameraRotEuler * irr::core::DEGTORAD);

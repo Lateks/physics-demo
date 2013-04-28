@@ -24,7 +24,7 @@ Modifications made for the Game Engine Architecture project:
   https://github.com/alanjrogers/bullet-physics/tree/master/Demos/BspDemo.)
 
 - Removed the scaling parameter since this is done inside the Bullet Physics
-  Wrapper class anyway.
+  wrapper class anyway.
 
 ---------------------------------
 

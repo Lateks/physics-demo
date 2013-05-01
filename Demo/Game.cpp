@@ -2,16 +2,17 @@
 #include "GameActor.h"
 #include "GameData.h"
 #include "IDisplay.h"
-#include "TimerFactories.h"
+#include "ITimer.h"
 #include "IGameLogic.h"
 #include "IInputState.h"
 #include "IEventManager.h"
 #include "EventManager.h" // TODO: make a factory method for these.
-#include "RenderingEngineFactories.h"
 #include "IPhysicsEngine.h"
-#include "PhysicsEngineFactories.h"
+#include "EngineComponentFactories.h"
 #include "Vec3.h"
+
 #include <irrlicht.h>
+
 #include <iostream>
 #include <memory>
 #include <iostream>
@@ -26,7 +27,7 @@ namespace GameEngine
 	Game::Game()
 	{
 		// Setup the display component (rendering and input handling).
-		std::unique_ptr<IDisplay> pRenderer(Display::CreateRenderer());
+		std::unique_ptr<IDisplay> pRenderer(CreateRenderer());
 		if (!pRenderer.get())
 		{
 			std::cerr << "Failed to create rendering device." << std::cerr;
@@ -53,7 +54,7 @@ namespace GameEngine
 		m_pData->SetInputHandler(std::shared_ptr<IGameLogic>(pGameLogic.release()));
 
 		// Setup timer.
-		std::unique_ptr<ITimer> pTimer(GetTimer());
+		std::unique_ptr<ITimer> pTimer(CreateTimer());
 		if (!pTimer)
 		{
 			std::cerr << "Failed to create a timer." << std::endl;
@@ -73,7 +74,7 @@ namespace GameEngine
 		// Setup physics. World is scaled by the constant given as parameter
 		// (compared to the size of the rendered world).
 		std::unique_ptr<Physics::IPhysicsEngine> physics(
-			Physics::CreatePhysicsEngine(0.05f));
+			CreatePhysicsEngine(0.05f));
 		if (!physics)
 		{
 			std::cerr << "Failed to initialize physics engine." << std::endl;

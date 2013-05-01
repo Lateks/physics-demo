@@ -39,7 +39,6 @@ namespace GameEngine
 
 			virtual void VSetCameraPosition(Vec3& newPosition) = 0;
 			virtual void VSetCameraTarget(Vec3& newTarget) = 0;
-			virtual void VSetCameraProjection(Mat4& newProjection) = 0;
 
 			virtual Vec3 VGetCameraPosition() const = 0;
 			virtual Vec3 VGetCameraTarget() const = 0;

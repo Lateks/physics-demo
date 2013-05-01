@@ -93,16 +93,7 @@
     <ClInclude Include="XMLPhysicsData.h">
       <Filter>Header Files\Physics</Filter>
     </ClInclude>
-    <ClInclude Include="PhysicsEngineFactories.h">
-      <Filter>Header Files\Physics</Filter>
-    </ClInclude>
-    <ClInclude Include="RenderingEngineFactories.h">
-      <Filter>Header Files\Display</Filter>
-    </ClInclude>
     <ClInclude Include="ITimer.h">
-      <Filter>Header Files\TimeKeeping</Filter>
-    </ClInclude>
-    <ClInclude Include="TimerFactories.h">
       <Filter>Header Files\TimeKeeping</Filter>
     </ClInclude>
     <ClInclude Include="WorldTransformComponent.h">
@@ -165,6 +156,9 @@
     <ClInclude Include="IGameLogic.h">
       <Filter>Header Files\BaseGameLogic</Filter>
     </ClInclude>
+    <ClInclude Include="EngineComponentFactories.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Demo.cpp">
@@ -220,6 +214,9 @@
     </ClCompile>
     <ClCompile Include="IGameLogic.cpp">
       <Filter>Source Files\BaseGameLogic</Filter>
+    </ClCompile>
+    <ClCompile Include="EngineComponentFactories.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

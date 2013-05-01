@@ -73,7 +73,6 @@ namespace GameEngine
 		{
 		public:
 			IrrlichtMessagingWindow(std::size_t messageBufferSize, irr::gui::IGUIEnvironment *irrlichtGUI);
-			~IrrlichtMessagingWindow();
 			virtual void AddMessage(const std::wstring& message) override;
 			virtual void SetPosition(unsigned int minX, unsigned int minY) override;
 			virtual void SetWidth(unsigned int width) override;
@@ -112,9 +111,10 @@ namespace GameEngine
 			}
 		};
 
-		// Conversions between Irrlicht linear algebra types and the game engine's
-		// corresponding types.
-
+		/*
+		* Conversion functions between Irrlicht linear algebra types and the game engine's
+		* corresponding types.
+		*/
 		vector3df ConvertVector(Vec3& vector)
 		{
 			vector3df converted(vector.x(), vector.y(), vector.z());
@@ -125,7 +125,7 @@ namespace GameEngine
 			return converted;
 		}
 
-		// Assumes left-handed coordinate system for the input vector.
+		// This assumes left-handed coordinate system for the input vector.
 		Vec3 ConvertVector(vector3df& vector)
 		{
 			return Vec3(vector.X, vector.Y, -vector.Z);
@@ -141,19 +141,9 @@ namespace GameEngine
 			return Quaternion(quat.X, quat.Y, quat.Z, quat.W);
 		}
 
-		// TODO: handedness
-		matrix4 ConvertProjectionMatrix(Mat4& matrix)
-		{
-			matrix4 newMatrix;
-			for (int i = 0; i < 4; i++)
-				for (int j = 0; j < 4; j++)
-				{
-					float value = matrix.index(i, j);
-					newMatrix[i*4 + j] = (float) matrix.index(i, j);
-				}
-			return newMatrix;
-		}
-
+		/*
+		 * Implementation of the IrrlichtTimer class.
+		 */
 		IrrlichtTimer::IrrlichtTimer(shared_ptr<IrrlichtDisplay> pDisplay)
 			: m_pDisplay(pDisplay) { }
 
@@ -165,11 +155,9 @@ namespace GameEngine
 			return shared_ptr<IrrlichtDisplay>(m_pDisplay)->m_pData->GetTime();
 		}
 
-		unsigned int IrrlichtDisplayData::GetTime()
-		{
-			return m_pDevice->getTimer()->getTime();
-		}
-
+		/*
+		 * Implementation of the IrrlichtDisplay class.
+		 */
 		IrrlichtDisplay::IrrlichtDisplay()
 			: m_pData(new IrrlichtDisplayData())
 		{
@@ -275,12 +263,6 @@ namespace GameEngine
 		{
 			assert(m_pData->m_pCamera);
 			m_pData->m_pCamera->setTarget(ConvertVector(newTarget));
-		}
-
-		void IrrlichtDisplay::VSetCameraProjection(Mat4& newProjection)
-		{
-			assert(m_pData->m_pCamera);
-			m_pData->m_pCamera->setProjectionMatrix(ConvertProjectionMatrix(newProjection));
 		}
 
 		bool IrrlichtDisplay::VRunning()
@@ -394,6 +376,9 @@ namespace GameEngine
 			return ConvertQuaternion(quaternionRot);
 		}
 
+		/*
+		 * Implementation of the IrrlichtDisplayData PIMPL struct (helper methods).
+		 */
 		ISceneNode *IrrlichtDisplayData::GetSceneNode(ActorID actorId)
 		{
 			auto it = sceneNodes.find(actorId);
@@ -401,6 +386,11 @@ namespace GameEngine
 			if (it != sceneNodes.end())
 				return it->second;
 			return nullptr;
+		}
+
+		unsigned int IrrlichtDisplayData::GetTime()
+		{
+			return m_pDevice->getTimer()->getTime();
 		}
 
 		void IrrlichtDisplayData::AddSceneNode(WeakActorPtr pActor, irr::scene::ISceneNode *pNode, unsigned int texture)
@@ -476,7 +466,10 @@ namespace GameEngine
 			pNode->setScale(ConvertVector(pWorldTransform->GetScale()));
 		}
 
-				IrrlichtMessagingWindow::IrrlichtMessagingWindow(std::size_t messageBufferSize, irr::gui::IGUIEnvironment *irrlichtGUI)
+		/*
+		 * Implementation of the IrrlichtMessagingWindow class.
+		 */
+		IrrlichtMessagingWindow::IrrlichtMessagingWindow(std::size_t messageBufferSize, irr::gui::IGUIEnvironment *irrlichtGUI)
 			: m_color(255, 255, 255, 255), m_maxMessages(messageBufferSize),
 			m_posX(0), m_posY(0), m_visible(false), m_pFont(nullptr), m_width(400),
 			m_irrlichtGUI(irrlichtGUI)
@@ -495,8 +488,6 @@ namespace GameEngine
 				m_fontHeight = m_pFont->getDimension(L"I").Height + 2;
 			}
 		}
-
-		IrrlichtMessagingWindow::~IrrlichtMessagingWindow() { }
 
 		void IrrlichtMessagingWindow::AddMessage(const std::wstring& message)
 		{

@@ -35,7 +35,6 @@ namespace GameEngine
 
 			virtual void VSetCameraPosition(Vec3& newPosition) override;
 			virtual void VSetCameraTarget(Vec3& newTarget) override;
-			virtual void VSetCameraProjection(Mat4& newProjection) override;
 
 			virtual Vec3 VGetCameraPosition() const override;
 			virtual Vec3 VGetCameraTarget() const override;

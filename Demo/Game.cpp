@@ -24,20 +24,25 @@ namespace GameEngine
 	using Events::IEventManager;
 	using Events::EventManager;
 
+	inline void PrintError(const std::string& message)
+	{
+		std::cerr << message << std::endl;
+	}
+
 	Game::Game()
 	{
 		// Setup the display component (rendering and input handling).
 		std::unique_ptr<IDisplay> pRenderer(CreateRenderer());
 		if (!pRenderer.get())
 		{
-			std::cerr << "Failed to create rendering device." << std::cerr;
+			PrintError("Failed to create rendering device.");
 			return;
 		}
 
 		if (!pRenderer->VSetupAndOpenWindow(1024, 800,
 			Display::DRIVER_TYPE::OPEN_GL, Display::CAMERA_TYPE::FPS))
 		{
-			std::cerr << "Failed to open OpenGL device." << std::cerr;
+			PrintError("Failed to open OpenGL device.");
 			return;
 		}
 
@@ -48,7 +53,7 @@ namespace GameEngine
 		std::unique_ptr<IGameLogic> pGameLogic(CreateDemoGameLogic());
 		if (!pGameLogic)
 		{
-			std::cerr << "Failed to create demo input handler." << std::endl;
+			PrintError("Failed to create demo input handler.");
 			return;
 		}
 		m_pData->SetInputHandler(std::shared_ptr<IGameLogic>(pGameLogic.release()));
@@ -57,7 +62,7 @@ namespace GameEngine
 		std::unique_ptr<ITimer> pTimer(CreateTimer());
 		if (!pTimer)
 		{
-			std::cerr << "Failed to create a timer." << std::endl;
+			PrintError("Failed to create a timer.");
 			return;
 		}
 		m_pData->setTimer(std::shared_ptr<ITimer>(pTimer.release()));
@@ -66,7 +71,7 @@ namespace GameEngine
 		std::unique_ptr<IEventManager> pEventManager(new EventManager());
 		if (!pEventManager)
 		{
-			std::cerr << "Failed to create an event manager." << std::endl;
+			PrintError("Failed to create an event manager.");
 			return;
 		}
 		m_pData->SetEventManager(std::shared_ptr<Events::IEventManager>(pEventManager.release()));
@@ -77,7 +82,7 @@ namespace GameEngine
 			CreatePhysicsEngine(0.05f));
 		if (!physics)
 		{
-			std::cerr << "Failed to initialize physics engine." << std::endl;
+			PrintError("Failed to initialize physics engine.");
 			return;
 		}
 		m_pData->SetPhysicsEngine(std::shared_ptr<Physics::IPhysicsEngine>(physics.release()));

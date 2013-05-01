@@ -431,8 +431,8 @@ namespace GameEngine
 		void IrrlichtDisplayData::UpdateActorPosition(EventPtr pEvent)
 		{
 			assert(pEvent->GetEventType() == EventType::ACTOR_MOVED);
-			ActorMoveEvent *pMoveEvent =
-				dynamic_cast<ActorMoveEvent*>(pEvent.get());
+			std::shared_ptr<ActorMoveEvent> pMoveEvent =
+				std::dynamic_pointer_cast<ActorMoveEvent>(pEvent);
 
 			shared_ptr<GameData> pGame = GameData::GetInstance();
 			WeakActorPtr pWeakActor = pGame->GetActor(pMoveEvent->GetActorId());
@@ -442,7 +442,7 @@ namespace GameEngine
 			StrongActorPtr pActor(pWeakActor);
 			ISceneNode *pNode = GetSceneNode(pActor->GetID());
 
-			if (pActor.get() && pNode)
+			if (pActor && pNode)
 			{
 				weak_ptr<WorldTransformComponent> pWeakTransform = pActor->GetWorldTransform();
 				if (!pWeakTransform.expired())

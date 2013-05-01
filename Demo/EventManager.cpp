@@ -34,7 +34,7 @@ namespace GameEngine
 		{
 			EventHandlerList *handlerList = &m_eventHandlers[event->GetEventType()];
 			std::for_each(handlerList->begin(), handlerList->end(),
-				[&event] (EventHandlerPtr handler) { (*handler.get())(event); });
+				[&event] (EventHandlerPtr handler) { (*handler)(event); });
 		}
 
 		void EventManager::QueueEvent(IEventData& event)

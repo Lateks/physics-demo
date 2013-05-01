@@ -103,7 +103,7 @@ namespace GameEngine
 			{
 				ActorID id = it->first;
 				std::shared_ptr<BulletPhysicsObject> pObject = it->second;
-				assert(pObject.get());
+				assert(pObject);
 				if (pObject->GetNumBodies() > 1 || pObject->GetNumBodies() == 0)
 					continue; // do not update static actors
 
@@ -422,7 +422,7 @@ namespace GameEngine
 		unsigned int BulletPhysics::VAddPickConstraint(ActorID actorId, Vec3& pickPosition, Vec3& cameraPosition)
 		{
 			std::shared_ptr<BulletPhysicsObject> pObject = m_pData->GetPhysicsObject(actorId);
-			if (!pObject.get() || pObject->IsStatic() || pObject->IsKinematic())
+			if (!pObject || pObject->IsStatic() || pObject->IsKinematic())
 				return 0;
 
 			// Calculate parameters for the constraint.
@@ -455,8 +455,8 @@ namespace GameEngine
 				if (pEvent->GetEventType() != handledType)
 					return;
 
-				Events::CameraMoveEvent *pMoveEvent =
-					dynamic_cast<Events::CameraMoveEvent*>(pEvent.get());
+				std::shared_ptr<Events::CameraMoveEvent> pMoveEvent =
+					std::dynamic_pointer_cast<Events::CameraMoveEvent>(pEvent);
 
 				this->VUpdatePickConstraint(actorId, pickConstraintId,
 					pMoveEvent->GetRayFrom(), pMoveEvent->GetRayTo());
@@ -465,11 +465,12 @@ namespace GameEngine
 
 			std::shared_ptr<BulletPhysicsConstraint> pPickConstraint =
 				pObject->GetConstraint(pickConstraintId);
-			assert(pPickConstraint.get() && pPickConstraint->GetBulletConstraint() &&
+			assert(pPickConstraint && pPickConstraint->GetBulletConstraint() &&
 				pPickConstraint->GetConstraintType() == BulletPhysicsConstraint::ConstraintType::PICK_CONSTRAINT);
 
 			// Store the callback function and picking distance for later reference.
-			BulletPickConstraint *pConstraint = dynamic_cast<BulletPickConstraint*>(pPickConstraint.get());
+			std::shared_ptr<BulletPickConstraint> pConstraint =
+				std::dynamic_pointer_cast<BulletPickConstraint>(pPickConstraint);
 			pConstraint->SetConstraintUpdater(pHandler, handledType);
 			pConstraint->SetPickDistance(pickDistance);
 
@@ -495,18 +496,19 @@ namespace GameEngine
 		void BulletPhysics::VUpdatePickConstraint(ActorID actorId, ConstraintID constraintId, Vec3& rayFrom, Vec3& rayTo)
 		{
 			std::shared_ptr<BulletPhysicsObject> pObject = m_pData->GetPhysicsObject(actorId);
-			if (!pObject.get() || pObject->GetNumBodies() != 1 || pObject->GetNumConstraints() == 0)
+			if (!pObject || pObject->GetNumBodies() != 1 || pObject->GetNumConstraints() == 0)
 				return;
 
 			std::shared_ptr<BulletPhysicsConstraint> pPickConstraint = pObject->GetConstraint(constraintId);
-			assert(pPickConstraint.get() && pPickConstraint->GetBulletConstraint());
+			assert(pPickConstraint && pPickConstraint->GetBulletConstraint());
 
 			bool isPickConstraint = pPickConstraint->GetConstraintType() == BulletPhysicsConstraint::ConstraintType::PICK_CONSTRAINT;
 			assert(isPickConstraint);
-			if (!pPickConstraint.get() || !pPickConstraint->GetBulletConstraint() || !isPickConstraint)
+			if (!pPickConstraint || !pPickConstraint->GetBulletConstraint() || !isPickConstraint)
 				return;
 
-			BulletPickConstraint *pConstraint = dynamic_cast<BulletPickConstraint*>(pPickConstraint.get());
+			std::shared_ptr<BulletPickConstraint> pConstraint =
+				std::dynamic_pointer_cast<BulletPickConstraint>(pPickConstraint);
 
 			// Update the pick constraint and keep it at the same picking distance as
 			// when it was picked up.
@@ -533,7 +535,7 @@ namespace GameEngine
 		void BulletPhysics::VRemoveConstraint(ActorID actorId, unsigned int constraintId)
 		{
 			std::shared_ptr<BulletPhysicsObject> pObject = m_pData->GetPhysicsObject(actorId);
-			if (!pObject.get() || pObject->GetNumBodies() != 1 || pObject->GetNumConstraints() == 0)
+			if (!pObject || pObject->GetNumBodies() != 1 || pObject->GetNumConstraints() == 0)
 				return;
 			std::shared_ptr<BulletPhysicsConstraint> pConstraint = pObject->GetConstraint(constraintId);
 			assert(pConstraint && pConstraint->GetBulletConstraint());
@@ -546,7 +548,8 @@ namespace GameEngine
 			// Restore angular factor to re-enable rotations.
 			if (pConstraint->GetConstraintType() == BulletPhysicsConstraint::ConstraintType::PICK_CONSTRAINT)
 			{
-				BulletPickConstraint *pPickConstraint = dynamic_cast<BulletPickConstraint*>(pConstraint.get());
+				std::shared_ptr<BulletPickConstraint> pPickConstraint =
+					std::dynamic_pointer_cast<BulletPickConstraint>(pConstraint);
 				pBody->setAngularFactor(pPickConstraint->GetOriginalAngularFactor());
 			}
 
@@ -732,7 +735,7 @@ namespace GameEngine
 		std::shared_ptr<BulletPhysicsObject> BulletPhysicsData::AddShape(StrongActorPtr pActor, btCollisionShape *shape,
 			float mass, const std::string& material)
 		{
-			assert(pActor.get());
+			assert(pActor);
 			// There can be only one rigid body per (non-static) actor currently in this implementation.
 			ActorID id = pActor->GetID();
 			assert(m_actorToBulletPhysicsObjectMap.find(id) == m_actorToBulletPhysicsObjectMap.end());
@@ -770,7 +773,7 @@ namespace GameEngine
 
 		std::shared_ptr<BulletPhysicsObject> BulletPhysicsData::AddStaticColliderShape(StrongActorPtr pActor, btCollisionShape *shape, bool isTrigger)
 		{
-			assert(pActor.get());
+			assert(pActor);
 			ActorID id = pActor->GetID();
 
 			// Triggers may have only one rigid body but other static actors may have several.

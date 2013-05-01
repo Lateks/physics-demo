@@ -58,7 +58,8 @@ namespace GameEngine
 	void PrintTriggerEvent(std::shared_ptr<Display::MessagingWindow> pMessages,
 		Events::EventPtr event)
 	{
-		Events::TriggerEvent *pEvent = dynamic_cast<Events::TriggerEvent*>(event.get());
+		std::shared_ptr<Events::TriggerEvent> pEvent =
+			std::dynamic_pointer_cast<Events::TriggerEvent>(event);
 		std::wstringstream message;
 		message << L"Actor " << pEvent->GetActorId();
 		if (event->GetEventType() == Events::EventType::ENTER_TRIGGER)

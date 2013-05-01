@@ -32,7 +32,7 @@ namespace GameEngine
 	{
 		// Setup the display component (rendering and input handling).
 		std::unique_ptr<IDisplay> pRenderer(CreateRenderer());
-		if (!pRenderer.get())
+		if (!pRenderer)
 		{
 			PrintError("Failed to create rendering device.");
 			return;

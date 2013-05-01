@@ -7,15 +7,32 @@
 #include <algorithm>
 #include <map>
 
+namespace
+{
+	std::shared_ptr<GameEngine::GameData> pInstance;
+}
+
 namespace GameEngine
 {
-	std::shared_ptr<GameData> GameData::pInstance;
+	struct GameDataImpl
+	{
+		std::shared_ptr<Display::IDisplay> m_pDisplay;
+		std::shared_ptr<Display::IInputState> m_pInputState;
+		std::shared_ptr<Events::IEventManager> m_pEvents;
+		std::shared_ptr<Physics::IPhysicsEngine> m_pPhysicsEngine;
+		std::shared_ptr<IGameLogic> m_pInputHandler;
+		std::shared_ptr<ITimer> m_pTimer;
+
+		std::map<ActorID, std::shared_ptr<GameActor>> m_actors;
+	};
+
+	GameData::GameData() : m_pData(new GameDataImpl()) { }
 
 	GameData::~GameData() { }
 
 	float GameData::CurrentTimeSec()
 	{
-		return m_pTimer->GetTimeMs() / 1000.0f;
+		return m_pData->m_pTimer->GetTimeMs() / 1000.0f;
 	}
 
 	void GameData::AddActor(WeakActorPtr pActor)
@@ -24,7 +41,7 @@ namespace GameEngine
 			return;
 
 		StrongActorPtr pStrongActor(pActor);
-		m_actors[pStrongActor->GetID()] = pStrongActor; 
+		m_pData->m_actors[pStrongActor->GetID()] = pStrongActor; 
 	}
 
 	std::shared_ptr<GameData> GameData::GetInstance()
@@ -38,66 +55,66 @@ namespace GameEngine
 
 	std::weak_ptr<GameActor> GameData::GetActor(ActorID id)
 	{
-		return m_actors[id];
+		return m_pData->m_actors[id];
 	}
 
 	void GameData::SetInputHandler(std::shared_ptr<IGameLogic> pInputHandler)
 	{
-		m_pInputHandler = pInputHandler;
+		m_pData->m_pInputHandler = pInputHandler;
 	}
 
 	std::shared_ptr<IGameLogic> GameData::GetInputHandler() const
 	{
-		return m_pInputHandler;
+		return m_pData->m_pInputHandler;
 	}
 
 	void GameData::SetPhysicsEngine(std::shared_ptr<Physics::IPhysicsEngine> pPhysics)
 	{
-		m_pPhysicsEngine = pPhysics;
+		m_pData->m_pPhysicsEngine = pPhysics;
 	}
 
 	std::shared_ptr<Physics::IPhysicsEngine> GameData::GetPhysicsEngine() const
 	{
-		return m_pPhysicsEngine;
+		return m_pData->m_pPhysicsEngine;
 	}
 
 	void GameData::SetInputStateHandler(std::shared_ptr<Display::IInputState> pInputState)
 	{
-		m_pInputState = std::shared_ptr<Display::IInputState>(pInputState);
+		m_pData->m_pInputState = std::shared_ptr<Display::IInputState>(pInputState);
 	}
 
 	std::shared_ptr<Display::IInputState> GameData::GetInputStateHandler() const
 	{
-		return m_pInputState;
+		return m_pData->m_pInputState;
 	}
 
 	void GameData::SetDisplayComponent(std::shared_ptr<Display::IDisplay> pDisplay)
 	{
-		m_pDisplay = pDisplay;
+		m_pData->m_pDisplay = pDisplay;
 	}
 
 	std::shared_ptr<Display::IDisplay> GameData::GetDisplayComponent() const
 	{
-		return m_pDisplay;
+		return m_pData->m_pDisplay;
 	}
 
-	void GameData::setTimer(std::shared_ptr<ITimer> pTimer)
+	void GameData::SetTimer(std::shared_ptr<ITimer> pTimer)
 	{
-		m_pTimer = pTimer;
+		m_pData->m_pTimer = pTimer;
 	}
 
-	std::shared_ptr<ITimer> GameData::Timer() const
+	std::shared_ptr<ITimer> GameData::GetTimer() const
 	{
-		return m_pTimer;
+		return m_pData->m_pTimer;
 	}
 
 	void GameData::SetEventManager(std::shared_ptr<Events::IEventManager> pManager)
 	{
-		m_pEvents = pManager;
+		m_pData->m_pEvents = pManager;
 	}
 
 	std::shared_ptr<Events::IEventManager> GameData::GetEventManager() const
 	{
-		return m_pEvents;
+		return m_pData->m_pEvents;
 	}
 }

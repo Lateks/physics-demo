@@ -7,20 +7,13 @@
 
 namespace GameEngine
 {
+	struct GameDataImpl;
+
 	class GameData
 	{
 	private:
-		static std::shared_ptr<GameData> pInstance;
-		GameData() { }
-
-		std::shared_ptr<Display::IDisplay> m_pDisplay;
-		std::shared_ptr<Display::IInputState> m_pInputState;
-		std::shared_ptr<Events::IEventManager> m_pEvents;
-		std::shared_ptr<Physics::IPhysicsEngine> m_pPhysicsEngine;
-		std::shared_ptr<IGameLogic> m_pInputHandler;
-		std::shared_ptr<ITimer> m_pTimer;
-
-		std::map<ActorID, std::shared_ptr<GameActor>> m_actors;
+		GameData();
+		std::unique_ptr<GameDataImpl> m_pData;
 	public:
 		static std::shared_ptr<GameData> GetInstance();
 		~GameData();
@@ -42,8 +35,8 @@ namespace GameEngine
 		void SetDisplayComponent(std::shared_ptr<Display::IDisplay> pDisplay);
 		std::shared_ptr<Display::IDisplay> GetDisplayComponent() const;
 
-		void setTimer(std::shared_ptr<ITimer> pTimer);
-		std::shared_ptr<ITimer> Timer() const;
+		void SetTimer(std::shared_ptr<ITimer> pTimer);
+		std::shared_ptr<ITimer> GetTimer() const;
 
 		void SetEventManager(std::shared_ptr<Events::IEventManager> pManager);
 		std::shared_ptr<Events::IEventManager> GetEventManager() const;

@@ -64,7 +64,7 @@ namespace GameEngine
 			PrintError("Failed to create a timer.");
 			return;
 		}
-		m_pData->setTimer(std::shared_ptr<ITimer>(pTimer.release()));
+		m_pData->SetTimer(std::shared_ptr<ITimer>(pTimer.release()));
 
 		// Setup event manager.
 		std::unique_ptr<IEventManager> pEventManager(CreateEventManager());

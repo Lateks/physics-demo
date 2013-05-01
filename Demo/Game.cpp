@@ -6,7 +6,6 @@
 #include "IGameLogic.h"
 #include "IInputState.h"
 #include "IEventManager.h"
-#include "EventManager.h" // TODO: make a factory method for these.
 #include "IPhysicsEngine.h"
 #include "EngineComponentFactories.h"
 #include "Vec3.h"
@@ -68,7 +67,7 @@ namespace GameEngine
 		m_pData->setTimer(std::shared_ptr<ITimer>(pTimer.release()));
 
 		// Setup event manager.
-		std::unique_ptr<IEventManager> pEventManager(new EventManager());
+		std::unique_ptr<IEventManager> pEventManager(CreateEventManager());
 		if (!pEventManager)
 		{
 			PrintError("Failed to create an event manager.");

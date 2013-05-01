@@ -2,12 +2,18 @@
 #include "BulletPhysics.h"
 #include "IrrlichtDisplay.h"
 #include "GameData.h"
+#include "EventManager.h"
 
 namespace GameEngine
 {
 	std::unique_ptr<Display::IDisplay> CreateRenderer()
 	{
 		return std::unique_ptr<Display::IDisplay>(new Display::IrrlichtDisplay());
+	}
+
+	std::unique_ptr<Events::IEventManager> CreateEventManager()
+	{
+		return std::unique_ptr<Events::IEventManager>(new Events::EventManager());
 	}
 
 	std::unique_ptr<Physics::IPhysicsEngine> CreatePhysicsEngine(float worldScale)

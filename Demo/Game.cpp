@@ -89,7 +89,7 @@ namespace GameEngine
 
 	Game::~Game() { }
 
-	Game::Game(Game& game)
+	Game::Game(Game&& game)
 	{
 		if (this != &game)
 		{

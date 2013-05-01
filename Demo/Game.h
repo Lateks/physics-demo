@@ -9,13 +9,11 @@ namespace GameEngine
 	{
 	public:
 		Game();
-		~Game();
-		Game(Game& game);
+		virtual ~Game();
+		Game(Game&& game);
 		int Run();
 	private:
 		std::shared_ptr<GameData> m_pData;
-		void HandleInputs();
-		void ThrowCube(Vec3& throwTowards);
 	};
 }
 

@@ -1,14 +1,20 @@
 #include "DemoGameLogic.h"
-#include "WorldTransformComponent.h"
+#include "IInputState.h"
+#include "IEventManager.h"
 #include "IPhysicsEngine.h"
 #include "MessagingWindow.h"
 #include "IEventManager.h"
 #include "Events.h"
-#include "GameData.h"
-#include "GameActor.h"
 #include "IDisplay.h"
-#include "BspLoaderFactory.h"
+#include "GameData.h"
+
 #include "Vec3.h"
+
+#include "GameActor.h"
+#include "WorldTransformComponent.h"
+
+#include "BspLoaderFactory.h"
+
 #include <iostream>
 #include <cassert>
 
@@ -21,6 +27,84 @@ namespace
 
 namespace GameEngine
 {
+	struct CameraState
+	{
+		CameraState() { }
+		CameraState(Vec3& pos, Vec3& target)
+			: cameraPos(pos), cameraTarget(target) { };
+		Vec3 cameraPos;
+		Vec3 cameraTarget;
+	};
+
+	struct DemoGameLogicData
+	{
+		Display::IInputState::MouseState m_previousMouseState;
+		Display::IInputState::MouseState m_currentMouseState;
+		CameraState m_previousCameraState;
+		CameraState m_currentCameraState;
+
+		ActorID m_pickedActor;
+		unsigned int m_pickConstraintId;
+
+		inline bool CameraMoved();
+		inline bool LeftMousePressed();
+		inline bool LeftMouseDown();
+		inline bool LeftMouseReleased();
+		inline bool RightMousePressed();
+		inline bool RightMouseDown();
+		inline bool RightMouseReleased();
+	};
+
+	void PrintTriggerEvent(std::shared_ptr<Display::MessagingWindow> pMessages,
+		Events::EventPtr event)
+	{
+		Events::TriggerEvent *pEvent = dynamic_cast<Events::TriggerEvent*>(event.get());
+		std::wstringstream message;
+		message << L"Actor " << pEvent->GetActorId();
+		if (event->GetEventType() == Events::EventType::ENTER_TRIGGER)
+		{
+				message << L" entered the trigger.";
+		}
+		else if (event->GetEventType() == Events::EventType::EXIT_TRIGGER)
+		{
+			message << L" exited the trigger.";
+		}
+		pMessages->AddMessage(message.str());
+	}
+
+	void ThrowCube(Vec3& throwTowards)
+	{
+		auto pGame = GameData::GetInstance();
+		auto pDisplay = pGame->GetDisplayComponent();
+		Vec3 cameraPos = pDisplay->VGetCameraPosition();
+
+		StrongActorPtr cube(new GameActor(cameraPos));
+		std::weak_ptr<WorldTransformComponent> pWeakTransform = cube->GetWorldTransform();
+		if (!pWeakTransform.expired())
+		{
+			std::shared_ptr<WorldTransformComponent> pTransform(pWeakTransform);
+			pTransform->SetRotation(pDisplay->VGetCameraRotation());
+		}
+		pGame->AddActor(cube);
+
+		pDisplay->VAddCubeSceneNode(15.f, cube, WOODBOX_TEXTURE);
+		auto physics = pGame->GetPhysicsEngine();
+		physics->VAddBox(Vec3(15.f, 15.f, 15.f), cube, "Titanium", "Bouncy");
+
+		Vec3 throwDirection = throwTowards - cameraPos;
+
+		// Also make the object rotate slightly "away from the camera".
+		Vec3 rotationAxis = pDisplay->VGetCameraRightVector();
+		rotationAxis[2] = -rotationAxis[2];
+
+		physics->VSetLinearVelocity(cube->GetID(), throwDirection, 10.f);
+		physics->VSetAngularVelocity(cube->GetID(), rotationAxis, 2.5f);
+	}
+
+	DemoGameLogic::DemoGameLogic() : m_pData(new DemoGameLogicData()) { }
+
+	DemoGameLogic::~DemoGameLogic() { }
+
 	/* Note: the coordinates given here are all given in a right-handed
 	 * coordinate system. The IrrlichtDisplay component converts them to
 	 * the left-handed system used by Irrlicht by negating the z component.
@@ -76,144 +160,99 @@ namespace GameEngine
 
 		// Create an event handler to print out messages when a trigger event is detected.
 		Events::EventHandlerPtr eventPrinter(new std::function<void(Events::EventPtr)>
-			([pMessages, this] (Events::EventPtr event)
+			([pMessages] (Events::EventPtr event)
 		{
-			this->PrintTriggerEvent(pMessages, event);
+			PrintTriggerEvent(pMessages, event);
 		}));
+
 		pEventMgr->RegisterHandler(Events::EventType::ENTER_TRIGGER, eventPrinter);
 		pEventMgr->RegisterHandler(Events::EventType::EXIT_TRIGGER, eventPrinter);
-	}
-
-	void DemoGameLogic::PrintTriggerEvent(std::shared_ptr<Display::MessagingWindow> pMessages,
-		Events::EventPtr event)
-	{
-		Events::TriggerEvent *pEvent = dynamic_cast<Events::TriggerEvent*>(event.get());
-		std::wstringstream message;
-		message << L"Actor " << pEvent->GetActorId();
-		if (event->GetEventType() == Events::EventType::ENTER_TRIGGER)
-		{
-				message << L" entered the trigger.";
-		}
-		else if (event->GetEventType() == Events::EventType::EXIT_TRIGGER)
-		{
-			message << L" exited the trigger.";
-		}
-		pMessages->AddMessage(message.str());
 	}
 
 	void DemoGameLogic::HandleInputs()
 	{
 		auto pGame = GameData::GetInstance();
 		assert(pGame && pGame->GetInputStateHandler());
-		m_currentMouseState = pGame->GetInputStateHandler()->GetMouseState();
+		m_pData->m_currentMouseState = pGame->GetInputStateHandler()->GetMouseState();
 
 		auto pDisplay = pGame->GetDisplayComponent();
 		auto pPhysics = pGame->GetPhysicsEngine();
-		m_currentCameraState = CameraState(pDisplay->VGetCameraPosition(), pDisplay->VGetCameraTarget());
+		m_pData->m_currentCameraState = CameraState(pDisplay->VGetCameraPosition(), pDisplay->VGetCameraTarget());
 
-		if (RightMouseReleased())
+		if (m_pData->RightMouseReleased())
 		{
 			ThrowCube(pDisplay->VGetCameraTarget());
 		}
 
-		if (LeftMousePressed())
+		if (m_pData->LeftMousePressed())
 		{
 			Vec3 pickPoint;
-			Vec3 rayFrom = m_currentCameraState.cameraPos;
-			Vec3 rayTo = rayFrom + (m_currentCameraState.cameraTarget-rayFrom).normalized() * 500.f;
+			Vec3 rayFrom = m_pData->m_currentCameraState.cameraPos;
+			Vec3 rayTo = rayFrom + (m_pData->m_currentCameraState.cameraTarget-rayFrom).normalized() * 500.f;
 			ActorID pickedActorId = pGame->GetPhysicsEngine()->VGetClosestActorHit(
 				rayFrom, rayTo, pickPoint);
 			std::cerr << pickedActorId << std::endl;
 			if (pickedActorId != 0)
 			{
-				m_pickConstraintId = pPhysics->VAddPickConstraint(pickedActorId, pickPoint,
-					m_currentCameraState.cameraPos);
-				m_pickedActor = pickedActorId;
+				m_pData->m_pickConstraintId = pPhysics->VAddPickConstraint(pickedActorId, pickPoint,
+					m_pData->m_currentCameraState.cameraPos);
+				m_pData->m_pickedActor = pickedActorId;
 			}
 		}
-		else if (LeftMouseReleased() && m_pickedActor != 0)
+		else if (m_pData->LeftMouseReleased() && m_pData->m_pickedActor != 0)
 		{
-			pPhysics->VRemoveConstraint(m_pickedActor, m_pickConstraintId);
-			m_pickedActor = 0;
-			m_pickConstraintId = 0;
+			pPhysics->VRemoveConstraint(m_pData->m_pickedActor, m_pData->m_pickConstraintId);
+			m_pData->m_pickedActor = 0;
+			m_pData->m_pickConstraintId = 0;
 		}
 
-		if (CameraMoved())
+		if (m_pData->CameraMoved())
 		{
 			auto pEventMgr = pGame->GetEventManager();
 			if (pEventMgr)
 			{
 				std::shared_ptr<Events::IEventData> event(new Events::CameraMoveEvent(pGame->CurrentTimeSec(),
-					m_currentCameraState.cameraPos, m_currentCameraState.cameraTarget));
+					m_pData->m_currentCameraState.cameraPos, m_pData->m_currentCameraState.cameraTarget));
 				pEventMgr->QueueEvent(event);
 			}
 		}
 
-		m_previousMouseState = m_currentMouseState;
-		m_previousCameraState = m_currentCameraState;
+		m_pData->m_previousMouseState = m_pData->m_currentMouseState;
+		m_pData->m_previousCameraState = m_pData->m_currentCameraState;
 	}
 
-	void DemoGameLogic::ThrowCube(Vec3& throwTowards)
-	{
-		auto pGame = GameData::GetInstance();
-		auto pDisplay = pGame->GetDisplayComponent();
-		Vec3 cameraPos = pDisplay->VGetCameraPosition();
-
-		StrongActorPtr cube(new GameActor(cameraPos));
-		std::weak_ptr<WorldTransformComponent> pWeakTransform = cube->GetWorldTransform();
-		if (!pWeakTransform.expired())
-		{
-			std::shared_ptr<WorldTransformComponent> pTransform(pWeakTransform);
-			pTransform->SetRotation(pDisplay->VGetCameraRotation());
-		}
-		pGame->AddActor(cube);
-
-		pDisplay->VAddCubeSceneNode(15.f, cube, WOODBOX_TEXTURE);
-		auto physics = pGame->GetPhysicsEngine();
-		physics->VAddBox(Vec3(15.f, 15.f, 15.f), cube, "Titanium", "Bouncy");
-
-		Vec3 throwDirection = throwTowards - cameraPos;
-
-		// Also make the object rotate slightly "away from the camera".
-		Vec3 rotationAxis = pDisplay->VGetCameraRightVector();
-		rotationAxis[2] = -rotationAxis[2];
-
-		physics->VSetLinearVelocity(cube->GetID(), throwDirection, 10.f);
-		physics->VSetAngularVelocity(cube->GetID(), rotationAxis, 2.5f);
-	}
-
-	bool DemoGameLogic::CameraMoved()
+	bool DemoGameLogicData::CameraMoved()
 	{
 		return m_previousCameraState.cameraPos != m_currentCameraState.cameraPos ||
 			m_previousCameraState.cameraTarget != m_currentCameraState.cameraTarget;
 	}
 
-	bool DemoGameLogic::LeftMousePressed()
+	bool DemoGameLogicData::LeftMousePressed()
 	{
 		return m_currentMouseState.LeftMouseDown && !m_previousMouseState.LeftMouseDown;
 	}
 
-	bool DemoGameLogic::LeftMouseDown()
+	bool DemoGameLogicData::LeftMouseDown()
 	{
 		return m_currentMouseState.LeftMouseDown && m_previousMouseState.LeftMouseDown;
 	}
 
-	bool DemoGameLogic::LeftMouseReleased()
+	bool DemoGameLogicData::LeftMouseReleased()
 	{
 		return !m_currentMouseState.LeftMouseDown && m_previousMouseState.LeftMouseDown;
 	}
 
-	bool DemoGameLogic::RightMousePressed()
+	bool DemoGameLogicData::RightMousePressed()
 	{
 		return m_currentMouseState.RightMouseDown && !m_previousMouseState.RightMouseDown;
 	}
 
-	bool DemoGameLogic::RightMouseDown()
+	bool DemoGameLogicData::RightMouseDown()
 	{
 		return m_currentMouseState.RightMouseDown && m_previousMouseState.RightMouseDown;
 	}
 
-	bool DemoGameLogic::RightMouseReleased()
+	bool DemoGameLogicData::RightMouseReleased()
 	{
 		return !m_currentMouseState.RightMouseDown && m_previousMouseState.RightMouseDown;
 	}

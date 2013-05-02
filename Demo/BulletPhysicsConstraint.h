@@ -3,7 +3,6 @@
 
 #include "enginefwd.h"
 #include "IEventManager.h"
-#include "Vec3.h"
 #include <btBulletDynamicsCommon.h>
 
 namespace GameEngine

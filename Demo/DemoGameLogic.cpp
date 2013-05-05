@@ -119,7 +119,7 @@ namespace GameEngine
 		auto pPhysics = pGame->GetPhysicsEngine();
 		auto pEventMgr = pGame->GetEventManager();
 		auto pMessages = pDisplay->VGetMessageWindow();
-		pMessages->SetFont("..\\assets\\fontlucida.png");
+		pMessages->SetFont("..\\assets\\fontcourier.bmp");
 		pMessages->SetVisible(true);
 		pMessages->SetWidth(600);
 

@@ -10,8 +10,8 @@ namespace GameEngine
 	{
 	public:
 		virtual ~IGameLogic() { };
-		virtual void HandleInputs() = 0;
-		virtual void SetupInitialScene() = 0;
+		virtual void VHandleInputs() = 0;
+		virtual void VSetupInitialScene() = 0;
 	};
 
 	std::unique_ptr<IGameLogic> CreateDemoGameLogic();

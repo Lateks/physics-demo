@@ -40,9 +40,9 @@ namespace GameEngine
 
 			virtual void VSetCameraPosition(Vec3& newPosition) = 0;
 			virtual void VSetCameraTarget(Vec3& newTarget) = 0;
-			virtual void VSetCameraFOV(double degrees) = 0;
-			virtual void VSetCameraNearPlaneDistance(double distance) = 0;
-			virtual void VSetCameraFarPlaneDistance(double distance) = 0;
+			virtual void VSetCameraFOV(float degrees) = 0;
+			virtual void VSetCameraNearPlaneDistance(float distance) = 0;
+			virtual void VSetCameraFarPlaneDistance(float distance) = 0;
 
 			virtual Vec3 VGetCameraPosition() const = 0;
 			virtual Vec3 VGetCameraTarget() const = 0;

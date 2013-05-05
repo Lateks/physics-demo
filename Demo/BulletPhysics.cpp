@@ -143,7 +143,7 @@ namespace GameEngine
 				{
 					Events::EventPtr event;
 					event.reset(new Events::ActorMoveEvent(pGame->CurrentTimeSec(), pActor->GetID()));
-					pGame->GetEventManager()->QueueEvent(event);
+					pGame->GetEventManager()->VQueueEvent(event);
 				}
 			}
 		}
@@ -451,8 +451,8 @@ namespace GameEngine
 			Events::EventHandlerPtr pHandler(new std::function<void(Events::EventPtr)>(
 				[this, pickConstraintId, actorId, handledType] (Events::EventPtr pEvent)
 			{
-				assert(pEvent->GetEventType() == handledType);
-				if (pEvent->GetEventType() != handledType)
+				assert(pEvent->VGetEventType() == handledType);
+				if (pEvent->VGetEventType() != handledType)
 					return;
 
 				std::shared_ptr<Events::CameraMoveEvent> pMoveEvent =
@@ -487,7 +487,7 @@ namespace GameEngine
 			std::shared_ptr<Events::IEventManager> pEventMgr = pGame->GetEventManager();
 			if (pEventMgr)
 			{
-				pEventMgr->RegisterHandler(handledType, pHandler);
+				pEventMgr->VRegisterHandler(handledType, pHandler);
 			}
 
 			return pickConstraintId;
@@ -561,7 +561,7 @@ namespace GameEngine
 			std::shared_ptr<Events::IEventManager> pEventMgr = pGame->GetEventManager();
 			if (pEventMgr)
 			{
-				pEventMgr->DeregisterHandler(pConstraint->GetHandlerEventType(), pConstraint->GetConstraintUpdater());
+				pEventMgr->VDeregisterHandler(pConstraint->GetHandlerEventType(), pConstraint->GetConstraintUpdater());
 			}
 			pObject->RemoveConstraint(constraintId);
 		}
@@ -856,7 +856,7 @@ namespace GameEngine
 				ActorID actorId = firstIsTrigger ? GetActorID(pBody2) : GetActorID(pBody1);
 				event.reset(new Events::TriggerEntryEvent(pGameData->CurrentTimeSec(),
 					triggerId, actorId));
-				pEventManager->QueueEvent(event);
+				pEventManager->VQueueEvent(event);
 			}
 			else // not a trigger event
 			{
@@ -875,7 +875,7 @@ namespace GameEngine
 				event.reset(new Events::ActorCollideEvent(pGameData->CurrentTimeSec(),
 					id1, id2, collisionPoints, btVector3_to_Vec3(sumNormalForce, m_worldScaleConst),
 					btVector3_to_Vec3(sumFrictionForce, m_worldScaleConst)));
-				pEventManager->QueueEvent(event);
+				pEventManager->VQueueEvent(event);
 			}
 		}
 
@@ -899,13 +899,13 @@ namespace GameEngine
 				ActorID actorId = firstIsTrigger ? GetActorID(pBody2) : GetActorID(pBody1);
 				event.reset(new Events::TriggerExitEvent(pGameData->CurrentTimeSec(),
 					triggerId, actorId));
-				pEventManager->QueueEvent(event);
+				pEventManager->VQueueEvent(event);
 			}
 			else
 			{
 				event.reset(new Events::ActorSeparationEvent(
 					pGameData->CurrentTimeSec(), id1, id2));
-				pEventManager->QueueEvent(event);
+				pEventManager->VQueueEvent(event);
 			}
 		}
 	}

@@ -20,14 +20,14 @@ namespace GameEngine
 
 			EventManager();
 			virtual ~EventManager() { }
-			virtual void DispatchEvents() override;
-			virtual void DispatchEvent(IEventData& event) override;
-			virtual void DispatchEvent(EventPtr event) override;
-			virtual void QueueEvent(IEventData& event) override;
-			virtual void QueueEvent(EventPtr event) override;
-			virtual void DequeueFirst(EventType type) override;
-			virtual void RegisterHandler(EventType type, EventHandlerPtr handler) override;
-			virtual void DeregisterHandler(EventType type, EventHandlerPtr handler) override;
+			virtual void VDispatchEvents() override;
+			virtual void VDispatchEvent(IEventData& event) override;
+			virtual void VDispatchEvent(EventPtr event) override;
+			virtual void VQueueEvent(IEventData& event) override;
+			virtual void VQueueEvent(EventPtr event) override;
+			virtual void VDequeueFirst(EventType type) override;
+			virtual void VRegisterHandler(EventType type, EventHandlerPtr handler) override;
+			virtual void VDeregisterHandler(EventType type, EventHandlerPtr handler) override;
 		private:
 			// Use a two queue system like in McShaffry's book
 			// (while one of the queues is being processed, the

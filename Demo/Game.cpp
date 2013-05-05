@@ -110,7 +110,7 @@ namespace GameEngine
 		if (!pDisplay || !physics || !events || !gameLogic)
 			return 1;
 
-		gameLogic->SetupInitialScene();
+		gameLogic->VSetupInitialScene();
 
 		float timeBegin = m_pData->CurrentTimeSec();
 		float timeEnd;
@@ -119,8 +119,8 @@ namespace GameEngine
 		{
 			if (pDisplay->VWindowActive())
 			{
-				gameLogic->HandleInputs();
-				events->DispatchEvents();
+				gameLogic->VHandleInputs();
+				events->VDispatchEvents();
 				physics->VUpdateSimulation(frameDeltaSec);
 				physics->VSyncScene();
 				pDisplay->VDrawScene();

@@ -288,7 +288,7 @@ namespace GameEngine
 			}
 		}
 
-		void IrrlichtDisplay::VSetCameraFOV(double degrees)
+		void IrrlichtDisplay::VSetCameraFOV(float degrees)
 		{
 			assert(m_pData->m_pCamera);
 			if (m_pData->m_pCamera)
@@ -297,7 +297,7 @@ namespace GameEngine
 			}
 		}
 
-		void IrrlichtDisplay::VSetCameraNearPlaneDistance(double distance)
+		void IrrlichtDisplay::VSetCameraNearPlaneDistance(float distance)
 		{
 			assert(m_pData->m_pCamera);
 			if (m_pData->m_pCamera)
@@ -306,7 +306,7 @@ namespace GameEngine
 			}
 		}
 
-		void IrrlichtDisplay::VSetCameraFarPlaneDistance(double distance)
+		void IrrlichtDisplay::VSetCameraFarPlaneDistance(float distance)
 		{
 			assert(m_pData->m_pCamera);
 			if (m_pData->m_pCamera)
@@ -493,13 +493,13 @@ namespace GameEngine
 
 			sceneNodes[pStrongActor->GetID()] = pNode;
 			auto game = GameData::GetInstance();
-			game->GetEventManager()->RegisterHandler(EventType::ACTOR_MOVED,
+			game->GetEventManager()->VRegisterHandler(EventType::ACTOR_MOVED,
 				m_pMoveEventHandler);
 		}
 
 		void IrrlichtDisplayData::UpdateActorPosition(EventPtr pEvent)
 		{
-			assert(pEvent->GetEventType() == EventType::ACTOR_MOVED);
+			assert(pEvent->VGetEventType() == EventType::ACTOR_MOVED);
 			std::shared_ptr<ActorMoveEvent> pMoveEvent =
 				std::dynamic_pointer_cast<ActorMoveEvent>(pEvent);
 

@@ -13,8 +13,8 @@ namespace GameEngine
 		{
 		public:
 			explicit BaseEventData(const float timeStamp) : m_timeStamp(timeStamp) { }
-			virtual EventType GetEventType() const = 0;
-			float GetTimestamp() const { return m_timeStamp; }
+			virtual EventType VGetEventType() const = 0;
+			virtual float VGetTimestamp() const override { return m_timeStamp; }
 		private:
 			const float m_timeStamp;
 		};
@@ -42,7 +42,7 @@ namespace GameEngine
 				m_sumNormalForce(sumNormalForce), m_sumFrictionForce(sumFrictionForce)
 			{ }
 			virtual ~ActorCollideEvent() { };
-			virtual EventType GetEventType() const override
+			virtual EventType VGetEventType() const override
 			{
 				return eventType;
 			}
@@ -71,7 +71,7 @@ namespace GameEngine
 			ActorSeparationEvent(const float timeStamp, ActorID first, ActorID second)
 				: CollisionEvent(timeStamp, first, second) { }
 			virtual ~ActorSeparationEvent() { };
-			virtual EventType GetEventType() const override
+			virtual EventType VGetEventType() const override
 			{
 				return eventType;
 			}
@@ -98,7 +98,7 @@ namespace GameEngine
 			TriggerEntryEvent(const float timeStamp, ActorID trigger, ActorID actorId)
 				: TriggerEvent(timeStamp, trigger, actorId) { }
 			virtual ~TriggerEntryEvent() { };
-			virtual EventType GetEventType() const override
+			virtual EventType VGetEventType() const override
 			{
 				return eventType;
 			}
@@ -112,7 +112,7 @@ namespace GameEngine
 			TriggerExitEvent(const float timeStamp, ActorID trigger, ActorID actorId)
 				: TriggerEvent(timeStamp, trigger, actorId) { }
 			virtual ~TriggerExitEvent() { };
-			virtual EventType GetEventType() const override
+			virtual EventType VGetEventType() const override
 			{
 				return eventType;
 			}
@@ -126,7 +126,7 @@ namespace GameEngine
 			ActorMoveEvent(const float timeStamp, ActorID actorId)
 				: BaseEventData(timeStamp), m_actorId(actorId) { }
 			virtual ~ActorMoveEvent() { };
-			virtual EventType GetEventType() const override
+			virtual EventType VGetEventType() const override
 			{
 				return eventType;
 			}
@@ -164,7 +164,7 @@ namespace GameEngine
 			CameraMoveEvent(const float timeStamp, Vec3 cameraPos, Vec3 cameraTarget)
 				: RayChangeEvent(timeStamp, cameraPos, cameraTarget) { }
 			virtual ~CameraMoveEvent() { }
-			virtual EventType GetEventType() const override
+			virtual EventType VGetEventType() const override
 			{
 				return eventType;
 			}

@@ -11,7 +11,7 @@ namespace GameEngine
 	{
 		EventManager::EventManager() : m_activeQueue(0) { }
 
-		void EventManager::DispatchEvents()
+		void EventManager::VDispatchEvents()
 		{
 			auto processingQueue = &m_eventQueues[m_activeQueue];
 			m_activeQueue = (m_activeQueue + 1) % EventManager::NUM_QUEUES;
@@ -20,45 +20,45 @@ namespace GameEngine
 			while (!processingQueue->empty())
 			{
 				EventPtr event = processingQueue->front();
-				DispatchEvent(event);
+				VDispatchEvent(event);
 				processingQueue->pop_front();
 			}
 		}
 
-		void EventManager::DispatchEvent(IEventData& event)
+		void EventManager::VDispatchEvent(IEventData& event)
 		{
-			DispatchEvent(EventPtr(&event));
+			VDispatchEvent(EventPtr(&event));
 		}
 
-		void EventManager::DispatchEvent(EventPtr event)
+		void EventManager::VDispatchEvent(EventPtr event)
 		{
-			EventHandlerList *handlerList = &m_eventHandlers[event->GetEventType()];
+			EventHandlerList *handlerList = &m_eventHandlers[event->VGetEventType()];
 			std::for_each(handlerList->begin(), handlerList->end(),
 				[&event] (EventHandlerPtr handler) { (*handler)(event); });
 		}
 
-		void EventManager::QueueEvent(IEventData& event)
+		void EventManager::VQueueEvent(IEventData& event)
 		{
-			QueueEvent(EventPtr(&event));
+			VQueueEvent(EventPtr(&event));
 		}
 
-		void EventManager::QueueEvent(EventPtr event)
+		void EventManager::VQueueEvent(EventPtr event)
 		{
 			m_eventQueues[m_activeQueue].push_back(event);
 		}
 
-		void EventManager::DequeueFirst(EventType type)
+		void EventManager::VDequeueFirst(EventType type)
 		{
 			auto activeQueue = m_eventQueues[m_activeQueue];
 			auto it = std::find_if(activeQueue.begin(), activeQueue.end(),
-				[&type] (EventPtr event) { return event->GetEventType() == type; });
+				[&type] (EventPtr event) { return event->VGetEventType() == type; });
 			if (it != activeQueue.end())
 			{
 				activeQueue.erase(it);
 			}
 		}
 
-		void EventManager::RegisterHandler(EventType type, EventHandlerPtr handler)
+		void EventManager::VRegisterHandler(EventType type, EventHandlerPtr handler)
 		{
 			auto handlers = &m_eventHandlers[type];
 			auto it = std::find_if(handlers->begin(), handlers->end(),
@@ -69,7 +69,7 @@ namespace GameEngine
 			}
 		}
 
-		void EventManager::DeregisterHandler(EventType type, EventHandlerPtr handler)
+		void EventManager::VDeregisterHandler(EventType type, EventHandlerPtr handler)
 		{
 			EventHandlerList& handlers = m_eventHandlers[type];
 			auto it = std::find_if(handlers.begin(), handlers.end(),

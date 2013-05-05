@@ -35,9 +35,9 @@ namespace GameEngine
 
 			virtual void VSetCameraPosition(Vec3& newPosition) override;
 			virtual void VSetCameraTarget(Vec3& newTarget) override;
-			virtual void VSetCameraFOV(double degrees) override;
-			virtual void VSetCameraNearPlaneDistance(double distance) override;
-			virtual void VSetCameraFarPlaneDistance(double distance) override;
+			virtual void VSetCameraFOV(float degrees) override;
+			virtual void VSetCameraNearPlaneDistance(float distance) override;
+			virtual void VSetCameraFarPlaneDistance(float distance) override;
 
 			virtual Vec3 VGetCameraPosition() const override;
 			virtual Vec3 VGetCameraTarget() const override;

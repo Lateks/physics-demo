@@ -62,11 +62,11 @@ namespace GameEngine
 			std::dynamic_pointer_cast<Events::TriggerEvent>(event);
 		std::wstringstream message;
 		message << L"Actor " << pEvent->GetActorId();
-		if (event->GetEventType() == Events::EventType::ENTER_TRIGGER)
+		if (event->VGetEventType() == Events::EventType::ENTER_TRIGGER)
 		{
 				message << L" entered the trigger.";
 		}
-		else if (event->GetEventType() == Events::EventType::EXIT_TRIGGER)
+		else if (event->VGetEventType() == Events::EventType::EXIT_TRIGGER)
 		{
 			message << L" exited the trigger.";
 		}
@@ -112,7 +112,7 @@ namespace GameEngine
 	 * (Also note that the concept of handedness does not affect quaternions
 	 * used for handling rotations.)
 	 */
-	void DemoGameLogic::SetupInitialScene()
+	void DemoGameLogic::VSetupInitialScene()
 	{
 		auto pGame = GameData::GetInstance();
 		auto pDisplay = pGame->GetDisplayComponent();
@@ -166,11 +166,11 @@ namespace GameEngine
 			PrintTriggerEvent(pMessages, event);
 		}));
 
-		pEventMgr->RegisterHandler(Events::EventType::ENTER_TRIGGER, eventPrinter);
-		pEventMgr->RegisterHandler(Events::EventType::EXIT_TRIGGER, eventPrinter);
+		pEventMgr->VRegisterHandler(Events::EventType::ENTER_TRIGGER, eventPrinter);
+		pEventMgr->VRegisterHandler(Events::EventType::EXIT_TRIGGER, eventPrinter);
 	}
 
-	void DemoGameLogic::HandleInputs()
+	void DemoGameLogic::VHandleInputs()
 	{
 		auto pGame = GameData::GetInstance();
 		assert(pGame && pGame->GetInputStateHandler());
@@ -214,7 +214,7 @@ namespace GameEngine
 			{
 				std::shared_ptr<Events::IEventData> event(new Events::CameraMoveEvent(pGame->CurrentTimeSec(),
 					m_pData->m_currentCameraState.cameraPos, m_pData->m_currentCameraState.cameraTarget));
-				pEventMgr->QueueEvent(event);
+				pEventMgr->VQueueEvent(event);
 			}
 		}
 

@@ -27,8 +27,8 @@ namespace GameEngine
 		{
 		public:
 			virtual ~IEventData() { };
-			virtual EventType GetEventType() const = 0;
-			virtual float GetTimestamp() const = 0;
+			virtual EventType VGetEventType() const = 0;
+			virtual float VGetTimestamp() const = 0;
 		};
 
 		typedef std::shared_ptr<IEventData> EventPtr;
@@ -40,14 +40,14 @@ namespace GameEngine
 		public:
 			IEventManager() { }
 			virtual ~IEventManager() { }
-			virtual void DispatchEvents() = 0;
-			virtual void DispatchEvent(IEventData& event) = 0;
-			virtual void DispatchEvent(EventPtr event) = 0;
-			virtual void QueueEvent(IEventData& event) = 0;
-			virtual void QueueEvent(EventPtr event) = 0;
-			virtual void DequeueFirst(EventType type) = 0;
-			virtual void RegisterHandler(EventType type, EventHandlerPtr handler) = 0;
-			virtual void DeregisterHandler(EventType type, EventHandlerPtr handler) = 0;
+			virtual void VDispatchEvents() = 0;
+			virtual void VDispatchEvent(IEventData& event) = 0;
+			virtual void VDispatchEvent(EventPtr event) = 0;
+			virtual void VQueueEvent(IEventData& event) = 0;
+			virtual void VQueueEvent(EventPtr event) = 0;
+			virtual void VDequeueFirst(EventType type) = 0;
+			virtual void VRegisterHandler(EventType type, EventHandlerPtr handler) = 0;
+			virtual void VDeregisterHandler(EventType type, EventHandlerPtr handler) = 0;
 		};
 	}
 }

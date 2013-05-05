@@ -13,8 +13,8 @@ namespace GameEngine
 	public:
 		DemoGameLogic();
 		virtual ~DemoGameLogic();
-		virtual void HandleInputs() override;
-		virtual void SetupInitialScene() override;
+		virtual void VHandleInputs() override;
+		virtual void VSetupInitialScene() override;
 	private:
 		std::unique_ptr<DemoGameLogicData> m_pData;
 	};

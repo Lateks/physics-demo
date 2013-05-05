@@ -61,15 +61,15 @@ namespace GameEngine
 		std::shared_ptr<Events::TriggerEvent> pEvent =
 			std::dynamic_pointer_cast<Events::TriggerEvent>(event);
 		std::wstringstream message;
-		message << L"Actor " << pEvent->GetActorId();
 		if (event->VGetEventType() == Events::EventType::ENTER_TRIGGER)
 		{
-				message << L" entered the trigger.";
+				message << L"ENTER";
 		}
 		else if (event->VGetEventType() == Events::EventType::EXIT_TRIGGER)
 		{
-			message << L" exited the trigger.";
+			message << L"EXIT";
 		}
+		message << " TRIGGER (actor " << pEvent->GetActorId() << ")";
 		pMessages->AddMessage(message.str());
 	}
 

@@ -14,7 +14,7 @@ namespace GameEngine
 		virtual ~GameActor() { };
 		unsigned int GetID() { return actorId; }
 		void SetWorldTransform(WorldTransformComponent *trans);
-		std::weak_ptr<WorldTransformComponent> GetWorldTransform();
+		std::shared_ptr<WorldTransformComponent> GetWorldTransform();
 	private:
 		ActorID actorId;
 		/* The transform component is stored separately from the

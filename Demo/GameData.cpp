@@ -53,7 +53,7 @@ namespace GameEngine
 		return pInstance;
 	}
 
-	std::weak_ptr<GameActor> GameData::GetActor(ActorID id)
+	std::shared_ptr<GameActor> GameData::GetActor(ActorID id)
 	{
 		return m_pData->m_actors[id];
 	}

@@ -111,10 +111,10 @@ namespace GameEngine
 				const Quaternion rot = btQuaternion_to_Quaternion(body->getOrientation());
 				const Vec3 pos = btVector3_to_Vec3(body->getCenterOfMassPosition(), m_pData->m_worldScaleConst);
 
-				WeakActorPtr pWeakActor = pGame->GetActor(id);
-				if (!pWeakActor.expired())
+				auto pActor = pGame->GetActor(id);
+				if (pActor)
 				{
-					UpdateWorldTransform(StrongActorPtr(pWeakActor), pos, rot);
+					UpdateWorldTransform(pActor, pos, rot);
 				}
 			}
 		}
@@ -122,13 +122,11 @@ namespace GameEngine
 		void UpdateWorldTransform(StrongActorPtr pActor, const Vec3& pos, const Quaternion& rot)
 		{
 			shared_ptr<GameData> pGame = GameData::GetInstance();
-			weak_ptr<WorldTransformComponent> pWeakWorldTrans =
-				pActor->GetWorldTransform();
+			auto pWorldTrans = pActor->GetWorldTransform();
 
-			if (!pWeakWorldTrans.expired())
+			if (pWorldTrans)
 			{
 				bool changed = false;
-				shared_ptr<WorldTransformComponent> pWorldTrans(pWeakWorldTrans);
 				if (pWorldTrans->GetRotation() != rot)
 				{
 					pWorldTrans->SetRotation(rot);
@@ -459,7 +457,7 @@ namespace GameEngine
 					std::dynamic_pointer_cast<Events::CameraMoveEvent>(pEvent);
 
 				this->VUpdatePickConstraint(actorId, pickConstraintId,
-					pMoveEvent->GetRayFrom(), pMoveEvent->GetRayTo());
+					pMoveEvent->GetCameraPosition(), pMoveEvent->GetCameraTarget());
 			})
 			);
 
@@ -741,11 +739,9 @@ namespace GameEngine
 			assert(m_actorToBulletPhysicsObjectMap.find(id) == m_actorToBulletPhysicsObjectMap.end());
 			m_actorToBulletPhysicsObjectMap[id].reset(new BulletPhysicsObject(id)); // creates a dynamic object
 
-			std::weak_ptr<WorldTransformComponent> pWeakWorldTransform
-				= pActor->GetWorldTransform();
-			if (!pWeakWorldTransform.expired())
+			auto pWorldTransform = pActor->GetWorldTransform();
+			if (pWorldTransform)
 			{
-				std::shared_ptr<WorldTransformComponent> pWorldTransform(pWeakWorldTransform);
 				btMotionState *motionState = GetMotionStateFrom(pWorldTransform);
 
 				MaterialData matData(m_physicsMaterialData->LookupMaterial(material));
@@ -788,11 +784,9 @@ namespace GameEngine
 					: BulletPhysicsObject::PhysicsType::STATIC));
 			}
 
-			std::weak_ptr<WorldTransformComponent> pWeakWorldTransform
-				= pActor->GetWorldTransform();
-			if (!pWeakWorldTransform.expired())
+			auto pWorldTransform = pActor->GetWorldTransform();
+			if (pWorldTransform)
 			{
-				std::shared_ptr<WorldTransformComponent> pWorldTransform(pWeakWorldTransform);
 				btMotionState *motionState = GetMotionStateFrom(pWorldTransform);
 
 				// Objects that have 0 mass are regarded as immovable by Bullet.

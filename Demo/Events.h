@@ -3,6 +3,7 @@
 
 #include "enginefwd.h"
 #include "Vec3.h"
+#include "Vec4.h"
 #include "IEventManager.h"
 
 namespace GameEngine
@@ -139,37 +140,28 @@ namespace GameEngine
 			ActorID m_actorId;
 		};
 
-		class RayChangeEvent : public BaseEventData
-		{
-		public:
-			RayChangeEvent(const float timeStamp, Vec3 rayFrom, Vec3 rayTo)
-				: BaseEventData(timeStamp), m_rayFrom(rayFrom), m_rayTo(rayTo) { }
-			virtual ~RayChangeEvent() { }
-			Vec3 GetRayFrom()
-			{
-				return m_rayFrom;
-			}
-			Vec3 GetRayTo()
-			{
-				return m_rayTo;
-			}
-		private:
-			Vec3 m_rayFrom;
-			Vec3 m_rayTo;
-		};
-
-		class CameraMoveEvent : public RayChangeEvent
+		class CameraMoveEvent : public BaseEventData
 		{
 		public:
 			CameraMoveEvent(const float timeStamp, Vec3 cameraPos, Vec3 cameraTarget)
-				: RayChangeEvent(timeStamp, cameraPos, cameraTarget) { }
+				: BaseEventData(timeStamp), m_cameraPos(cameraPos), m_cameraTarget(cameraTarget) { }
 			virtual ~CameraMoveEvent() { }
 			virtual EventType VGetEventType() const override
 			{
 				return eventType;
 			}
+			Vec3 GetCameraPosition()
+			{
+				return m_cameraPos;
+			}
+			Vec3 GetCameraTarget()
+			{
+				return m_cameraTarget;
+			}
 		private:
 			const static EventType eventType = EventType::CAMERA_MOVED;
+			Vec3 m_cameraPos;
+			Vec3 m_cameraTarget;
 		};
 	}
 }

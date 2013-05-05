@@ -28,8 +28,8 @@ namespace GameEngine
 		m_pTransform.reset(trans);
 	}
 
-	std::weak_ptr<WorldTransformComponent> GameActor::GetWorldTransform()
+	std::shared_ptr<WorldTransformComponent> GameActor::GetWorldTransform()
 	{
-		return std::weak_ptr<WorldTransformComponent>(m_pTransform);
+		return m_pTransform;
 	}
 }

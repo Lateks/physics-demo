@@ -45,6 +45,8 @@ namespace GameEngine
 			return;
 		}
 
+		pRenderer->VSetCameraFOV(75.f);
+
 		m_pData = GameData::GetInstance();
 		m_pData->SetInputStateHandler(pRenderer->VGetInputState());
 		m_pData->SetDisplayComponent(std::shared_ptr<Display::IDisplay>(pRenderer.release()));

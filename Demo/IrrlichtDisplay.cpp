@@ -251,7 +251,6 @@ namespace GameEngine
 			default: // defaults to the Irrlicht default FPS camera
 				m_pData->m_pCamera = m_pData->m_pSmgr->addCameraSceneNodeFPS();
 			}
-			m_pData->m_pCamera->setFOV(irr::core::degToRad(75.f));
 			m_pData->m_pDevice->getCursorControl()->setVisible(false);
 
 			return true;
@@ -273,14 +272,47 @@ namespace GameEngine
 		void IrrlichtDisplay::VSetCameraPosition(Vec3& newPosition)
 		{
 			assert(m_pData->m_pCamera);
-			m_pData->m_pCamera->setPosition(ConvertVector(newPosition));
-			m_pData->m_pCamera->updateAbsolutePosition();
+			if (m_pData->m_pCamera)
+			{
+				m_pData->m_pCamera->setPosition(ConvertVector(newPosition));
+				m_pData->m_pCamera->updateAbsolutePosition();
+			}
 		}
 
 		void IrrlichtDisplay::VSetCameraTarget(Vec3& newTarget)
 		{
 			assert(m_pData->m_pCamera);
-			m_pData->m_pCamera->setTarget(ConvertVector(newTarget));
+			if (m_pData->m_pCamera)
+			{
+				m_pData->m_pCamera->setTarget(ConvertVector(newTarget));
+			}
+		}
+
+		void IrrlichtDisplay::VSetCameraFOV(double degrees)
+		{
+			assert(m_pData->m_pCamera);
+			if (m_pData->m_pCamera)
+			{
+				m_pData->m_pCamera->setFOV(irr::core::degToRad(degrees));
+			}
+		}
+
+		void IrrlichtDisplay::VSetCameraNearPlaneDistance(double distance)
+		{
+			assert(m_pData->m_pCamera);
+			if (m_pData->m_pCamera)
+			{
+				m_pData->m_pCamera->setNearValue(distance);
+			}
+		}
+
+		void IrrlichtDisplay::VSetCameraFarPlaneDistance(double distance)
+		{
+			assert(m_pData->m_pCamera);
+			if (m_pData->m_pCamera)
+			{
+				m_pData->m_pCamera->setFarValue(distance);
+			}
 		}
 
 		bool IrrlichtDisplay::VRunning()

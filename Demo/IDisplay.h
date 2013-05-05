@@ -18,6 +18,7 @@ namespace GameEngine
 		enum class CAMERA_TYPE
 		{
 			FPS,
+			FPS_WASD,
 			STATIC
 		};
 

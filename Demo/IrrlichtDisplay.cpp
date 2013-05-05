@@ -207,6 +207,20 @@ namespace GameEngine
 			}
 		}
 
+		std::unique_ptr<irr::SKeyMap[]> CreateWASDKeyMap()
+		{
+			std::unique_ptr<irr::SKeyMap[]> wasdKeyMap(new irr::SKeyMap[4]);
+			wasdKeyMap[0].Action = irr::EKA_MOVE_FORWARD;
+			wasdKeyMap[0].KeyCode = irr::KEY_KEY_W;
+			wasdKeyMap[1].Action = irr::EKA_MOVE_BACKWARD;
+			wasdKeyMap[1].KeyCode = irr::KEY_KEY_S;
+			wasdKeyMap[2].Action = irr::EKA_STRAFE_LEFT;
+			wasdKeyMap[2].KeyCode = irr::KEY_KEY_A;
+			wasdKeyMap[3].Action = irr::EKA_STRAFE_RIGHT;
+			wasdKeyMap[3].KeyCode = irr::KEY_KEY_D;
+			return wasdKeyMap;
+		}
+
 		bool IrrlichtDisplay::VSetupAndOpenWindow(unsigned int width, unsigned int height,
 			DRIVER_TYPE driverType, CAMERA_TYPE cameraType)
 		{
@@ -230,7 +244,11 @@ namespace GameEngine
 			case CAMERA_TYPE::STATIC:
 				m_pData->m_pCamera = m_pData->m_pSmgr->addCameraSceneNode();
 				break;
-			default:
+			case CAMERA_TYPE::FPS_WASD:
+				m_pData->m_pCamera = m_pData->m_pSmgr->addCameraSceneNodeFPS(
+					0, 100.f, 0.5f, -1, CreateWASDKeyMap().get(), 4);
+				break;
+			default: // defaults to the Irrlicht default FPS camera
 				m_pData->m_pCamera = m_pData->m_pSmgr->addCameraSceneNodeFPS();
 			}
 			m_pData->m_pCamera->setFOV(irr::core::degToRad(75.f));

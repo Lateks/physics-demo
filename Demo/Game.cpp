@@ -39,7 +39,7 @@ namespace GameEngine
 		}
 
 		if (!pRenderer->VSetupAndOpenWindow(1024, 800,
-			Display::DRIVER_TYPE::OPEN_GL, Display::CAMERA_TYPE::FPS))
+			Display::DRIVER_TYPE::OPEN_GL, Display::CAMERA_TYPE::FPS_WASD))
 		{
 			PrintError("Failed to open OpenGL device.");
 			return;

@@ -50,6 +50,9 @@ namespace GameEngine
 			virtual Vec3 VGetCameraRightVector() const = 0;
 			virtual Quaternion VGetCameraRotation() const = 0;
 
+			virtual void VHideCursor() = 0;
+			virtual void VShowCursor() = 0;
+
 			// Returns a unique id that can be used to refer to the texture.
 			// Returns 0 if loading fails.
 			virtual unsigned int VLoadTexture(const std::string& filePath) = 0;

@@ -66,6 +66,7 @@ namespace GameEngine
 			void AddSceneNode(WeakActorPtr pActor, irr::scene::ISceneNode *pNode, unsigned int texture);
 			void UpdateActorPosition(Events::EventPtr pEvent);
 			void SetNodeTransform(irr::scene::ISceneNode *pNode, shared_ptr<WorldTransformComponent> pWorldTransform);
+			void SetCursorVisible(bool value);
 			unsigned int GetTime();
 		};
 
@@ -251,7 +252,6 @@ namespace GameEngine
 			default: // defaults to the Irrlicht default FPS camera
 				m_pData->m_pCamera = m_pData->m_pSmgr->addCameraSceneNodeFPS();
 			}
-			m_pData->m_pDevice->getCursorControl()->setVisible(false);
 
 			return true;
 		}
@@ -312,6 +312,25 @@ namespace GameEngine
 			if (m_pData->m_pCamera)
 			{
 				m_pData->m_pCamera->setFarValue(distance);
+			}
+		}
+
+		void IrrlichtDisplay::VHideCursor()
+		{
+			m_pData->SetCursorVisible(false);
+		}
+
+		void IrrlichtDisplay::VShowCursor()
+		{
+			m_pData->SetCursorVisible(true);
+		}
+
+		void IrrlichtDisplayData::SetCursorVisible(bool value)
+		{
+			assert(m_pDevice);
+			if (m_pDevice)
+			{
+				m_pDevice->getCursorControl()->setVisible(value);
 			}
 		}
 

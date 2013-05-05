@@ -45,6 +45,9 @@ namespace GameEngine
 			virtual Vec3 VGetCameraRightVector() const override;
 			virtual Quaternion VGetCameraRotation() const override;
 
+			virtual void VHideCursor() override;
+			virtual void VShowCursor() override;
+
 			virtual unsigned int VLoadTexture(const std::string& filePath) override;
 
 			virtual void VAddSphereSceneNode(float radius, WeakActorPtr pActor, unsigned int texture) override;

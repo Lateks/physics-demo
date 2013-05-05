@@ -46,6 +46,7 @@ namespace GameEngine
 		}
 
 		pRenderer->VSetCameraFOV(75.f);
+		pRenderer->VHideCursor();
 
 		m_pData = GameData::GetInstance();
 		m_pData->SetInputStateHandler(pRenderer->VGetInputState());

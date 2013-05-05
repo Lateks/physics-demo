@@ -11,15 +11,13 @@ namespace GameEngine
 {
 	namespace Events
 	{
+		struct EventManagerData;
+
 		class EventManager : public IEventManager
 		{
 		public:
-			typedef std::vector<EventHandlerPtr> EventHandlerList;
-			typedef std::map<EventType, EventHandlerList> EventTypeToHandlerMap;
-			typedef std::deque<EventPtr> EventQueue;
-
 			EventManager();
-			virtual ~EventManager() { }
+			virtual ~EventManager();
 			virtual void VDispatchEvents() override;
 			virtual void VDispatchEvent(IEventData& event) override;
 			virtual void VDispatchEvent(EventPtr event) override;
@@ -29,13 +27,7 @@ namespace GameEngine
 			virtual void VRegisterHandler(EventType type, EventHandlerPtr handler) override;
 			virtual void VDeregisterHandler(EventType type, EventHandlerPtr handler) override;
 		private:
-			// Use a two queue system like in McShaffry's book
-			// (while one of the queues is being processed, the
-			// other one is used to queue new events and dequeue events).
-			static const unsigned int NUM_QUEUES = 2;
-			unsigned int m_activeQueue;
-			EventQueue m_eventQueues[NUM_QUEUES];
-			EventTypeToHandlerMap m_eventHandlers;
+			std::unique_ptr<EventManagerData> m_pData;
 		};
 	}
 }

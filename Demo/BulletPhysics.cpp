@@ -371,18 +371,24 @@ namespace GameEngine
 		{
 			btVector3 btRayFrom = Vec3_to_btVector3(rayFrom, m_pData->m_worldScaleConst);
 			btVector3 btRayTo = Vec3_to_btVector3(rayTo, m_pData->m_worldScaleConst);
-			btCollisionWorld::ClosestRayResultCallback rayCallback(btRayFrom, btRayTo);
+			btCollisionWorld::AllHitsRayResultCallback rayCallback(btRayFrom, btRayTo);
 
 			m_pData->m_pDynamicsWorld->rayTest(btRayFrom, btRayTo, rayCallback);
 			ActorID actorHit = 0;
 			if (rayCallback.hasHit())
 			{
-				const btRigidBody *pBody = btRigidBody::upcast(rayCallback.m_collisionObject);
-				assert(pBody);
-				if (pBody && !pBody->isStaticOrKinematicObject())
+				// Pick the first body that was hit and was not a static or a kinematic object
+				// (those are unpickable).
+				for (int i = 0; i < rayCallback.m_collisionObjects.size(); i++)
 				{
-					actorHit = m_pData->m_rigidBodyToActorMap[pBody];
-					pickPosition = btVector3_to_Vec3(rayCallback.m_hitPointWorld, m_pData->m_worldScaleConst);
+					const btRigidBody *pBody = btRigidBody::upcast(rayCallback.m_collisionObjects[i]);
+					assert(pBody);
+					if (pBody && !pBody->isStaticOrKinematicObject())
+					{
+						actorHit = m_pData->m_rigidBodyToActorMap[pBody];
+						pickPosition = btVector3_to_Vec3(rayCallback.m_hitPointWorld[i], m_pData->m_worldScaleConst);
+						break;
+					}
 				}
 			}
 			return actorHit;

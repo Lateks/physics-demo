@@ -39,6 +39,7 @@ using GameEngine::Events::ActorMoveEvent;
 namespace
 {
 	unsigned int TEXTURE_ID = 0;
+	const unsigned int RGB_MAX = 255;
 }
 
 namespace GameEngine
@@ -143,6 +144,12 @@ namespace GameEngine
 		irr::video::SColorf ConvertRGBAColorToSColorf(const RGBAColor& color)
 		{
 			return irr::video::SColorf(color.r(), color.g(), color.b(), color.a());
+		}
+
+		SColor ConvertRGBAColorToSColor(const RGBAColor& color)
+		{
+			return irr::video::SColor((u32) color.a() * RGB_MAX,
+				(u32) color.r() * RGB_MAX, (u32) color.g() * RGB_MAX, (u32) color.b() * RGB_MAX);
 		}
 
 		/*
@@ -415,6 +422,29 @@ namespace GameEngine
 			if (node)
 			{
 				node->setMaterialFlag(irr::video::EMF_LIGHTING, lightingOn);
+			}
+		}
+
+		void IrrlichtDisplay::VSetSceneNodeLightColors(ActorID actorId, const RGBAColor& specularColor,
+				const RGBAColor& ambientColor, const RGBAColor& diffuseColor)
+		{
+			auto node = m_pData->sceneNodes[actorId];
+			if (node && node->getMaterialCount() > 0)
+			{
+				irr::video::SMaterial& material = node->getMaterial(0);
+				material.AmbientColor = ConvertRGBAColorToSColor(ambientColor);
+				material.SpecularColor = ConvertRGBAColorToSColor(specularColor);
+				material.DiffuseColor = ConvertRGBAColorToSColor(diffuseColor);
+			}
+		}
+
+		void IrrlichtDisplay::VSetSceneNodeShininess(ActorID actorId, float shininess)
+		{
+			auto node = m_pData->sceneNodes[actorId];
+			if (node && node->getMaterialCount() > 0)
+			{
+				irr::video::SMaterial& material = node->getMaterial(0);
+				material.Shininess = shininess;
 			}
 		}
 

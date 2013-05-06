@@ -58,6 +58,9 @@ namespace GameEngine
 			virtual void VRemoveSceneNode(ActorID actorId) override;
 			virtual void VSetSceneNodeLighting(ActorID actorId, bool lightingOn) override;
 			virtual void VSetGlobalAmbientLight(const RGBAColor& color) override;
+			virtual void VSetSceneNodeLightColors(ActorID actorId, const RGBAColor& specularColor,
+				const RGBAColor& ambientColor, const RGBAColor& diffuseColor) override;
+			virtual void VSetSceneNodeShininess(ActorID actorId, float shininess) override;
 
 			virtual void VLoadMap(const std::string& mapFilePath, const std::string& meshName, Vec3& position) override;
 		private:

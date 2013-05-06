@@ -9,6 +9,7 @@
 #include "GameData.h"
 
 #include "Vec3.h"
+#include "Vec4.h"
 
 #include "GameActor.h"
 #include "WorldTransformComponent.h"
@@ -23,6 +24,8 @@ namespace
 	unsigned int WOODBOX_TEXTURE;
 	unsigned int MUD_TEXTURE;
 	unsigned int BEACHBALL_TEXTURE;
+
+	const unsigned int HL_UPDATE_INTERVAL = 15;
 }
 
 namespace GameEngine
@@ -56,12 +59,32 @@ namespace GameEngine
 		inline bool RightMouseReleased();
 		void UpdateHighlight();
 	};
+	
+	void AddHighlight(ActorID actorId)
+	{
+		auto pDisplay = GameData::GetInstance()->GetDisplayComponent();
+		if (actorId && pDisplay)
+		{
+			pDisplay->VSetSceneNodeShininess(actorId, 10.f);
+			pDisplay->VSetSceneNodeLightColors(actorId, RGBAColor::Blue, RGBAColor::Blue, RGBAColor::Blue);
+		}
+	}
+
+	void RemoveHighlight(ActorID actorId)
+	{
+		auto pDisplay = GameData::GetInstance()->GetDisplayComponent();
+		if (actorId && pDisplay)
+		{
+			pDisplay->VSetSceneNodeShininess(actorId, 0.f);
+			pDisplay->VSetSceneNodeLightColors(actorId, RGBAColor::White, RGBAColor::White, RGBAColor::White);
+		}
+	}
 
 	void DemoGameLogicData::UpdateHighlight()
 	{
 		auto pGameData = GameData::GetInstance();
 		unsigned int currentTime = pGameData->CurrentTimeMs();
-		if (m_lastUpdate - currentTime > 500)
+		if (currentTime - m_lastUpdate > HL_UPDATE_INTERVAL)
 		{
 			if (!m_pickConstraintId)
 			{
@@ -75,19 +98,11 @@ namespace GameEngine
 				{
 					if (pickedActorId)
 					{
-						auto pDisplay = pGameData->GetDisplayComponent();
-						if (pDisplay)
-						{
-							pDisplay->VSetSceneNodeLighting(pickedActorId, false);
-						}
+						AddHighlight(pickedActorId);
 					}
 					if (m_pickedActor)
 					{
-						auto pDisplay = pGameData->GetDisplayComponent();
-						if (pDisplay)
-						{
-							pDisplay->VSetSceneNodeLighting(m_pickedActor, true);
-						}
+						RemoveHighlight(m_pickedActor);
 					}
 				}
 				m_pickedActor = pickedActorId;
@@ -161,7 +176,21 @@ namespace GameEngine
 		physics->VSetAngularVelocity(cube->GetID(), rotationAxis, 2.5f);
 	}
 
-	DemoGameLogic::DemoGameLogic() : m_pData(new DemoGameLogicData()) { }
+	DemoGameLogic::DemoGameLogic() : m_pData(new DemoGameLogicData())
+	{
+		unsigned int currentTime = GameData::GetInstance()->CurrentTimeMs();
+		if (currentTime > HL_UPDATE_INTERVAL)
+		{
+			currentTime -= HL_UPDATE_INTERVAL;
+		}
+		else
+		{
+			currentTime = 0;
+		}
+		m_pData->m_lastUpdate = currentTime;
+		m_pData->m_pickConstraintId = 0;
+		m_pData->m_pickedActor = 0;
+	}
 
 	DemoGameLogic::~DemoGameLogic() { }
 
@@ -238,17 +267,10 @@ namespace GameEngine
 			DebugPrintCollisionEvent(event);
 		}));
 
-		Events::EventHandlerPtr highlightUpdater(new std::function<void(Events::EventPtr)>
-			([this] (Events::EventPtr event)
-		{
-			this->m_pData->UpdateHighlight();
-		}));
-
 		pEventMgr->VRegisterHandler(Events::EventType::ENTER_TRIGGER, eventPrinter);
 		pEventMgr->VRegisterHandler(Events::EventType::EXIT_TRIGGER, eventPrinter);
 		pEventMgr->VRegisterHandler(Events::EventType::COLLISION_EVENT, debugPrinter);
 		pEventMgr->VRegisterHandler(Events::EventType::SEPARATION_EVENT, debugPrinter);
-		pEventMgr->VRegisterHandler(Events::EventType::CAMERA_MOVED, highlightUpdater);
 	}
 
 	void DemoGameLogic::VUpdate()
@@ -260,6 +282,8 @@ namespace GameEngine
 		auto pDisplay = pGame->GetDisplayComponent();
 		auto pPhysics = pGame->GetPhysicsEngine();
 		m_pData->m_currentCameraState = CameraState(pDisplay->VGetCameraPosition(), pDisplay->VGetCameraTarget());
+
+		m_pData->UpdateHighlight();
 
 		if (m_pData->RightMouseReleased())
 		{
@@ -287,12 +311,8 @@ namespace GameEngine
 					m_pData->m_currentCameraState.cameraPos);
 				if (m_pData->m_pickedActor != pickedActorId)
 				{
-					auto pDisplay = pGame->GetDisplayComponent();
-					if (pDisplay)
-					{
-						pDisplay->VSetSceneNodeLighting(m_pData->m_pickedActor, true);
-						pDisplay->VSetSceneNodeLighting(pickedActorId, false);
-					}
+					AddHighlight(pickedActorId);
+					RemoveHighlight(m_pData->m_pickedActor);
 					m_pData->m_pickedActor = pickedActorId;
 				}
 			}

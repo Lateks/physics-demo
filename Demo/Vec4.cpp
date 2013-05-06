@@ -3,6 +3,12 @@
 
 namespace GameEngine
 {
+	const Vec4 Vec4::White(1.f, 1.f, 1.f, 1.f);
+	const Vec4 Vec4::Black(0.f, 0.f, 0.f, 1.f);
+	const Vec4 Vec4::Blue(0.f, 0.f, 1.f, 1.f);
+	const Vec4 Vec4::Red(1.f, 0.f, 0.f, 1.f);
+	const Vec4 Vec4::Green(0.f, 1.f, 0.f, 1.f);
+
 	Vec4::Vec4(const Vec4& other)
 	{
 		if (this != &other)

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "enginefwd.h"
+#include "Vec4.h"
 #include <string>
 
 namespace GameEngine
@@ -63,6 +64,9 @@ namespace GameEngine
 
 			virtual void VRemoveSceneNode(ActorID actorId) = 0;
 			virtual void VSetSceneNodeLighting(ActorID actorId, bool lightingOn) = 0;
+			virtual void VSetSceneNodeLightColors(ActorID actorId, const RGBAColor& specularColor = RGBAColor::White,
+				const RGBAColor& ambientColor = RGBAColor::White, const RGBAColor& diffuseColor = RGBAColor::White) = 0;
+			virtual void VSetSceneNodeShininess(ActorID actorId, float shininess) = 0;
 			virtual void VSetGlobalAmbientLight(const RGBAColor& color) = 0;
 
 			virtual void VLoadMap(const std::string& mapFilePath, const std::string& meshName, Vec3& position) = 0;

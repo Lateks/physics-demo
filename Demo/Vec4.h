@@ -54,6 +54,12 @@ namespace GameEngine
 		{
 			return m_w;
 		}
+
+		static const Vec4 White;
+		static const Vec4 Black;
+		static const Vec4 Blue;
+		static const Vec4 Red;
+		static const Vec4 Green;
 	private:
 		float m_x;
 		float m_y;

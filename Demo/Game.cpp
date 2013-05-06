@@ -53,14 +53,6 @@ namespace GameEngine
 		pGameData->SetInputStateHandler(pRenderer->VGetInputState());
 		pGameData->SetDisplayComponent(std::shared_ptr<Display::IDisplay>(pRenderer.release()));
 
-		std::unique_ptr<IGameLogic> pGameLogic(CreateDemoGameLogic());
-		if (!pGameLogic)
-		{
-			PrintError("Failed to create demo input handler.");
-			return;
-		}
-		pGameData->SetInputHandler(std::shared_ptr<IGameLogic>(pGameLogic.release()));
-
 		// Setup timer.
 		std::unique_ptr<ITimer> pTimer(CreateTimer());
 		if (!pTimer)
@@ -69,6 +61,15 @@ namespace GameEngine
 			return;
 		}
 		pGameData->SetTimer(std::shared_ptr<ITimer>(pTimer.release()));
+
+		// Setup the main game logic handler (handles inputs etc.).
+		std::unique_ptr<IGameLogic> pGameLogic(CreateDemoGameLogic());
+		if (!pGameLogic)
+		{
+			PrintError("Failed to create demo input handler.");
+			return;
+		}
+		pGameData->SetInputHandler(std::shared_ptr<IGameLogic>(pGameLogic.release()));
 
 		// Setup event manager.
 		std::unique_ptr<IEventManager> pEventManager(CreateEventManager());

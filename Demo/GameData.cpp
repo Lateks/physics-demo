@@ -32,12 +32,16 @@ namespace GameEngine
 
 	float GameData::CurrentTimeSec()
 	{
-		return m_pData->m_pTimer->GetTimeMs() / 1000.0f;
+		return CurrentTimeMs() / 1000.0f;
 	}
 
 	unsigned int GameData::CurrentTimeMs()
 	{
-		return m_pData->m_pTimer->GetTimeMs();
+		if (m_pData->m_pTimer)
+		{
+			return m_pData->m_pTimer->GetTimeMs();
+		}
+		return 0;
 	}
 
 	void GameData::AddActor(WeakActorPtr pActor)

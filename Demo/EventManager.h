@@ -18,9 +18,7 @@ namespace GameEngine
 			EventManager();
 			virtual ~EventManager();
 			virtual void VDispatchEvents() override;
-			virtual void VDispatchEvent(IEventData& event) override;
 			virtual void VDispatchEvent(EventPtr event) override;
-			virtual void VQueueEvent(IEventData& event) override;
 			virtual void VQueueEvent(EventPtr event) override;
 			virtual void VDequeueFirst(EventType type) override;
 			virtual void VRegisterHandler(EventType type, EventHandlerPtr handler) override;

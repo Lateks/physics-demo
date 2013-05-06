@@ -45,21 +45,11 @@ namespace GameEngine
 			}
 		}
 
-		void EventManager::VDispatchEvent(IEventData& event)
-		{
-			VDispatchEvent(EventPtr(&event));
-		}
-
 		void EventManager::VDispatchEvent(EventPtr event)
 		{
 			EventHandlerList *handlerList = &m_pData->m_eventHandlers[event->VGetEventType()];
 			std::for_each(handlerList->begin(), handlerList->end(),
 				[&event] (EventHandlerPtr handler) { (*handler)(event); });
-		}
-
-		void EventManager::VQueueEvent(IEventData& event)
-		{
-			VQueueEvent(EventPtr(&event));
 		}
 
 		void EventManager::VQueueEvent(EventPtr event)

@@ -48,8 +48,10 @@ namespace GameEngine
 
 			virtual unsigned int VLoadTexture(const std::string& filePath) override;
 
-			virtual void VAddSphereSceneNode(float radius, WeakActorPtr pActor, unsigned int texture) override;
-			virtual void VAddCubeSceneNode(float dim, WeakActorPtr pActor, unsigned int texture) override;
+			// If no texture id is given as a parameter (the texture parameter is 0),
+			// the scene node is rendered as a wireframe).
+			virtual void VAddSphereSceneNode(float radius, WeakActorPtr pActor, unsigned int texture = 0) override;
+			virtual void VAddCubeSceneNode(float dim, WeakActorPtr pActor, unsigned int texture = 0) override;
 			virtual void VAddMeshSceneNode(const std::string& meshFilePath, WeakActorPtr pActor, unsigned int texture = 0) override;
 			virtual void VRemoveSceneNode(ActorID actorId) override;
 

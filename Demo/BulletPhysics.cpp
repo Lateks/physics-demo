@@ -711,13 +711,14 @@ namespace GameEngine
 					continue;
 
 				const btRigidBody * body1 =
-					static_cast<btRigidBody const *>(pContactPoint->getBody0());
+					static_cast<const btRigidBody *>(pContactPoint->getBody0());
 				const btRigidBody * body2 =
-					static_cast<btRigidBody const *>(pContactPoint->getBody1());
+					static_cast<const btRigidBody *>(pContactPoint->getBody1());
 
+				// Keep rigid body pointers always in the same order to make
+				// comparisons between collision pairs easier.
 				if (body1 > body2)
 				{
-					// TODO: does this work right? (swaps the pointers, not their contents)
 					std::swap(body1, body2);
 				}
 

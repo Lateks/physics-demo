@@ -1,11 +1,8 @@
-#ifndef WORLD_TRANSFORM_COMPONENT_H
-#define WORLD_TRANSFORM_COMPONENT_H
+#pragma once
 
 #include "enginefwd.h"
-#include "Mat4.h"
 #include "Vec3.h"
 #include "Vec4.h"
-#include <iostream>
 
 namespace GameEngine
 {
@@ -50,5 +47,3 @@ namespace GameEngine
 		}
 	};
 }
-
-#endif

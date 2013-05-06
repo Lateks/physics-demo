@@ -1,5 +1,4 @@
-#ifndef I_EVENT_MANAGER_H
-#define I_EVENT_MANAGER_H
+#pragma once
 
 #include <functional>
 #include <memory>
@@ -51,5 +50,3 @@ namespace GameEngine
 		};
 	}
 }
-
-#endif

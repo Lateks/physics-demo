@@ -1,5 +1,4 @@
-#ifndef BULLET_PHYSICS_OBJECT_H
-#define BULLET_PHYSICS_OBJECT_H
+#pragma once
 
 #include "enginefwd.h"
 #include "BulletPhysicsConstraint.h"
@@ -90,5 +89,3 @@ namespace GameEngine
 		};
 	}
 }
-
-#endif

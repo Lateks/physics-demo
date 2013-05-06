@@ -1,5 +1,4 @@
-#ifndef I_INPUT_STATE_H
-#define I_INPUT_STATE_H
+#pragma once
 
 namespace GameEngine
 {
@@ -10,7 +9,10 @@ namespace GameEngine
 		public:
 			struct MouseState
 			{
-				MouseState() : LeftMouseDown(false), RightMouseDown(false) { }
+				MouseState() : LeftMouseDown(false), RightMouseDown(false), X(0), Y(0) { }
+				MouseState(bool leftMouseDown, bool rightMouseDown, int x, int y)
+					: LeftMouseDown(leftMouseDown), RightMouseDown(rightMouseDown), X(x), Y(y) { }
+
 				bool LeftMouseDown;
 				bool RightMouseDown;
 				int X;
@@ -28,5 +30,3 @@ namespace GameEngine
 		};
 	}
 }
-
-#endif

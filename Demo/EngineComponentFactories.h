@@ -1,5 +1,4 @@
-#ifndef ENGINE_COMPONENT_FACTORIES_H
-#define ENGINE_COMPONENT_FACTORIES_H
+#pragma once
 
 #include "enginefwd.h"
 
@@ -10,5 +9,3 @@ namespace GameEngine
 	std::unique_ptr<ITimer> CreateTimer();
 	std::unique_ptr<Events::IEventManager> CreateEventManager();
 }
-
-#endif

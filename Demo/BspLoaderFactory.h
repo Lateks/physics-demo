@@ -1,5 +1,4 @@
-#ifndef BSP_LOADER_FACTORIES_H
-#define BSP_LOADER_FACTORIES_H
+#pragma once
 
 #include "BSPLoader.h"
 #include <memory>
@@ -12,5 +11,3 @@ namespace GameEngine
 	// The returned unique_ptr is a nullptr if file reading failed.
 	std::unique_ptr<BspLoader> CreateBspLoader(const std::string& bspFilePath);
 }
-
-#endif

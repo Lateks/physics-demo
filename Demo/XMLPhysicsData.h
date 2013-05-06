@@ -1,5 +1,4 @@
-#ifndef XML_PHYSICS_DATA
-#define XML_PHYSICS_DATA
+#pragma once
 
 #include <map>
 #include <string>
@@ -35,5 +34,3 @@ namespace GameEngine
 		};
 	}
 }
-
-#endif

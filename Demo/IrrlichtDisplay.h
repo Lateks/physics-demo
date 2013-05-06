@@ -1,10 +1,8 @@
-#ifndef IRRLICHT_DISPLAY_H
-#define IRRLICHT_DISPLAY_H
+#pragma once
 
 #include "enginefwd.h"
 #include "IDisplay.h"
 #include "ITimer.h"
-#include "IEventManager.h"
 #include <memory>
 
 namespace GameEngine
@@ -72,5 +70,3 @@ namespace GameEngine
 		};
 	}
 }
-
-#endif

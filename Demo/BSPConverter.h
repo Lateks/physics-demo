@@ -1,5 +1,4 @@
-#ifndef BSP_CONVERTER_H
-#define BSP_CONVERTER_H
+#pragma once
 
 #include "Vec4.h"
 #include <vector>
@@ -15,4 +14,3 @@ namespace Utils
 	void ConvertBsp(BspLoader& bspLoader,
 		std::function<void(std::vector<GameEngine::Vec4>& planeEquations)> addConvexMesh);
 }
-#endif

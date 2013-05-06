@@ -1,5 +1,4 @@
-#ifndef I_PHYSICS_ENGINE
-#define I_PHYSICS_ENGINE
+#pragma once
 
 #include "enginefwd.h"
 #include "BSPLoader.h"
@@ -66,5 +65,3 @@ namespace GameEngine
 		};
 	}
 }
-
-#endif

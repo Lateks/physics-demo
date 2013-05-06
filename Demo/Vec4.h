@@ -1,5 +1,4 @@
-#ifndef VEC_4_H
-#define VEC_4_H
+#pragma once
 
 namespace GameEngine
 {
@@ -26,5 +25,3 @@ namespace GameEngine
 		float m_w;
 	};
 }
-
-#endif

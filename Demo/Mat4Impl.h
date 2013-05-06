@@ -1,5 +1,4 @@
-#ifndef MAT_4_IMPL_H
-#define MAT_4_IMPL_H
+#pragma once
 
 namespace GameEngine
 {
@@ -25,5 +24,3 @@ namespace GameEngine
 		float matrix[4][4];
 	};
 }
-
-#endif

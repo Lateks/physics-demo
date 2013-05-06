@@ -1,5 +1,4 @@
-#ifndef EVENTS_H
-#define EVENTS_H
+#pragma once
 
 #include "enginefwd.h"
 #include "Vec3.h"
@@ -165,5 +164,3 @@ namespace GameEngine
 		};
 	}
 }
-
-#endif

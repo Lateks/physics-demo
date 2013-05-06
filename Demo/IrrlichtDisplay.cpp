@@ -45,6 +45,22 @@ namespace GameEngine
 {
 	namespace Display
 	{
+		class IrrlichtInputState : public IInputState, public irr::IEventReceiver
+		{
+		public:
+			virtual ~IrrlichtInputState() { }
+
+			virtual bool OnEvent(const irr::SEvent& event)
+			{
+				if (event.EventType == irr::EET_MOUSE_INPUT_EVENT)
+				{
+					m_mouseState = IInputState::MouseState(event.MouseInput.isLeftPressed(),
+						event.MouseInput.isRightPressed(), event.MouseInput.X, event.MouseInput.Y);
+				}
+				return false;
+			}
+		};
+
 		struct IrrlichtDisplayData
 		{
 			std::map<unsigned int, irr::video::ITexture*> textures;
@@ -74,12 +90,12 @@ namespace GameEngine
 		{
 		public:
 			IrrlichtMessagingWindow(std::size_t messageBufferSize, irr::gui::IGUIEnvironment *irrlichtGUI);
-			virtual void AddMessage(const std::wstring& message) override;
-			virtual void SetPosition(unsigned int minX, unsigned int minY) override;
-			virtual void SetWidth(unsigned int width) override;
-			virtual void SetFont(const std::string& fontFileName) override;
-			virtual void SetVisible(bool visible) override;
-			virtual void Render() const override;
+			virtual void VAddMessage(const std::wstring& message) override;
+			virtual void VSetPosition(unsigned int minX, unsigned int minY) override;
+			virtual void VSetWidth(unsigned int width) override;
+			virtual void VSetFont(const std::string& fontFileName) override;
+			virtual void VSetVisible(bool visible) override;
+			virtual void VRender() const override;
 		private:
 			irr::gui::IGUIFont *m_pFont;
 			irr::gui::IGUIEnvironment *m_irrlichtGUI;
@@ -92,24 +108,6 @@ namespace GameEngine
 			std::vector<irr::core::stringw> m_messageBuffer;
 			irr::video::SColor m_color;
 			void SetFontHeight();
-		};
-
-		class IrrlichtInputState : public IInputState, public irr::IEventReceiver
-		{
-		public:
-			virtual ~IrrlichtInputState() { }
-
-			virtual bool OnEvent(const irr::SEvent& event)
-			{
-				if (event.EventType == irr::EET_MOUSE_INPUT_EVENT)
-				{
-					m_mouseState.LeftMouseDown = event.MouseInput.isLeftPressed();
-					m_mouseState.RightMouseDown = event.MouseInput.isRightPressed();
-					m_mouseState.X = event.MouseInput.X;
-					m_mouseState.Y = event.MouseInput.Y;
-				}
-				return false;
-			}
 		};
 
 		/*
@@ -188,7 +186,7 @@ namespace GameEngine
 			m_pData->m_pSmgr->drawAll();
 
 			m_pData->m_pGui->drawAll();
-			m_pData->m_messageWindow->Render();
+			m_pData->m_messageWindow->VRender();
 
 			m_pData->m_pDriver->endScene();
 		}
@@ -238,7 +236,7 @@ namespace GameEngine
 			m_pData->m_pGui = m_pData->m_pDevice->getGUIEnvironment();
 
 			m_pData->m_messageWindow.reset(new IrrlichtMessagingWindow(10, m_pData->m_pGui));
-			m_pData->m_messageWindow->SetPosition(10, 10);
+			m_pData->m_messageWindow->VSetPosition(10, 10);
 
 			switch (cameraType)
 			{
@@ -558,7 +556,7 @@ namespace GameEngine
 			}
 		}
 
-		void IrrlichtMessagingWindow::AddMessage(const std::wstring& message)
+		void IrrlichtMessagingWindow::VAddMessage(const std::wstring& message)
 		{
 			if (m_messageBuffer.size() == m_maxMessages)
 			{
@@ -567,13 +565,13 @@ namespace GameEngine
 			m_messageBuffer.push_back(irr::core::stringw(message.c_str()));
 		}
 
-		void IrrlichtMessagingWindow::SetPosition(unsigned int minX, unsigned int minY)
+		void IrrlichtMessagingWindow::VSetPosition(unsigned int minX, unsigned int minY)
 		{
 			m_posX = minX;
 			m_posY = minY;
 		}
 
-		void IrrlichtMessagingWindow::SetFont(const std::string& fontFilePath)
+		void IrrlichtMessagingWindow::VSetFont(const std::string& fontFilePath)
 		{
 			if (m_irrlichtGUI)
 			{
@@ -582,17 +580,17 @@ namespace GameEngine
 			}
 		}
 
-		void IrrlichtMessagingWindow::SetVisible(bool visible)
+		void IrrlichtMessagingWindow::VSetVisible(bool visible)
 		{
 			m_visible = visible;
 		}
 
-		void IrrlichtMessagingWindow::SetWidth(unsigned int width)
+		void IrrlichtMessagingWindow::VSetWidth(unsigned int width)
 		{
 			m_width = width;
 		}
 
-		void IrrlichtMessagingWindow::Render() const
+		void IrrlichtMessagingWindow::VRender() const
 		{
 			assert(m_pFont);
 			if (!m_pFont || !m_visible)

@@ -1,5 +1,4 @@
-#ifndef GAME_ACTOR_H
-#define GAME_ACTOR_H
+#pragma once
 
 #include "enginefwd.h"
 #include <memory>
@@ -24,6 +23,3 @@ namespace GameEngine
 		std::shared_ptr<WorldTransformComponent> m_pTransform;
 	};
 }
-
-
-#endif

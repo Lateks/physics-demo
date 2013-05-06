@@ -1,7 +1,5 @@
-#ifndef DEMO_INPUT_HANDLER_H
-#define DEMO_INPUT_HANDLER_H
+#pragma once
 
-#include "enginefwd.h"
 #include "IGameLogic.h"
 
 namespace GameEngine
@@ -19,5 +17,3 @@ namespace GameEngine
 		std::unique_ptr<DemoGameLogicData> m_pData;
 	};
 }
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef I_DISPLAY_H
-#define I_DISPLAY_H
+#pragma once
 
 #include "enginefwd.h"
 #include <string>
@@ -66,5 +65,3 @@ namespace GameEngine
 		};
 	}
 }
-
-#endif

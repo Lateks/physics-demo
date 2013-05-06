@@ -1,5 +1,4 @@
-#ifndef BULLET_PHYSICS
-#define BULLET_PHYSICS
+#pragma once
 
 #include "enginefwd.h"
 #include "IPhysicsEngine.h"
@@ -57,5 +56,3 @@ namespace GameEngine
 		};
 	}
 }
-
-#endif

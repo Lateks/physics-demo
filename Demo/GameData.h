@@ -1,8 +1,6 @@
-#ifndef GAME_DATA_H
-#define GAME_DATA_H
+#pragma once
 
 #include "enginefwd.h"
-#include <map>
 #include <memory>
 
 namespace GameEngine
@@ -42,5 +40,3 @@ namespace GameEngine
 		std::shared_ptr<Events::IEventManager> GetEventManager() const;
 	};
 }
-
-#endif

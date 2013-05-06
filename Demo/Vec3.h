@@ -1,5 +1,4 @@
-#ifndef VEC_3_H
-#define VEC_3_H
+#pragma once
 
 #include "enginefwd.h"
 #include <Eigen\Dense>
@@ -42,5 +41,3 @@ namespace GameEngine
 
 	std::ostream& operator<<(std::ostream& stream, const Vec3& vec);
 }
-
-#endif

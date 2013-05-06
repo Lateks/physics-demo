@@ -7,6 +7,8 @@ int main()
 {
 	GameEngine::Game game;
 
-	return game.Run();
+	if (!game.Run())
+		return 1;
+	return 0;
 }
 

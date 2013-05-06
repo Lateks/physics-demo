@@ -1,5 +1,4 @@
-#ifndef I_TIMER_H
-#define I_TIMER_H
+#pragma once
 
 namespace GameEngine
 {
@@ -10,5 +9,3 @@ namespace GameEngine
 		virtual unsigned int GetTimeMs() = 0;
 	};
 }
-
-#endif

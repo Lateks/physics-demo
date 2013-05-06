@@ -70,7 +70,7 @@ namespace GameEngine
 			message << L"EXIT";
 		}
 		message << " TRIGGER (actor " << pEvent->GetActorId() << ")";
-		pMessages->AddMessage(message.str());
+		pMessages->VAddMessage(message.str());
 	}
 
 	void ThrowCube(Vec3& throwTowards)
@@ -119,9 +119,9 @@ namespace GameEngine
 		auto pPhysics = pGame->GetPhysicsEngine();
 		auto pEventMgr = pGame->GetEventManager();
 		auto pMessages = pDisplay->VGetMessageWindow();
-		pMessages->SetFont("..\\assets\\fontcourier.bmp");
-		pMessages->SetVisible(true);
-		pMessages->SetWidth(600);
+		pMessages->VSetFont("..\\assets\\fontcourier.bmp");
+		pMessages->VSetVisible(true);
+		pMessages->VSetWidth(600);
 
 		// Create an actor for the world map to be able to refer to the associated
 		// rigid bodies. Note: now that the map itself has an actor and a

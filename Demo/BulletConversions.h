@@ -1,5 +1,4 @@
-#ifndef BULLET_CONVERSIONS_H
-#define BULLET_CONVERSIONS_H
+#pragma once
 
 #include "Vec3.h"
 #include "Vec4.h"
@@ -17,5 +16,3 @@ namespace GameEngine
 		btQuaternion Quaternion_to_btQuaternion(const Quaternion& quat);
 	}
 }
-
-#endif

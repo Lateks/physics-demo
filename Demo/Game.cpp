@@ -30,6 +30,8 @@ namespace GameEngine
 
 	Game::Game()
 	{
+		auto pGameData = GameData::GetInstance();
+
 		// Setup the display component (rendering and input handling).
 		std::unique_ptr<IDisplay> pRenderer(CreateRenderer());
 		if (!pRenderer)
@@ -48,9 +50,8 @@ namespace GameEngine
 		pRenderer->VSetCameraFOV(75.f);
 		pRenderer->VHideCursor();
 
-		m_pData = GameData::GetInstance();
-		m_pData->SetInputStateHandler(pRenderer->VGetInputState());
-		m_pData->SetDisplayComponent(std::shared_ptr<Display::IDisplay>(pRenderer.release()));
+		pGameData->SetInputStateHandler(pRenderer->VGetInputState());
+		pGameData->SetDisplayComponent(std::shared_ptr<Display::IDisplay>(pRenderer.release()));
 
 		std::unique_ptr<IGameLogic> pGameLogic(CreateDemoGameLogic());
 		if (!pGameLogic)
@@ -58,7 +59,7 @@ namespace GameEngine
 			PrintError("Failed to create demo input handler.");
 			return;
 		}
-		m_pData->SetInputHandler(std::shared_ptr<IGameLogic>(pGameLogic.release()));
+		pGameData->SetInputHandler(std::shared_ptr<IGameLogic>(pGameLogic.release()));
 
 		// Setup timer.
 		std::unique_ptr<ITimer> pTimer(CreateTimer());
@@ -67,7 +68,7 @@ namespace GameEngine
 			PrintError("Failed to create a timer.");
 			return;
 		}
-		m_pData->SetTimer(std::shared_ptr<ITimer>(pTimer.release()));
+		pGameData->SetTimer(std::shared_ptr<ITimer>(pTimer.release()));
 
 		// Setup event manager.
 		std::unique_ptr<IEventManager> pEventManager(CreateEventManager());
@@ -76,7 +77,7 @@ namespace GameEngine
 			PrintError("Failed to create an event manager.");
 			return;
 		}
-		m_pData->SetEventManager(std::shared_ptr<Events::IEventManager>(pEventManager.release()));
+		pGameData->SetEventManager(std::shared_ptr<Events::IEventManager>(pEventManager.release()));
 
 		// Setup physics. World is scaled by the constant given as parameter
 		// (compared to the size of the rendered world).
@@ -87,53 +88,45 @@ namespace GameEngine
 			PrintError("Failed to initialize physics engine.");
 			return;
 		}
-		m_pData->SetPhysicsEngine(std::shared_ptr<Physics::IPhysicsEngine>(physics.release()));
+		pGameData->SetPhysicsEngine(std::shared_ptr<Physics::IPhysicsEngine>(physics.release()));
 	}
 
 	Game::~Game() { }
 
-	Game::Game(Game&& game)
+	bool Game::Run()
 	{
-		if (this != &game)
-		{
-			m_pData = game.m_pData;
-			game.m_pData = nullptr;
-		}
-	}
+		auto pGameData = GameData::GetInstance();
+		auto pDisplay = pGameData->GetDisplayComponent();
+		auto pPhysics = pGameData->GetPhysicsEngine();
+		auto pEvents = pGameData->GetEventManager();
+		auto pGameLogic = pGameData->GetInputHandler();
+		if (!pDisplay || !pPhysics || !pEvents || !pGameLogic)
+			return false;
 
-	int Game::Run()
-	{
-		auto pDisplay = m_pData->GetDisplayComponent();
-		auto physics = m_pData->GetPhysicsEngine();
-		auto events = m_pData->GetEventManager();
-		auto gameLogic = m_pData->GetInputHandler();
-		if (!pDisplay || !physics || !events || !gameLogic)
-			return 1;
+		pGameLogic->VSetupInitialScene();
 
-		gameLogic->VSetupInitialScene();
-
-		float timeBegin = m_pData->CurrentTimeSec();
+		float timeBegin = pGameData->CurrentTimeSec();
 		float timeEnd;
 		float frameDeltaSec = 1.0f/60;
 		while (pDisplay->VRunning())
 		{
 			if (pDisplay->VWindowActive())
 			{
-				gameLogic->VHandleInputs();
-				events->VDispatchEvents();
-				physics->VUpdateSimulation(frameDeltaSec);
-				physics->VSyncScene();
+				pGameLogic->VHandleInputs();
+				pEvents->VDispatchEvents();
+				pPhysics->VUpdateSimulation(frameDeltaSec);
+				pPhysics->VSyncScene();
 				pDisplay->VDrawScene();
 			}
 			else
 			{
 				pDisplay->VYieldDevice();
 			}
-			timeEnd = m_pData->CurrentTimeSec();
+			timeEnd = pGameData->CurrentTimeSec();
 			frameDeltaSec = timeEnd - timeBegin;
 			timeBegin = timeEnd;
 		}
 
-		return 0;
+		return true;
 	}
 }

@@ -8,7 +8,7 @@ namespace GameEngine
 {
 	std::unique_ptr<BspLoader> CreateBspLoader(const std::string& bspFilePath)
 	{
-		std::unique_ptr<BspLoader> bspLoader(nullptr);
+		std::unique_ptr<BspLoader> bspLoader;
 		FILE *file = fopen(bspFilePath.c_str(), "r");
 		if (file)
 		{

@@ -58,6 +58,7 @@ namespace GameEngine
 		inline bool RightMouseDown();
 		inline bool RightMouseReleased();
 		void UpdateHighlight();
+		ActorID PickTarget(Vec3& pickPoint);
 	};
 	
 	void AddHighlight(ActorID actorId)
@@ -80,6 +81,22 @@ namespace GameEngine
 		}
 	}
 
+	ActorID DemoGameLogicData::PickTarget(Vec3& pickPoint)
+	{
+		auto pGameData = GameData::GetInstance();
+		auto pRaycaster = pGameData->GetPhysicsEngine();
+		ActorID pickedActorId = 0;
+		if (pRaycaster)
+		{
+			Vec3 rayFrom = m_currentCameraState.cameraPos;
+			Vec3 targetVector = (m_currentCameraState.cameraTarget-rayFrom).normalized() * 500.f;
+			Vec3 rayTo = rayFrom + targetVector;
+			pickedActorId = pGameData->GetPhysicsEngine()->VGetClosestActorHit(
+				rayFrom, rayTo, pickPoint);
+		}
+		return pickedActorId;
+	}
+
 	void DemoGameLogicData::UpdateHighlight()
 	{
 		auto pGameData = GameData::GetInstance();
@@ -88,12 +105,8 @@ namespace GameEngine
 		{
 			if (!m_pickConstraintId)
 			{
-				auto pRaycaster = pGameData->GetPhysicsEngine();
 				Vec3 pickPoint;
-				Vec3 rayFrom = m_currentCameraState.cameraPos;
-				Vec3 rayTo = rayFrom + (m_currentCameraState.cameraTarget-rayFrom).normalized() * 500.f;
-				ActorID pickedActorId = pGameData->GetPhysicsEngine()->VGetClosestActorHit(
-					rayFrom, rayTo, pickPoint);
+				ActorID pickedActorId = PickTarget(pickPoint);
 				if (pickedActorId != m_pickedActor)
 				{
 					if (pickedActorId)
@@ -293,10 +306,7 @@ namespace GameEngine
 		if (m_pData->LeftMousePressed())
 		{
 			Vec3 pickPoint;
-			Vec3 rayFrom = m_pData->m_currentCameraState.cameraPos;
-			Vec3 rayTo = rayFrom + (m_pData->m_currentCameraState.cameraTarget-rayFrom).normalized() * 500.f;
-			ActorID pickedActorId = pGame->GetPhysicsEngine()->VGetClosestActorHit(
-				rayFrom, rayTo, pickPoint);
+			ActorID pickedActorId = m_pData->PickTarget(pickPoint);
 
 			std::cerr << "Selected actor id: ";
 			if (!pickedActorId)

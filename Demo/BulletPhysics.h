@@ -13,7 +13,7 @@ namespace GameEngine
 		class BulletPhysics : public IPhysicsEngine
 		{
 		public:
-			BulletPhysics(float worldScale = 1.f);
+			explicit BulletPhysics(float worldScale = 1.f);
 			virtual ~BulletPhysics();
 			
 			virtual bool VInitEngine() override;

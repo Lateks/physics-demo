@@ -130,14 +130,19 @@ namespace GameEngine
 			return Vec3(vector.X, vector.Y, -vector.Z);
 		}
 
-		quaternion ConvertQuaternion(Quaternion& quat)
+		quaternion ConvertQuaternion(const Quaternion& quat)
 		{
 			return quaternion(quat.x(), quat.y(), quat.z(), quat.w());
 		}
 
-		Quaternion ConvertQuaternion(irr::core::quaternion& quat)
+		Quaternion ConvertQuaternion(const irr::core::quaternion& quat)
 		{
 			return Quaternion(quat.X, quat.Y, quat.Z, quat.W);
+		}
+
+		irr::video::SColorf ConvertRGBAColorToSColorf(const RGBAColor& color)
+		{
+			return irr::video::SColorf(color.r(), color.g(), color.b(), color.a());
 		}
 
 		/*
@@ -388,6 +393,11 @@ namespace GameEngine
 		{
 			irr::video::SColorf irrColor(color.r(), color.g(), color.b(), color.a());
 			m_pData->m_pSmgr->addLightSceneNode(0, ConvertVector(position), irrColor, lightRadius);
+		}
+
+		void IrrlichtDisplay::VSetGlobalAmbientLight(const RGBAColor& color)
+		{
+			m_pData->m_pSmgr->setAmbientLight(ConvertRGBAColorToSColorf(color));
 		}
 
 		void IrrlichtDisplay::VRemoveSceneNode(ActorID actorId)

@@ -19,6 +19,7 @@ namespace GameEngine
 		~GameData();
 
 		float CurrentTimeSec();
+		unsigned int CurrentTimeMs();
 
 		void AddActor(std::weak_ptr<GameActor> pActor);
 		std::shared_ptr<GameActor> GetActor(ActorID id);

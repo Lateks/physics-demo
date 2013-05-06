@@ -45,6 +45,7 @@ namespace GameEngine
 
 		ActorID m_pickedActor;
 		unsigned int m_pickConstraintId;
+		unsigned int m_lastUpdate;
 
 		inline bool CameraMoved();
 		inline bool LeftMousePressed();
@@ -53,7 +54,48 @@ namespace GameEngine
 		inline bool RightMousePressed();
 		inline bool RightMouseDown();
 		inline bool RightMouseReleased();
+		void UpdateHighlight();
 	};
+
+	void DemoGameLogicData::UpdateHighlight()
+	{
+		auto pGameData = GameData::GetInstance();
+		unsigned int currentTime = pGameData->CurrentTimeMs();
+		if (m_lastUpdate - currentTime > 500)
+		{
+			if (!m_pickConstraintId)
+			{
+				auto pRaycaster = pGameData->GetPhysicsEngine();
+				Vec3 pickPoint;
+				Vec3 rayFrom = m_currentCameraState.cameraPos;
+				Vec3 rayTo = rayFrom + (m_currentCameraState.cameraTarget-rayFrom).normalized() * 500.f;
+				ActorID pickedActorId = pGameData->GetPhysicsEngine()->VGetClosestActorHit(
+					rayFrom, rayTo, pickPoint);
+				if (pickedActorId != m_pickedActor)
+				{
+					if (pickedActorId)
+					{
+						auto pDisplay = pGameData->GetDisplayComponent();
+						if (pDisplay)
+						{
+							pDisplay->VSetSceneNodeLighting(pickedActorId, false);
+						}
+					}
+					if (m_pickedActor)
+					{
+						auto pDisplay = pGameData->GetDisplayComponent();
+						if (pDisplay)
+						{
+							pDisplay->VSetSceneNodeLighting(m_pickedActor, true);
+						}
+					}
+				}
+				m_pickedActor = pickedActorId;
+			}
+
+			m_lastUpdate = currentTime;
+		}
+	}
 
 	void PrintTriggerEvent(std::shared_ptr<Display::MessagingWindow> pMessages,
 		Events::EventPtr event)
@@ -160,6 +202,7 @@ namespace GameEngine
 			RGBAColor(1.f, 1.f, 1.f, 1.f), 500.f);
 		pDisplay->VAddLightSceneNode(Vec3(150, 200, 450),
 			RGBAColor(1.f, 1.f, 1.f, 1.f), 500.f);
+		pDisplay->VSetGlobalAmbientLight(RGBAColor(0.1f, 0.1f, 0.15f, 1.f));
 
 		// Load textures.
 		MUD_TEXTURE = pDisplay->VLoadTexture("..\\assets\\cracked_mud.jpg");
@@ -176,8 +219,7 @@ namespace GameEngine
 		pDisplay->VAddCubeSceneNode(25.f, cube, WOODBOX_TEXTURE, true);
 		pPhysics->VAddBox(Vec3(25.f, 25.f, 25.f), cube, "manganese", "Normal");
 
-		// Add a trigger node, rendered as a wireframe cube. (The IrrlichtDisplay
-		// assumes you want a wireframe when no texture is given.)
+		// Add a trigger node, rendered as a wireframe cube.
 		StrongActorPtr trigger(new GameActor(Vec3(-100, 125, 450)));
 		pGame->AddActor(trigger);
 		pDisplay->VAddCubeSceneNode(125.f, trigger, 0);
@@ -196,13 +238,20 @@ namespace GameEngine
 			DebugPrintCollisionEvent(event);
 		}));
 
+		Events::EventHandlerPtr highlightUpdater(new std::function<void(Events::EventPtr)>
+			([this] (Events::EventPtr event)
+		{
+			this->m_pData->UpdateHighlight();
+		}));
+
 		pEventMgr->VRegisterHandler(Events::EventType::ENTER_TRIGGER, eventPrinter);
 		pEventMgr->VRegisterHandler(Events::EventType::EXIT_TRIGGER, eventPrinter);
 		pEventMgr->VRegisterHandler(Events::EventType::COLLISION_EVENT, debugPrinter);
 		pEventMgr->VRegisterHandler(Events::EventType::SEPARATION_EVENT, debugPrinter);
+		pEventMgr->VRegisterHandler(Events::EventType::CAMERA_MOVED, highlightUpdater);
 	}
 
-	void DemoGameLogic::VHandleInputs()
+	void DemoGameLogic::VUpdate()
 	{
 		auto pGame = GameData::GetInstance();
 		assert(pGame && pGame->GetInputStateHandler());
@@ -236,13 +285,21 @@ namespace GameEngine
 			{
 				m_pData->m_pickConstraintId = pPhysics->VAddPickConstraint(pickedActorId, pickPoint,
 					m_pData->m_currentCameraState.cameraPos);
-				m_pData->m_pickedActor = pickedActorId;
+				if (m_pData->m_pickedActor != pickedActorId)
+				{
+					auto pDisplay = pGame->GetDisplayComponent();
+					if (pDisplay)
+					{
+						pDisplay->VSetSceneNodeLighting(m_pData->m_pickedActor, true);
+						pDisplay->VSetSceneNodeLighting(pickedActorId, false);
+					}
+					m_pData->m_pickedActor = pickedActorId;
+				}
 			}
 		}
-		else if (m_pData->LeftMouseReleased() && m_pData->m_pickedActor != 0)
+		else if (m_pData->LeftMouseReleased() && m_pData->m_pickConstraintId != 0)
 		{
 			pPhysics->VRemoveConstraint(m_pData->m_pickedActor, m_pData->m_pickConstraintId);
-			m_pData->m_pickedActor = 0;
 			m_pData->m_pickConstraintId = 0;
 		}
 

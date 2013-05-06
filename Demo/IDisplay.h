@@ -63,6 +63,7 @@ namespace GameEngine
 
 			virtual void VRemoveSceneNode(ActorID actorId) = 0;
 			virtual void VSetSceneNodeLighting(ActorID actorId, bool lightingOn) = 0;
+			virtual void VSetGlobalAmbientLight(const RGBAColor& color) = 0;
 
 			virtual void VLoadMap(const std::string& mapFilePath, const std::string& meshName, Vec3& position) = 0;
 		};

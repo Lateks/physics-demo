@@ -112,7 +112,7 @@ namespace GameEngine
 		{
 			if (pDisplay->VWindowActive())
 			{
-				pGameLogic->VHandleInputs();
+				pGameLogic->VUpdate();
 				pEvents->VDispatchEvents();
 				pPhysics->VUpdateSimulation(frameDeltaSec);
 				pPhysics->VSyncScene();

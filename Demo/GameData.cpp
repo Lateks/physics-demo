@@ -35,6 +35,11 @@ namespace GameEngine
 		return m_pData->m_pTimer->GetTimeMs() / 1000.0f;
 	}
 
+	unsigned int GameData::CurrentTimeMs()
+	{
+		return m_pData->m_pTimer->GetTimeMs();
+	}
+
 	void GameData::AddActor(WeakActorPtr pActor)
 	{
 		if (pActor.expired())

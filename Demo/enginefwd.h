@@ -46,6 +46,7 @@ namespace GameEngine
 	class Vec3;
 	class Vec4;
 	typedef Vec4 Quaternion; // may be used as a quaternion structure
+	typedef Vec4 RGBAColor;
 
 	class Game;
 	class GameData;

@@ -42,26 +42,6 @@ namespace GameEngine
 		return *this;
 	}
 
-	float Vec4::x() const
-	{
-		return m_x;
-	}
-
-	float Vec4::y() const
-	{
-		return m_y;
-	}
-
-	float Vec4::z() const
-	{
-		return m_z;
-	}
-
-	float Vec4::w() const
-	{
-		return m_w;
-	}
-
 	std::ostream& operator<<(std::ostream& stream, const Vec4& vec)
 	{
 		stream << "("

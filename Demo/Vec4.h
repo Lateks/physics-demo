@@ -14,10 +14,46 @@ namespace GameEngine
 		Vec4 operator=(const Vec4& other);
 		bool operator==(const Vec4& other) const;
 		bool operator!=(const Vec4& other) const;
-		float x() const;
-		float y() const;
-		float z() const;
-		float w() const;
+
+		float x() const
+		{
+			return m_x;
+		}
+
+		float y() const
+		{
+			return m_y;
+		}
+
+		float z() const
+		{
+			return m_z;
+		}
+
+		float w() const
+		{
+			return m_w;
+		}
+
+		float r() const
+		{
+			return m_x;
+		}
+
+		float g() const
+		{
+			return m_y;
+		}
+
+		float b() const
+		{
+			return m_z;
+		}
+
+		float a() const
+		{
+			return m_w;
+		}
 	private:
 		float m_x;
 		float m_y;

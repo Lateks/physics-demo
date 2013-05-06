@@ -23,7 +23,7 @@ namespace GameEngine
 		Vec3(Eigen::Vector3f vector, CSHandedness handedness = CSHandedness::RIGHT)
 			: Eigen::Vector3f(vector), m_handedness(handedness) { };
 		virtual ~Vec3() { };
-		CSHandedness GetHandedness()
+		CSHandedness GetHandedness() const
 		{
 			return m_handedness;
 		}

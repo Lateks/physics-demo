@@ -105,7 +105,7 @@ namespace GameEngine
 		}
 		pGame->AddActor(cube);
 
-		pDisplay->VAddCubeSceneNode(15.f, cube, WOODBOX_TEXTURE);
+		pDisplay->VAddCubeSceneNode(15.f, cube, WOODBOX_TEXTURE, true);
 		auto physics = pGame->GetPhysicsEngine();
 		physics->VAddBox(Vec3(15.f, 15.f, 15.f), cube, "Titanium", "Bouncy");
 
@@ -141,9 +141,7 @@ namespace GameEngine
 		pMessages->VSetWidth(600);
 
 		// Create an actor for the world map to be able to refer to the associated
-		// rigid bodies. Note: now that the map itself has an actor and a
-		// world transform, the renderer could also use it to determine the
-		// position of the map. (TODO?)
+		// rigid bodies.
 		Vec3 mapPosition(-1350, -130, 1400);
 		StrongActorPtr world(new GameActor(mapPosition));
 		pGame->AddActor(world);
@@ -154,6 +152,15 @@ namespace GameEngine
 		pDisplay->VSetCameraPosition(Vec3(80,40,60));
 		pDisplay->VSetCameraTarget(Vec3(-80,40,60));
 
+		pDisplay->VAddLightSceneNode(Vec3(-100, 120, 60),
+			RGBAColor(1.f, 1.f, 1.f, 1.f), 500.f);
+		pDisplay->VAddLightSceneNode(Vec3(200, 120, 60),
+			RGBAColor(1.f, 1.f, 1.f, 1.f), 500.f);
+		pDisplay->VAddLightSceneNode(Vec3(-100, 200, 450),
+			RGBAColor(1.f, 1.f, 1.f, 1.f), 500.f);
+		pDisplay->VAddLightSceneNode(Vec3(150, 200, 450),
+			RGBAColor(1.f, 1.f, 1.f, 1.f), 500.f);
+
 		// Load textures.
 		MUD_TEXTURE = pDisplay->VLoadTexture("..\\assets\\cracked_mud.jpg");
 		WOODBOX_TEXTURE = pDisplay->VLoadTexture("..\\assets\\woodbox2.jpg");
@@ -161,17 +168,17 @@ namespace GameEngine
 		// Setup actors and their graphical and physical representations.
 		StrongActorPtr ball(new GameActor(Vec3(0, 50, 60)));
 		pGame->AddActor(ball);
-		pDisplay->VAddSphereSceneNode(10.f, ball, MUD_TEXTURE);
+		pDisplay->VAddSphereSceneNode(10.f, ball, MUD_TEXTURE, true);
 		pPhysics->VAddSphere(10.f, ball, "Titanium", "Bouncy");
 
 		StrongActorPtr cube(new GameActor(Vec3(0, 80, 60)));
 		pGame->AddActor(cube);
-		pDisplay->VAddCubeSceneNode(25.f, cube, WOODBOX_TEXTURE);
+		pDisplay->VAddCubeSceneNode(25.f, cube, WOODBOX_TEXTURE, true);
 		pPhysics->VAddBox(Vec3(25.f, 25.f, 25.f), cube, "manganese", "Normal");
 
 		// Add a trigger node, rendered as a wireframe cube. (The IrrlichtDisplay
 		// assumes you want a wireframe when no texture is given.)
-		StrongActorPtr trigger(new GameActor(Vec3(-100.f, 125.f, 450.f)));
+		StrongActorPtr trigger(new GameActor(Vec3(-100, 125, 450)));
 		pGame->AddActor(trigger);
 		pDisplay->VAddCubeSceneNode(125.f, trigger, 0);
 		pPhysics->VCreateTrigger(trigger, 125.f);

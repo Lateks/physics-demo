@@ -73,6 +73,23 @@ namespace GameEngine
 		pMessages->VAddMessage(message.str());
 	}
 
+	void DebugPrintCollisionEvent(Events::EventPtr pEvent)
+	{
+		bool isCollisionEvent = pEvent->VGetEventType() == Events::EventType::COLLISION_EVENT ||
+			pEvent->VGetEventType() == Events::EventType::SEPARATION_EVENT;
+		assert(isCollisionEvent);
+		if (!isCollisionEvent)
+			return;
+
+		auto pCollisionEvent = std::dynamic_pointer_cast<Events::CollisionEvent>(pEvent);
+		if (pEvent->VGetEventType() == Events::EventType::COLLISION_EVENT)
+			std::cerr << "Collided: ";
+		else
+			std::cerr << "Separated: ";
+		auto collisionPair = pCollisionEvent->GetCollisionPair();
+		std::cerr << "actors " << collisionPair.first << " and " << collisionPair.second << std::endl;
+	}
+
 	void ThrowCube(Vec3& throwTowards)
 	{
 		auto pGame = GameData::GetInstance();
@@ -166,8 +183,16 @@ namespace GameEngine
 			PrintTriggerEvent(pMessages, event);
 		}));
 
+		Events::EventHandlerPtr debugPrinter(new std::function<void(Events::EventPtr)>
+			([] (Events::EventPtr event)
+		{
+			DebugPrintCollisionEvent(event);
+		}));
+
 		pEventMgr->VRegisterHandler(Events::EventType::ENTER_TRIGGER, eventPrinter);
 		pEventMgr->VRegisterHandler(Events::EventType::EXIT_TRIGGER, eventPrinter);
+		pEventMgr->VRegisterHandler(Events::EventType::COLLISION_EVENT, debugPrinter);
+		pEventMgr->VRegisterHandler(Events::EventType::SEPARATION_EVENT, debugPrinter);
 	}
 
 	void DemoGameLogic::VHandleInputs()

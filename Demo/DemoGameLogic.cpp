@@ -134,8 +134,8 @@ namespace GameEngine
 		std::unique_ptr<BspLoader> pBspLoader = CreateBspLoader("..\\assets\\20kdm2.bsp");
 		pPhysics->VLoadBspMap(*pBspLoader, world);
 
-		pDisplay->VSetCameraPosition(Vec3(80,50,60));
-		pDisplay->VSetCameraTarget(Vec3(-70,30,60));
+		pDisplay->VSetCameraPosition(Vec3(80,40,60));
+		pDisplay->VSetCameraTarget(Vec3(-80,40,60));
 
 		// Load textures.
 		MUD_TEXTURE = pDisplay->VLoadTexture("..\\assets\\cracked_mud.jpg");

@@ -11,6 +11,8 @@ namespace GameEngine
 	{
 	private:
 		GameData();
+		GameData(const GameData&);
+		GameData& operator=(const GameData&);
 		std::unique_ptr<GameDataImpl> m_pData;
 	public:
 		static std::shared_ptr<GameData> GetInstance();

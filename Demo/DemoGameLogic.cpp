@@ -192,7 +192,14 @@ namespace GameEngine
 			Vec3 rayTo = rayFrom + (m_pData->m_currentCameraState.cameraTarget-rayFrom).normalized() * 500.f;
 			ActorID pickedActorId = pGame->GetPhysicsEngine()->VGetClosestActorHit(
 				rayFrom, rayTo, pickPoint);
-			std::cerr << pickedActorId << std::endl;
+
+			std::cerr << "Selected actor id: ";
+			if (!pickedActorId)
+				std::cerr << "none";
+			else
+				std::cerr << pickedActorId;
+			std::cerr << std::endl;
+
 			if (pickedActorId != 0)
 			{
 				m_pData->m_pickConstraintId = pPhysics->VAddPickConstraint(pickedActorId, pickPoint,

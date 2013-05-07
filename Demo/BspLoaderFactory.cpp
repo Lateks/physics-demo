@@ -21,7 +21,7 @@ namespace GameEngine
 		else
 		{
 			bspFile.seekg(0, std::ios::end);
-			std::size_t fileSize = bspFile.tellg();
+			std::size_t fileSize = (std::size_t) bspFile.tellg();
 			bspFile.seekg(0, std::ios::beg);
 
 			std::unique_ptr<void, raw_pointer_deleter> memoryBuffer(malloc(fileSize + 1));

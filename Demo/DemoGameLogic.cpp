@@ -167,10 +167,9 @@ namespace GameEngine
 		Vec3 cameraPos = pDisplay->VGetCameraPosition();
 
 		StrongActorPtr cube(new GameActor(cameraPos));
-		std::weak_ptr<WorldTransformComponent> pWeakTransform = cube->GetWorldTransform();
-		if (!pWeakTransform.expired())
+		std::shared_ptr<WorldTransformComponent> pTransform = cube->GetWorldTransform();
+		if (pTransform)
 		{
-			std::shared_ptr<WorldTransformComponent> pTransform(pWeakTransform);
 			pTransform->SetRotation(pDisplay->VGetCameraRotation());
 		}
 		pGame->AddActor(cube);
@@ -181,7 +180,7 @@ namespace GameEngine
 
 		Vec3 throwDirection = throwTowards - cameraPos;
 
-		// Also make the object rotate slightly "away from the camera".
+		// Make the object rotate slightly "away from the camera".
 		Vec3 rotationAxis = pDisplay->VGetCameraRightVector();
 		rotationAxis[2] = -rotationAxis[2];
 
@@ -236,6 +235,7 @@ namespace GameEngine
 		pDisplay->VSetCameraPosition(Vec3(80,40,60));
 		pDisplay->VSetCameraTarget(Vec3(-80,40,60));
 
+		// Setup lighting.
 		pDisplay->VAddLightSceneNode(Vec3(-100, 120, 60),
 			RGBAColor(1.f, 1.f, 1.f, 1.f), 500.f);
 		pDisplay->VAddLightSceneNode(Vec3(200, 120, 60),

@@ -374,22 +374,51 @@ namespace GameEngine
 			btCollisionWorld::AllHitsRayResultCallback rayCallback(btRayFrom, btRayTo);
 
 			m_pData->m_pDynamicsWorld->rayTest(btRayFrom, btRayTo, rayCallback);
+
 			ActorID actorHit = 0;
+			float closestHitDistance = FLT_MAX;
+			btVector3 btPickPosition;
 			if (rayCallback.hasHit())
 			{
-				// Pick the first body that was hit and was not a static or a kinematic object
-				// (those are unpickable).
+				/* Pick the first body that was hit and was not a static or a kinematic object
+				 * (those are unpickable). The collection of collision objects in the raycallback
+				 * does not appear to be ordered by distance, so we need to keep track of the closest
+				 * hit so far. Triggers are ignored and picking is not possible through walls or
+				 * other static non-trigger objects.
+				 *
+				 * btCollisionWorld::ClosestRayResultCallback cannot be used here because we
+				 * want to be able to pick objects that are inside trigger bodies, in which
+				 * case the ClosestRayResultCallback would only detect a collision with the
+				 * trigger body, which is unpickable.
+				 */ 
 				for (int i = 0; i < rayCallback.m_collisionObjects.size(); i++)
 				{
 					const btRigidBody *pBody = btRigidBody::upcast(rayCallback.m_collisionObjects[i]);
 					assert(pBody);
-					if (pBody && !pBody->isStaticOrKinematicObject())
+					if (pBody)
 					{
-						actorHit = m_pData->m_rigidBodyToActorMap[pBody];
-						pickPosition = btVector3_to_Vec3(rayCallback.m_hitPointWorld[i], m_pData->m_worldScaleConst);
-						break;
+						auto actorId = m_pData->m_rigidBodyToActorMap[pBody];
+						auto hitPosition = rayCallback.m_hitPointWorld[i];
+						float objectDistance = (hitPosition-btRayFrom).length();
+						if (pBody->isStaticOrKinematicObject())
+						{
+							if (!m_pData->GetPhysicsObject(actorId)->IsTrigger() && objectDistance < closestHitDistance)
+							{
+								closestHitDistance = objectDistance;
+							}
+						}
+						else if (objectDistance < closestHitDistance)
+						{
+							actorHit = actorId;
+							btPickPosition = hitPosition;
+							closestHitDistance = objectDistance;
+						}
 					}
 				}
+			}
+			if (actorHit)
+			{
+				pickPosition = btVector3_to_Vec3(btPickPosition, m_pData->m_worldScaleConst);
 			}
 			return actorHit;
 		}

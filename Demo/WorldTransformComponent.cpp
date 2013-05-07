@@ -25,9 +25,7 @@ namespace GameEngine
 	}
 
 	WorldTransformComponent::WorldTransformComponent(WorldTransformComponent&& other)
-	{
-		m_pData = std::move(other.m_pData);
-	}
+		: m_pData(std::move(other.m_pData)) { }
 
 	WorldTransformComponent& WorldTransformComponent::operator=(const WorldTransformComponent& other)
 	{

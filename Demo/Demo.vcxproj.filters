@@ -87,9 +87,6 @@
     <ClInclude Include="Vec3.h">
       <Filter>Header Files\LinearAlgebra</Filter>
     </ClInclude>
-    <ClInclude Include="Mat4.h">
-      <Filter>Header Files\LinearAlgebra</Filter>
-    </ClInclude>
     <ClInclude Include="XMLPhysicsData.h">
       <Filter>Header Files\Physics</Filter>
     </ClInclude>
@@ -98,9 +95,6 @@
     </ClInclude>
     <ClInclude Include="WorldTransformComponent.h">
       <Filter>Header Files\GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="Mat4Impl.h">
-      <Filter>Header Files\LinearAlgebra</Filter>
     </ClInclude>
     <ClInclude Include="Vec4.h">
       <Filter>Header Files\LinearAlgebra</Filter>
@@ -168,9 +162,6 @@
       <Filter>Source Files\GameObject</Filter>
     </ClCompile>
     <ClCompile Include="Vec3.cpp">
-      <Filter>Source Files\LinearAlgebra</Filter>
-    </ClCompile>
-    <ClCompile Include="Mat4.cpp">
       <Filter>Source Files\LinearAlgebra</Filter>
     </ClCompile>
     <ClCompile Include="XMLPhysicsData.cpp">

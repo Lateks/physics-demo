@@ -102,7 +102,6 @@
     <ClInclude Include="IGameLogic.h" />
     <ClInclude Include="IEventManager.h" />
     <ClInclude Include="IInputState.h" />
-    <ClInclude Include="Mat4Impl.h" />
     <ClInclude Include="Vec4.h" />
     <ClInclude Include="WorldTransformComponent.h" />
     <ClInclude Include="IPhysicsEngine.h" />
@@ -112,7 +111,6 @@
     <ClInclude Include="GameActor.h" />
     <ClInclude Include="GameData.h" />
     <ClInclude Include="ITimer.h" />
-    <ClInclude Include="Mat4.h" />
     <ClInclude Include="MessagingWindow.h" />
     <ClInclude Include="Vec3.h" />
     <ClInclude Include="XMLPhysicsData.h" />
@@ -133,7 +131,6 @@
     <ClCompile Include="Demo.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameData.cpp" />
-    <ClCompile Include="Mat4.cpp" />
     <ClCompile Include="Vec3.cpp" />
     <ClCompile Include="Vec4.cpp" />
     <ClCompile Include="WorldTransformComponent.cpp" />

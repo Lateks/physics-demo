@@ -7,7 +7,6 @@
 #include "EventManager.h"
 #include "Events.h"
 #include "Vec3.h"
-#include "Mat4.h"
 #include "Vec4.h"
 #include <irrlicht.h>
 #include <iostream>
@@ -28,7 +27,6 @@ using irr::scene::ISceneManager;
 using irr::scene::ISceneNode;
 using irr::scene::IAnimatedMesh;
 
-using std::weak_ptr;
 using std::shared_ptr;
 
 using GameEngine::Events::IEventData;

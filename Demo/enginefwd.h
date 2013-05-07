@@ -8,9 +8,7 @@ namespace GameEngine
 	namespace Display
 	{
 		class IDisplay;
-		class IrrlichtDisplay;
 		class MessagingWindow;
-		class IrrlichtMessagingWindow;
 		class IInputState;
 	}
 
@@ -19,9 +17,6 @@ namespace GameEngine
 		class IPhysicsEngine;
 		struct MaterialData;
 		struct XMLPhysicsData;
-
-		class BulletPhysics;
-		class BulletPhysicsConstraint;
 		typedef unsigned int ConstraintID;
 	}
 
@@ -41,7 +36,6 @@ namespace GameEngine
 	typedef unsigned int ActorID;
 	class WorldTransformComponent;
 
-	class Mat4;
 	class Vec3;
 	class Vec4;
 	typedef Vec4 Quaternion; // may be used as a quaternion structure
@@ -52,7 +46,6 @@ namespace GameEngine
 	class IGameLogic;
 
 	class ITimer;
-	class IrrlichtTimer;
 }
 
 #endif

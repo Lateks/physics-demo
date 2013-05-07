@@ -25,12 +25,12 @@ namespace GameEngine
 			bspFile.seekg(0, std::ios::beg);
 
 			std::unique_ptr<void, raw_pointer_deleter> memoryBuffer(malloc(fileSize + 1));
-			if (bspFile.is_open())
+			if (memoryBuffer && bspFile.is_open())
 			{
 				bspFile.read((char*) memoryBuffer.get(), fileSize);
+				bspLoader.reset(new BspLoader());
+				bspLoader->loadBSPFile(memoryBuffer.get());
 			}
-			bspLoader.reset(new BspLoader());
-			bspLoader->loadBSPFile(memoryBuffer.get());
 		}
 		bspFile.close();
 		return bspLoader;

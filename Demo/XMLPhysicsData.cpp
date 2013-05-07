@@ -66,28 +66,37 @@ namespace GameEngine
 		void XMLPhysicsData::LoadDataFromXML(const std::string& fileName)
 		{
 			ifstream matFile(fileName);
-			string matData(
-				(istreambuf_iterator<char>(matFile)),
-				(istreambuf_iterator<char>()));
-			xml_document<> doc;
-			doc.parse<0>(const_cast<char*>(matData.c_str()));
-			xml_node<> *root = doc.first_node();
-
-			xml_node<> *materialNode = root->first_node("PhysicsMaterials");
-			assert(materialNode);
-
-			MapChildNodes(materialNode, [this] (xml_node<> *node)
+			if (matFile.fail())
 			{
-				this->m_materialTable.insert(ReadMaterialData(node));
-			});
-
-			materialNode = root->first_node("DensityTable");
-			assert(materialNode);
-
-			MapChildNodes(materialNode, [this] (xml_node<> *node)
+				std::cerr << "Failed to read XML data from path " << fileName << std::endl;
+			}
+			else
 			{
-				this->m_densities.insert(ReadDensity(node));
-			});
+				string matData(
+					(istreambuf_iterator<char>(matFile)),
+					(istreambuf_iterator<char>()));
+
+				xml_document<> doc;
+				doc.parse<0>(const_cast<char*>(matData.c_str()));
+				xml_node<> *root = doc.first_node();
+
+				xml_node<> *materialNode = root->first_node("PhysicsMaterials");
+				assert(materialNode);
+
+				MapChildNodes(materialNode, [this] (xml_node<> *node)
+				{
+					this->m_materialTable.insert(ReadMaterialData(node));
+				});
+
+				materialNode = root->first_node("DensityTable");
+				assert(materialNode);
+
+				MapChildNodes(materialNode, [this] (xml_node<> *node)
+				{
+					this->m_densities.insert(ReadDensity(node));
+				});
+			}
+			matFile.close();
 		}
 
 		MaterialData XMLPhysicsData::LookupMaterial(const std::string& materialName)

@@ -25,7 +25,7 @@ namespace
 	unsigned int MUD_TEXTURE;
 	unsigned int BEACHBALL_TEXTURE;
 
-	const unsigned int HL_UPDATE_INTERVAL = 15;
+	const float HL_UPDATE_INTERVAL = 1.f/60;
 }
 
 namespace GameEngine
@@ -48,7 +48,7 @@ namespace GameEngine
 
 		ActorID m_pickedActor;
 		unsigned int m_pickConstraintId;
-		unsigned int m_lastUpdate;
+		float m_updateTimer;
 
 		inline bool CameraMoved();
 		inline bool LeftMousePressed();
@@ -57,7 +57,7 @@ namespace GameEngine
 		inline bool RightMousePressed();
 		inline bool RightMouseDown();
 		inline bool RightMouseReleased();
-		void UpdateHighlight();
+		void UpdateHighlight(float deltaSec);
 		ActorID PickTarget(Vec3& pickPoint);
 	};
 	
@@ -97,11 +97,11 @@ namespace GameEngine
 		return pickedActorId;
 	}
 
-	void DemoGameLogicData::UpdateHighlight()
+	void DemoGameLogicData::UpdateHighlight(float deltaSec)
 	{
 		auto pGameData = GameData::GetInstance();
-		unsigned int currentTime = pGameData->CurrentTimeMs();
-		if (currentTime - m_lastUpdate > HL_UPDATE_INTERVAL)
+		m_updateTimer += deltaSec;
+		if (m_updateTimer > HL_UPDATE_INTERVAL)
 		{
 			if (!m_pickConstraintId)
 			{
@@ -121,7 +121,7 @@ namespace GameEngine
 				m_pickedActor = pickedActorId;
 			}
 
-			m_lastUpdate = currentTime;
+			m_updateTimer = 0.f;
 		}
 	}
 
@@ -186,16 +186,7 @@ namespace GameEngine
 
 	DemoGameLogic::DemoGameLogic() : m_pData(new DemoGameLogicData())
 	{
-		unsigned int currentTime = GameData::GetInstance()->CurrentTimeMs();
-		if (currentTime > HL_UPDATE_INTERVAL)
-		{
-			currentTime -= HL_UPDATE_INTERVAL;
-		}
-		else
-		{
-			currentTime = 0;
-		}
-		m_pData->m_lastUpdate = currentTime;
+		m_pData->m_updateTimer = 0.f;
 		m_pData->m_pickConstraintId = 0;
 		m_pData->m_pickedActor = 0;
 	}
@@ -282,7 +273,7 @@ namespace GameEngine
 		pEventMgr->VRegisterHandler(Events::EventType::SEPARATION_EVENT, debugPrinter);
 	}
 
-	void DemoGameLogic::VUpdate()
+	void DemoGameLogic::VUpdate(float deltaSec)
 	{
 		auto pGame = GameData::GetInstance();
 		assert(pGame && pGame->GetInputStateHandler());
@@ -290,9 +281,10 @@ namespace GameEngine
 
 		auto pDisplay = pGame->GetDisplayComponent();
 		auto pPhysics = pGame->GetPhysicsEngine();
-		m_pData->m_currentCameraState = CameraState(pDisplay->VGetCameraPosition(), pDisplay->VGetCameraTarget());
+		m_pData->m_currentCameraState =
+			CameraState(pDisplay->VGetCameraPosition(), pDisplay->VGetCameraTarget());
 
-		m_pData->UpdateHighlight();
+		m_pData->UpdateHighlight(deltaSec);
 
 		if (m_pData->RightMouseReleased())
 		{

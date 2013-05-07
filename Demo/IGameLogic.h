@@ -10,7 +10,7 @@ namespace GameEngine
 	{
 	public:
 		virtual ~IGameLogic() { };
-		virtual void VUpdate() = 0;
+		virtual void VUpdate(float deltaSec) = 0;
 		virtual void VSetupInitialScene() = 0;
 	};
 

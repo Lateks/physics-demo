@@ -80,7 +80,7 @@ namespace GameEngine
 			shared_ptr<IrrlichtInputState> m_pInputState;
 			shared_ptr<MessagingWindow> m_messageWindow;
 
-			void AddSceneNode(StrongActorPtr pActor, irr::scene::ISceneNode *pNode, unsigned int texture, bool lightingOn);
+			void AddSceneNode(ActorPtr pActor, irr::scene::ISceneNode *pNode, unsigned int texture, bool lightingOn);
 			void UpdateActorPosition(Events::EventPtr pEvent);
 			void SetNodeTransform(irr::scene::ISceneNode *pNode, const WorldTransformComponent& worldTransform);
 			void SetCursorVisible(bool value);
@@ -374,19 +374,19 @@ namespace GameEngine
 			return TEXTURE_ID;
 		}
 
-		void IrrlichtDisplay::VAddSphereSceneNode(float radius, StrongActorPtr pActor, unsigned int texture, bool lightingOn)
+		void IrrlichtDisplay::VAddSphereSceneNode(float radius, ActorPtr pActor, unsigned int texture, bool lightingOn)
 		{
 			auto node = m_pData->m_pSmgr->addSphereSceneNode(radius);
 			m_pData->AddSceneNode(pActor, node, texture, lightingOn);
 		}
 
-		void IrrlichtDisplay::VAddCubeSceneNode(float dim, StrongActorPtr pActor, unsigned int texture, bool lightingOn)
+		void IrrlichtDisplay::VAddCubeSceneNode(float dim, ActorPtr pActor, unsigned int texture, bool lightingOn)
 		{
 			auto node = m_pData->m_pSmgr->addCubeSceneNode(dim);
 			m_pData->AddSceneNode(pActor, node, texture, lightingOn);
 		}
 
-		void IrrlichtDisplay::VAddMeshSceneNode(const std::string& meshFilePath, StrongActorPtr pActor, unsigned int texture, bool lightingOn)
+		void IrrlichtDisplay::VAddMeshSceneNode(const std::string& meshFilePath, ActorPtr pActor, unsigned int texture, bool lightingOn)
 		{
 			auto mesh = m_pData->m_pSmgr->getMesh(meshFilePath.c_str());
 			if (mesh)
@@ -515,7 +515,7 @@ namespace GameEngine
 			return m_pDevice->getTimer()->getTime();
 		}
 
-		void IrrlichtDisplayData::AddSceneNode(StrongActorPtr pActor, irr::scene::ISceneNode *pNode,
+		void IrrlichtDisplayData::AddSceneNode(ActorPtr pActor, irr::scene::ISceneNode *pNode,
 			unsigned int texture, bool lightingOn)
 		{
 			if (!pActor)
@@ -551,12 +551,8 @@ namespace GameEngine
 			std::shared_ptr<ActorMoveEvent> pMoveEvent =
 				std::dynamic_pointer_cast<ActorMoveEvent>(pEvent);
 
-			shared_ptr<GameData> pGame = GameData::GetInstance();
-			WeakActorPtr pWeakActor = pGame->GetActor(pMoveEvent->GetActorId());
-			if (pWeakActor.expired())
-				return;
-
-			StrongActorPtr pActor(pWeakActor);
+			auto pGame = GameData::GetInstance();
+			ActorPtr pActor = pGame->GetActor(pMoveEvent->GetActorId());
 			ISceneNode *pNode = GetSceneNode(pActor->GetID());
 
 			if (pActor && pNode)

@@ -44,13 +44,12 @@ namespace GameEngine
 		return 0;
 	}
 
-	void GameData::AddActor(WeakActorPtr pActor)
+	void GameData::AddActor(ActorPtr pActor)
 	{
-		if (pActor.expired())
+		if (!pActor)
 			return;
 
-		StrongActorPtr pStrongActor(pActor);
-		m_pData->m_actors[pStrongActor->GetID()] = pStrongActor; 
+		m_pData->m_actors[pActor->GetID()] = pActor; 
 	}
 
 	std::shared_ptr<GameData> GameData::GetInstance()

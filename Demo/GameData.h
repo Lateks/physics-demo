@@ -21,7 +21,7 @@ namespace GameEngine
 		float CurrentTimeSec();
 		unsigned int CurrentTimeMs();
 
-		void AddActor(std::weak_ptr<GameActor> pActor);
+		void AddActor(std::shared_ptr<GameActor> pActor);
 		std::shared_ptr<GameActor> GetActor(ActorID id);
 
 		void SetInputHandler(std::shared_ptr<IGameLogic> pInputHandler);

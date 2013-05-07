@@ -26,21 +26,21 @@ namespace GameEngine
 			virtual void VSyncScene() = 0;
 
 			// Initializing different physics world objects.
-			virtual void VAddSphere(float radius, WeakActorPtr pActor,
+			virtual void VAddSphere(float radius, ActorPtr pActor,
 				const std::string& density, const std::string& material) = 0;
-			virtual void VAddBox(const Vec3& dimensions, WeakActorPtr pActor,
+			virtual void VAddBox(const Vec3& dimensions, ActorPtr pActor,
 				const std::string& density, const std::string& material) = 0;
 			virtual void VAddConvexMesh(std::vector<Vec3>& vertices,
-				WeakActorPtr pActor, const std::string& density, const std::string& material) = 0;
+				ActorPtr pActor, const std::string& density, const std::string& material) = 0;
 
 			// These are used to add e.g. map parts and other static entities.
-			virtual void VAddConvexStaticColliderMesh(std::vector<Vec3>& vertices, WeakActorPtr pActor) = 0;
-			virtual void VAddConvexStaticColliderMesh(std::vector<Vec4>& planeEquations, WeakActorPtr pActor) = 0;
+			virtual void VAddConvexStaticColliderMesh(std::vector<Vec3>& vertices, ActorPtr pActor) = 0;
+			virtual void VAddConvexStaticColliderMesh(std::vector<Vec4>& planeEquations, ActorPtr pActor) = 0;
 
-			virtual void VCreateTrigger(WeakActorPtr gameActor, const float dim) = 0;
+			virtual void VCreateTrigger(ActorPtr gameActor, const float dim) = 0;
 
 			// Adding e.g. Quake maps from bsp files.
-			virtual void VLoadBspMap(BspLoader& bspLoad, WeakActorPtr pActor) = 0;
+			virtual void VLoadBspMap(BspLoader& bspLoad, ActorPtr pActor) = 0;
 
 			virtual void VRemoveActor(ActorID id) = 0;
 

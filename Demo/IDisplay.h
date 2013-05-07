@@ -57,9 +57,9 @@ namespace GameEngine
 			// Returns 0 if loading fails.
 			virtual unsigned int VLoadTexture(const std::string& filePath) = 0;
 
-			virtual void VAddSphereSceneNode(float radius, StrongActorPtr pActor, unsigned int texture = 0, bool lightingOn = false) = 0;
-			virtual void VAddCubeSceneNode(float dim, StrongActorPtr pActor, unsigned int texture = 0, bool lightingOn = false) = 0;
-			virtual void VAddMeshSceneNode(const std::string& meshFilePath, StrongActorPtr pActor, unsigned int texture = 0, bool lightingOn = false) = 0;
+			virtual void VAddSphereSceneNode(float radius, ActorPtr pActor, unsigned int texture = 0, bool lightingOn = false) = 0;
+			virtual void VAddCubeSceneNode(float dim, ActorPtr pActor, unsigned int texture = 0, bool lightingOn = false) = 0;
+			virtual void VAddMeshSceneNode(const std::string& meshFilePath, ActorPtr pActor, unsigned int texture = 0, bool lightingOn = false) = 0;
 			virtual void VAddLightSceneNode(const Vec3& position, const RGBAColor& color, float lightRadius) = 0;
 
 			virtual void VRemoveSceneNode(ActorID actorId) = 0;

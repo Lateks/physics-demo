@@ -19,17 +19,17 @@ namespace GameEngine
 			virtual void VSyncScene() override;
 			virtual void VUpdateSimulation(float deltaSec) override;
 
-			virtual void VAddSphere(float radius, WeakActorPtr pActor,
+			virtual void VAddSphere(float radius, ActorPtr pActor,
 				const std::string& density, const std::string& material) override;
-			virtual void VAddBox(const Vec3& dimensions, WeakActorPtr pActor,
+			virtual void VAddBox(const Vec3& dimensions, ActorPtr pActor,
 				const std::string& density, const std::string& material) override;
 			virtual void VAddConvexMesh(std::vector<Vec3>& vertices,
-				WeakActorPtr pActor, const std::string& density, const std::string& material) override;
-			virtual void VAddConvexStaticColliderMesh(std::vector<Vec3>& vertices, WeakActorPtr pActor) override;
-			virtual void VAddConvexStaticColliderMesh(std::vector<Vec4>& planeEquations, WeakActorPtr pActor) override;
-			virtual void VCreateTrigger(WeakActorPtr pActor, const float dim) override;
+				ActorPtr pActor, const std::string& density, const std::string& material) override;
+			virtual void VAddConvexStaticColliderMesh(std::vector<Vec3>& vertices, ActorPtr pActor) override;
+			virtual void VAddConvexStaticColliderMesh(std::vector<Vec4>& planeEquations, ActorPtr pActor) override;
+			virtual void VCreateTrigger(ActorPtr pActor, const float dim) override;
 
-			virtual void VLoadBspMap(BspLoader& bspLoad, WeakActorPtr pActor) override;
+			virtual void VLoadBspMap(BspLoader& bspLoad, ActorPtr pActor) override;
 
 			virtual void VRemoveActor(ActorID id) override;
 

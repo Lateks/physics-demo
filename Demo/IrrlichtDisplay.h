@@ -50,9 +50,9 @@ namespace GameEngine
 
 			// If no texture id is given as a parameter (the texture parameter is 0),
 			// the scene node is rendered as a wireframe).
-			virtual void VAddSphereSceneNode(float radius, StrongActorPtr pActor, unsigned int texture, bool lightingOn) override;
-			virtual void VAddCubeSceneNode(float dim, StrongActorPtr pActor, unsigned int texture, bool lightingOn) override;
-			virtual void VAddMeshSceneNode(const std::string& meshFilePath, StrongActorPtr pActor, unsigned int texture, bool lightingOn) override;
+			virtual void VAddSphereSceneNode(float radius, ActorPtr pActor, unsigned int texture, bool lightingOn) override;
+			virtual void VAddCubeSceneNode(float dim, ActorPtr pActor, unsigned int texture, bool lightingOn) override;
+			virtual void VAddMeshSceneNode(const std::string& meshFilePath, ActorPtr pActor, unsigned int texture, bool lightingOn) override;
 			virtual void VAddLightSceneNode(const Vec3& position, const RGBAColor& color, float lightRadius) override;
 
 			virtual void VRemoveSceneNode(ActorID actorId) override;

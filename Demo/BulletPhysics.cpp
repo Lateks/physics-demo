@@ -66,9 +66,9 @@ namespace GameEngine
 
 			// METHODS:
 			virtual bool VInitializeSystems();
-			std::shared_ptr<BulletPhysicsObject> AddShape(StrongActorPtr pActor, btCollisionShape *shape,
+			std::shared_ptr<BulletPhysicsObject> AddShape(ActorPtr pActor, btCollisionShape *shape,
 				float mass, const std::string& physicsMaterial);
-			std::shared_ptr<BulletPhysicsObject> AddStaticColliderShape(StrongActorPtr pActor,
+			std::shared_ptr<BulletPhysicsObject> AddStaticColliderShape(ActorPtr pActor,
 				btCollisionShape *shape, bool trigger = false);
 			void SendNewCollisionEvent(const btPersistentManifold * manifold,
 			const btRigidBody * pBody1, const btRigidBody * pBody2);
@@ -91,7 +91,29 @@ namespace GameEngine
 			return m_pData->VInitializeSystems();
 		}
 
-		void UpdateWorldTransform(StrongActorPtr, const Vec3&, const Quaternion& rot);
+		void UpdateWorldTransform(ActorPtr pActor, const Vec3& pos, const Quaternion& rot)
+		{
+			shared_ptr<GameData> pGame = GameData::GetInstance();
+			WorldTransformComponent& worldTrans = pActor->GetWorldTransform();
+
+			bool changed = false;
+			if (worldTrans.GetRotation() != rot)
+			{
+				worldTrans.SetRotation(rot);
+				changed = true;
+			}
+			if (worldTrans.GetPosition() != pos)
+			{
+				worldTrans.SetPosition(pos);
+				changed = true;
+			}
+			if (changed)
+			{
+				Events::EventPtr event;
+				event.reset(new Events::ActorMoveEvent(pGame->CurrentTimeSec(), pActor->GetID()));
+				pGame->GetEventManager()->VQueueEvent(event);
+			}
+		}
 
 		// Update the locations of all actors involved in the physics
 		// simulation and signal changes in location with events.
@@ -119,41 +141,16 @@ namespace GameEngine
 			}
 		}
 
-		void UpdateWorldTransform(StrongActorPtr pActor, const Vec3& pos, const Quaternion& rot)
-		{
-			shared_ptr<GameData> pGame = GameData::GetInstance();
-			WorldTransformComponent& worldTrans = pActor->GetWorldTransform();
-
-			bool changed = false;
-			if (worldTrans.GetRotation() != rot)
-			{
-				worldTrans.SetRotation(rot);
-				changed = true;
-			}
-			if (worldTrans.GetPosition() != pos)
-			{
-				worldTrans.SetPosition(pos);
-				changed = true;
-			}
-			if (changed)
-			{
-				Events::EventPtr event;
-				event.reset(new Events::ActorMoveEvent(pGame->CurrentTimeSec(), pActor->GetID()));
-				pGame->GetEventManager()->VQueueEvent(event);
-			}
-		}
-
 		void BulletPhysics::VUpdateSimulation(float deltaSec)
 		{
 			m_pData->m_pDynamicsWorld->stepSimulation(deltaSec, 4);
 		}
 
-		void BulletPhysics::VAddSphere(float radius, WeakActorPtr pActor,
+		void BulletPhysics::VAddSphere(float radius, ActorPtr pActor,
 			const std::string& density, const std::string& material)
 		{
-			if (pActor.expired())
+			if (!pActor)
 				return;
-			StrongActorPtr pStrongActor(pActor);
 
 			float btRadius = m_pData->m_worldScaleConst * radius;
 			btSphereShape * const collisionShape = new btSphereShape(btRadius);
@@ -163,7 +160,7 @@ namespace GameEngine
 			const float mass = sphereVolume * matDensity;
 
 			std::shared_ptr<BulletPhysicsObject> pObject =
-				m_pData->AddShape(pStrongActor, collisionShape, mass, material);
+				m_pData->AddShape(pActor, collisionShape, mass, material);
 			auto pBody = pObject->GetRigidBodies()[0];
 
 			pBody->setRollingFriction(
@@ -172,12 +169,11 @@ namespace GameEngine
 				btCollisionObject::CF_ANISOTROPIC_ROLLING_FRICTION);
 		}
 
-		void BulletPhysics::VAddBox(const Vec3& dimensions, WeakActorPtr pActor,
+		void BulletPhysics::VAddBox(const Vec3& dimensions, ActorPtr pActor,
 			const std::string& density, const std::string& material)
 		{
-			if (pActor.expired())
+			if (!pActor)
 				return;
-			StrongActorPtr pStrongActor(pActor);
 
 			btVector3 btDimensions = Vec3_to_btVector3(dimensions, m_pData->m_worldScaleConst);
 			btBoxShape * const boxShape = new btBoxShape(0.5f * btDimensions);
@@ -186,15 +182,14 @@ namespace GameEngine
 			const float boxVolume = btDimensions.x() * btDimensions.y() * btDimensions.z();
 			const float mass = boxVolume * matDensity;
 
-			m_pData->AddShape(pStrongActor, boxShape, mass, material);
+			m_pData->AddShape(pActor, boxShape, mass, material);
 		}
 
 		void BulletPhysics::VAddConvexMesh(std::vector<Vec3>& vertices,
-				WeakActorPtr pActor, const std::string& density, const std::string& material)
+				ActorPtr pActor, const std::string& density, const std::string& material)
 		{
-			if (pActor.expired())
+			if (!pActor)
 				return;
-			StrongActorPtr pStrongActor(pActor);
 
 			btConvexHullShape * const convexShape = new btConvexHullShape();
 
@@ -211,15 +206,14 @@ namespace GameEngine
 			const float aabbVolume = dimensions.x() * dimensions.y() * dimensions.z();
 			const float mass = aabbVolume * matDensity;
 
-			m_pData->AddShape(pStrongActor, convexShape, mass, material);
+			m_pData->AddShape(pActor, convexShape, mass, material);
 		}
 
 		// Builds a convex static collision object from the convex hull of a set of vertices.
-		void BulletPhysics::VAddConvexStaticColliderMesh(std::vector<Vec3>& vertices, WeakActorPtr pActor)
+		void BulletPhysics::VAddConvexStaticColliderMesh(std::vector<Vec3>& vertices, ActorPtr pActor)
 		{
-			if (pActor.expired())
+			if (!pActor)
 				return;
-			StrongActorPtr pStrongActor(pActor);
 
 			btConvexHullShape* convexShape = new btConvexHullShape();
 			std::for_each(vertices.begin(), vertices.end(),
@@ -227,15 +221,14 @@ namespace GameEngine
 				Vec3_to_btVector3(vertex, this->m_pData->m_worldScaleConst)); });
 			float scaling = m_pData->m_worldScaleConst;
 
-			m_pData->AddStaticColliderShape(pStrongActor, convexShape);
+			m_pData->AddStaticColliderShape(pActor, convexShape);
 		}
 
 		// Builds a convex static collision object from the convex hull defined by a set of plane equations.
-		void BulletPhysics::VAddConvexStaticColliderMesh(std::vector<Vec4>& planeEquations, WeakActorPtr pActor)
+		void BulletPhysics::VAddConvexStaticColliderMesh(std::vector<Vec4>& planeEquations, ActorPtr pActor)
 		{
-			if (pActor.expired())
+			if (!pActor)
 				return;
-			StrongActorPtr pStrongActor(pActor);
 
 			btAlignedObjectArray<btVector3> vertices;
 			btAlignedObjectArray<btVector3> btPlaneEquations;
@@ -251,12 +244,12 @@ namespace GameEngine
 
 			btConvexHullShape *convexShape = new btConvexHullShape(&(vertices[0].getX()), vertices.size());
 
-			m_pData->AddStaticColliderShape(pStrongActor, convexShape);
+			m_pData->AddStaticColliderShape(pActor, convexShape);
 		}
 
-		void BulletPhysics::VLoadBspMap(BspLoader& bspLoad, WeakActorPtr pActor)
+		void BulletPhysics::VLoadBspMap(BspLoader& bspLoad, ActorPtr pActor)
 		{
-			if (pActor.expired())
+			if (!pActor)
 				return;
 
 			Utils::ConvertBsp(bspLoad,
@@ -266,11 +259,10 @@ namespace GameEngine
 			});
 		}
 
-		void BulletPhysics::VCreateTrigger(WeakActorPtr pActor, const float dim)
+		void BulletPhysics::VCreateTrigger(ActorPtr pActor, const float dim)
 		{
-			if (pActor.expired())
+			if (!pActor)
 				return;
-			StrongActorPtr pStrongActor(pActor);
 
 			// Create a cube-shaped trigger area. Of course, this could really
 			// be any convex shape. The common functionality associated with
@@ -280,7 +272,7 @@ namespace GameEngine
 				Vec3_to_btVector3(Vec3(dim, dim, dim), m_pData->m_worldScaleConst);
 			btBoxShape * const boxShape =
 				new btBoxShape(0.5f * boxDimensions);
-			m_pData->AddStaticColliderShape(pStrongActor, boxShape, true);
+			m_pData->AddStaticColliderShape(pActor, boxShape, true);
 		}
 		
 		void BulletPhysics::VRemoveActor(ActorID id)
@@ -764,7 +756,7 @@ namespace GameEngine
 			}
 		}
 
-		std::shared_ptr<BulletPhysicsObject> BulletPhysicsData::AddShape(StrongActorPtr pActor, btCollisionShape *shape,
+		std::shared_ptr<BulletPhysicsObject> BulletPhysicsData::AddShape(ActorPtr pActor, btCollisionShape *shape,
 			float mass, const std::string& material)
 		{
 			assert(pActor);
@@ -797,7 +789,8 @@ namespace GameEngine
 			return m_actorToBulletPhysicsObjectMap[id];
 		}
 
-		std::shared_ptr<BulletPhysicsObject> BulletPhysicsData::AddStaticColliderShape(StrongActorPtr pActor, btCollisionShape *shape, bool isTrigger)
+		std::shared_ptr<BulletPhysicsObject> BulletPhysicsData::AddStaticColliderShape(
+			ActorPtr pActor, btCollisionShape *shape, bool isTrigger)
 		{
 			assert(pActor);
 			ActorID id = pActor->GetID();

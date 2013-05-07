@@ -37,8 +37,7 @@ namespace GameEngine
 	}
 
 	class GameActor;
-	typedef std::shared_ptr<GameActor> StrongActorPtr;
-	typedef std::weak_ptr<GameActor> WeakActorPtr;
+	typedef std::shared_ptr<GameActor> ActorPtr;
 	typedef unsigned int ActorID;
 	class WorldTransformComponent;
 

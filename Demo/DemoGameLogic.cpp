@@ -166,7 +166,7 @@ namespace GameEngine
 		auto pDisplay = pGame->GetDisplayComponent();
 		Vec3 cameraPos = pDisplay->VGetCameraPosition();
 
-		StrongActorPtr cube(new GameActor(cameraPos));
+		auto cube = std::make_shared<GameActor>(cameraPos);
 		cube->GetWorldTransform().SetRotation(pDisplay->VGetCameraRotation());
 		pGame->AddActor(cube);
 
@@ -213,7 +213,7 @@ namespace GameEngine
 		// Create an actor for the world map to be able to refer to the associated
 		// rigid bodies.
 		Vec3 mapPosition(-1350, -130, 1400);
-		StrongActorPtr world(new GameActor(mapPosition));
+		auto world = std::make_shared<GameActor>(mapPosition);
 		pGame->AddActor(world);
 		pDisplay->VLoadMap("..\\assets\\map-20kdm2.pk3", "20kdm2.bsp", mapPosition);
 		std::unique_ptr<BspLoader> pBspLoader = CreateBspLoader("..\\assets\\20kdm2.bsp");
@@ -238,18 +238,18 @@ namespace GameEngine
 		WOODBOX_TEXTURE = pDisplay->VLoadTexture("..\\assets\\woodbox2.jpg");
 
 		// Setup actors and their graphical and physical representations.
-		StrongActorPtr ball(new GameActor(Vec3(0, 50, 60)));
+		auto ball = std::make_shared<GameActor>(Vec3(0, 50, 60));
 		pGame->AddActor(ball);
 		pDisplay->VAddSphereSceneNode(10.f, ball, MUD_TEXTURE, true);
 		pPhysics->VAddSphere(10.f, ball, "Titanium", "Bouncy");
 
-		StrongActorPtr cube(new GameActor(Vec3(0, 80, 60)));
+		auto cube = std::make_shared<GameActor>(Vec3(0, 80, 60));
 		pGame->AddActor(cube);
 		pDisplay->VAddCubeSceneNode(25.f, cube, WOODBOX_TEXTURE, true);
 		pPhysics->VAddBox(Vec3(25.f, 25.f, 25.f), cube, "manganese", "Normal");
 
 		// Add a trigger node, rendered as a wireframe cube.
-		StrongActorPtr trigger(new GameActor(Vec3(-100, 125, 450)));
+		auto trigger = std::make_shared<GameActor>(Vec3(-100, 125, 450));
 		pGame->AddActor(trigger);
 		pDisplay->VAddCubeSceneNode(125.f, trigger, 0);
 		pPhysics->VCreateTrigger(trigger, 125.f);

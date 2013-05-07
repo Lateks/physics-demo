@@ -106,8 +106,8 @@ namespace GameEngine
 
 		pGameLogic->VSetupInitialScene();
 
-		float timeBegin = pGameData->CurrentTimeSec();
-		float timeEnd;
+		unsigned int timeBegin = pGameData->CurrentTimeMs();
+		unsigned int timeEnd;
 		float frameDeltaSec = 1.0f/60;
 		while (pDisplay->VRunning())
 		{
@@ -123,8 +123,8 @@ namespace GameEngine
 			{
 				pDisplay->VYieldDevice();
 			}
-			timeEnd = pGameData->CurrentTimeSec();
-			frameDeltaSec = timeEnd - timeBegin;
+			timeEnd = pGameData->CurrentTimeMs();
+			frameDeltaSec = (timeEnd - timeBegin) / 1000.f;
 			timeBegin = timeEnd;
 		}
 

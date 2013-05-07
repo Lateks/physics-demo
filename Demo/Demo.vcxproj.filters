@@ -218,5 +218,8 @@
     <ClCompile Include="EngineComponentFactories.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="WorldTransformComponent.cpp">
+      <Filter>Source Files\GameObject</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

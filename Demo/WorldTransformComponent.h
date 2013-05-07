@@ -1,49 +1,31 @@
 #pragma once
 
 #include "enginefwd.h"
-#include "Vec3.h"
-#include "Vec4.h"
 
 namespace GameEngine
 {
+	struct WorldTransformComponentData;
+
 	class WorldTransformComponent
 	{
 	private:
-		Vec3 m_scale;
-		Quaternion m_rotation;
-		Vec3 m_position;
+		std::unique_ptr<WorldTransformComponentData> m_pData;
 	public:
-		WorldTransformComponent()
-			: m_scale(1, 1, 1, CSHandedness::NONE), m_rotation(0, 0, 0, 1), m_position(0, 0, 0) { }
+		WorldTransformComponent();
+		WorldTransformComponent(const WorldTransformComponent& other);
+		WorldTransformComponent(WorldTransformComponent&& other);
+		virtual ~WorldTransformComponent();
 
-		void SetRotation(const Quaternion& newRotation)
-		{
-			m_rotation = newRotation;
-		}
+		WorldTransformComponent& operator=(const WorldTransformComponent& other);
+		WorldTransformComponent& operator=(WorldTransformComponent&& other);
 
-		Quaternion GetRotation() const
-		{
-			return m_rotation;
-		}
+		void SetRotation(const Quaternion& newRotation);
+		Quaternion GetRotation() const;
 
-		void SetScale(const Vec3& newScale)
-		{
-			m_scale = newScale;
-		}
+		void SetScale(const Vec3& newScale);
+		Vec3 GetScale() const;
 
-		Vec3 GetScale() const
-		{
-			return m_scale;
-		}
-
-		void SetPosition(const Vec3& newPosition)
-		{
-			m_position = newPosition;
-		}
-
-		Vec3 GetPosition() const
-		{
-			return m_position;
-		}
+		void SetPosition(const Vec3& newPosition);
+		Vec3 GetPosition() const;
 	};
 }

@@ -82,7 +82,7 @@ namespace GameEngine
 
 			void AddSceneNode(StrongActorPtr pActor, irr::scene::ISceneNode *pNode, unsigned int texture, bool lightingOn);
 			void UpdateActorPosition(Events::EventPtr pEvent);
-			void SetNodeTransform(irr::scene::ISceneNode *pNode, shared_ptr<WorldTransformComponent> pWorldTransform);
+			void SetNodeTransform(irr::scene::ISceneNode *pNode, const WorldTransformComponent& worldTransform);
 			void SetCursorVisible(bool value);
 			unsigned int GetTime();
 		};
@@ -537,12 +537,7 @@ namespace GameEngine
 				pNode->setMaterialFlag(irr::video::EMF_LIGHTING, false);
 			}
 
-			weak_ptr<WorldTransformComponent> pWeakTransform = pActor->GetWorldTransform();
-			if (!pWeakTransform.expired())
-			{
-				shared_ptr<WorldTransformComponent> pWorldTransform(pWeakTransform);
-				SetNodeTransform(pNode, pWorldTransform);
-			}
+			SetNodeTransform(pNode, pActor->GetWorldTransform());
 
 			sceneNodes[pActor->GetID()] = pNode;
 			auto game = GameData::GetInstance();
@@ -566,26 +561,21 @@ namespace GameEngine
 
 			if (pActor && pNode)
 			{
-				weak_ptr<WorldTransformComponent> pWeakTransform = pActor->GetWorldTransform();
-				if (!pWeakTransform.expired())
-				{
-					shared_ptr<WorldTransformComponent> pWorldTransform(pWeakTransform);
-					SetNodeTransform(pNode, pWorldTransform);
-				}
+				SetNodeTransform(pNode, pActor->GetWorldTransform());
 			}
 		}
 
 		void IrrlichtDisplayData::SetNodeTransform(
-			irr::scene::ISceneNode *pNode, shared_ptr<WorldTransformComponent> pWorldTransform)
+			irr::scene::ISceneNode *pNode, const WorldTransformComponent& worldTransform)
 		{
-			quaternion rot = ConvertQuaternion(pWorldTransform->GetRotation());
+			quaternion rot = ConvertQuaternion(worldTransform.GetRotation());
 			vector3df eulerRot;
 			rot.toEuler(eulerRot);
 			eulerRot *= irr::core::RADTODEG;
 			pNode->setRotation(eulerRot);
 
-			pNode->setPosition(ConvertVector(pWorldTransform->GetPosition()));
-			pNode->setScale(ConvertVector(pWorldTransform->GetScale()));
+			pNode->setPosition(ConvertVector(worldTransform.GetPosition()));
+			pNode->setScale(ConvertVector(worldTransform.GetScale()));
 		}
 
 		/*

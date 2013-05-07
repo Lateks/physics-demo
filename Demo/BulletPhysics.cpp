@@ -78,7 +78,7 @@ namespace GameEngine
 			void SetupSystems();
 			void CleanUpRigidBodies();
 			void HandleNewCollisions(CollisionPairs& currentTickCollisions);
-			btMotionState *GetMotionStateFrom(std::shared_ptr<WorldTransformComponent> transform);
+			btMotionState *GetMotionStateFrom(const WorldTransformComponent& transform);
 			static void BulletInternalTickCallback(btDynamicsWorld * const pWorld, const btScalar timeStep);
 		};
 
@@ -122,27 +122,24 @@ namespace GameEngine
 		void UpdateWorldTransform(StrongActorPtr pActor, const Vec3& pos, const Quaternion& rot)
 		{
 			shared_ptr<GameData> pGame = GameData::GetInstance();
-			auto pWorldTrans = pActor->GetWorldTransform();
+			WorldTransformComponent& worldTrans = pActor->GetWorldTransform();
 
-			if (pWorldTrans)
+			bool changed = false;
+			if (worldTrans.GetRotation() != rot)
 			{
-				bool changed = false;
-				if (pWorldTrans->GetRotation() != rot)
-				{
-					pWorldTrans->SetRotation(rot);
-					changed = true;
-				}
-				if (pWorldTrans->GetPosition() != pos)
-				{
-					pWorldTrans->SetPosition(pos);
-					changed = true;
-				}
-				if (changed)
-				{
-					Events::EventPtr event;
-					event.reset(new Events::ActorMoveEvent(pGame->CurrentTimeSec(), pActor->GetID()));
-					pGame->GetEventManager()->VQueueEvent(event);
-				}
+				worldTrans.SetRotation(rot);
+				changed = true;
+			}
+			if (worldTrans.GetPosition() != pos)
+			{
+				worldTrans.SetPosition(pos);
+				changed = true;
+			}
+			if (changed)
+			{
+				Events::EventPtr event;
+				event.reset(new Events::ActorMoveEvent(pGame->CurrentTimeSec(), pActor->GetID()));
+				pGame->GetEventManager()->VQueueEvent(event);
 			}
 		}
 
@@ -776,30 +773,26 @@ namespace GameEngine
 			assert(m_actorToBulletPhysicsObjectMap.find(id) == m_actorToBulletPhysicsObjectMap.end());
 			m_actorToBulletPhysicsObjectMap[id].reset(new BulletPhysicsObject(id)); // creates a dynamic object
 
-			auto pWorldTransform = pActor->GetWorldTransform();
-			if (pWorldTransform)
-			{
-				btMotionState *motionState = GetMotionStateFrom(pWorldTransform);
+			btMotionState *motionState = GetMotionStateFrom(pActor->GetWorldTransform());
 
-				MaterialData matData(m_physicsMaterialData->LookupMaterial(material));
+			MaterialData matData(m_physicsMaterialData->LookupMaterial(material));
 
-				btVector3 localInertia(0, 0, 0);
-				if (mass > 0.f)
-					shape->calculateLocalInertia(mass, localInertia);
+			btVector3 localInertia(0, 0, 0);
+			if (mass > 0.f)
+				shape->calculateLocalInertia(mass, localInertia);
 
-				btRigidBody::btRigidBodyConstructionInfo rbInfo(
-					mass, motionState, shape, localInertia);
+			btRigidBody::btRigidBodyConstructionInfo rbInfo(
+				mass, motionState, shape, localInertia);
 
-				rbInfo.m_restitution = matData.m_restitution;
-				rbInfo.m_friction = matData.m_friction;
-				rbInfo.m_rollingFriction = matData.m_friction;
+			rbInfo.m_restitution = matData.m_restitution;
+			rbInfo.m_friction = matData.m_friction;
+			rbInfo.m_rollingFriction = matData.m_friction;
 
-				btRigidBody * const body = new btRigidBody(rbInfo);
-				m_pDynamicsWorld->addRigidBody(body);
+			btRigidBody * const body = new btRigidBody(rbInfo);
+			m_pDynamicsWorld->addRigidBody(body);
 
-				m_actorToBulletPhysicsObjectMap[id]->AddRigidBody(body);
-				m_rigidBodyToActorMap[body] = id;
-			}
+			m_actorToBulletPhysicsObjectMap[id]->AddRigidBody(body);
+			m_rigidBodyToActorMap[body] = id;
 
 			return m_actorToBulletPhysicsObjectMap[id];
 		}
@@ -821,47 +814,44 @@ namespace GameEngine
 					: BulletPhysicsObject::PhysicsType::STATIC));
 			}
 
-			auto pWorldTransform = pActor->GetWorldTransform();
-			if (pWorldTransform)
+			btMotionState *motionState = GetMotionStateFrom(pActor->GetWorldTransform());
+
+			// Objects that have 0 mass are regarded as immovable by Bullet.
+			btScalar const mass = 0;
+			btRigidBody::btRigidBodyConstructionInfo rbInfo(
+				mass, motionState, shape, btVector3(0, 0, 0));
+			btRigidBody * const body = new btRigidBody(rbInfo);
+
+			m_pDynamicsWorld->addRigidBody(body);
+			body->setCollisionFlags(body->getCollisionFlags() | btRigidBody::CF_STATIC_OBJECT);
+
+			if (isTrigger) // triggers may intersect with other objects (this causes a trigger related event, not a collision event)
 			{
-				btMotionState *motionState = GetMotionStateFrom(pWorldTransform);
-
-				// Objects that have 0 mass are regarded as immovable by Bullet.
-				btScalar const mass = 0;
-				btRigidBody::btRigidBodyConstructionInfo rbInfo(
-					mass, motionState, shape, btVector3(0, 0, 0));
-				btRigidBody * const body = new btRigidBody(rbInfo);
-
-				m_pDynamicsWorld->addRigidBody(body);
-				body->setCollisionFlags(body->getCollisionFlags() | btRigidBody::CF_STATIC_OBJECT);
-
-				if (isTrigger) // triggers may intersect with other objects (this causes a trigger related event, not a collision event)
-				{
-					body->setCollisionFlags(
-						body->getCollisionFlags() | btRigidBody::CF_NO_CONTACT_RESPONSE);
-				}
-				else
-				{
-					// Set the same restitution, friction and rolling friction for all static objects.
-					// This could possibly be based on the the material of the static object.
-					// (Can this data be parsed from the bsp file?)
-					body->setRestitution(0.2f);
-					body->setFriction(1.f);
-					body->setRollingFriction(0.2f);
-					body->setAnisotropicFriction(shape->getAnisotropicRollingFrictionDirection(),
-						btCollisionObject::CF_ANISOTROPIC_ROLLING_FRICTION);
-				}
-
-				m_actorToBulletPhysicsObjectMap[id]->AddRigidBody(body);
-				m_rigidBodyToActorMap[body] = id;
+				body->setCollisionFlags(
+					body->getCollisionFlags() | btRigidBody::CF_NO_CONTACT_RESPONSE);
 			}
+			else
+			{
+				// Set the same restitution, friction and rolling friction for all static objects.
+				// This could possibly be based on the the material of the static object.
+				// (Can this data be parsed from the bsp file?)
+				body->setRestitution(0.2f);
+				body->setFriction(1.f);
+				body->setRollingFriction(0.2f);
+				body->setAnisotropicFriction(shape->getAnisotropicRollingFrictionDirection(),
+					btCollisionObject::CF_ANISOTROPIC_ROLLING_FRICTION);
+			}
+
+			m_actorToBulletPhysicsObjectMap[id]->AddRigidBody(body);
+			m_rigidBodyToActorMap[body] = id;
+
 			return m_actorToBulletPhysicsObjectMap[id];
 		}
 
-		btMotionState *BulletPhysicsData::GetMotionStateFrom(std::shared_ptr<WorldTransformComponent> pWorldTransform)
+		btMotionState *BulletPhysicsData::GetMotionStateFrom(const WorldTransformComponent& worldTransform)
 		{
-			btQuaternion rotation(Quaternion_to_btQuaternion(pWorldTransform->GetRotation()));
-			btVector3 translation(Vec3_to_btVector3(pWorldTransform->GetPosition(), m_worldScaleConst));
+			btQuaternion rotation(Quaternion_to_btQuaternion(worldTransform.GetRotation()));
+			btVector3 translation(Vec3_to_btVector3(worldTransform.GetPosition(), m_worldScaleConst));
 			btTransform transform(rotation, translation);
 			return new btDefaultMotionState(transform);
 		}

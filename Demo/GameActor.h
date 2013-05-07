@@ -5,21 +5,18 @@
 
 namespace GameEngine
 {
+	struct GameActorData;
+
 	class GameActor
 	{
 	public:
 		GameActor();
 		GameActor(Vec3& startPosition);
-		virtual ~GameActor() { };
-		unsigned int GetID() { return actorId; }
-		void SetWorldTransform(WorldTransformComponent *trans);
-		std::shared_ptr<WorldTransformComponent> GetWorldTransform();
+		virtual ~GameActor();
+		ActorID GetID();
+		void SetWorldTransform(const WorldTransformComponent& trans);
+		WorldTransformComponent& GetWorldTransform();
 	private:
-		ActorID actorId;
-		/* The transform component is stored separately from the
-		 * 3D model because it can be used by several engine components
-		 * (such as the physics engine and AI engine).
-		 */
-		std::shared_ptr<WorldTransformComponent> m_pTransform;
+		std::unique_ptr<GameActorData> m_pData;
 	};
 }

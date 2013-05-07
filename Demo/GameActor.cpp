@@ -10,26 +10,40 @@ namespace
 
 namespace GameEngine
 {
-	GameActor::GameActor()
-		: m_pTransform(new WorldTransformComponent())
+	struct GameActorData
 	{
-		actorId = ++ID; // Note: numbering starts from 1.
+		GameActorData() : m_actorId(0), m_pTransform() { }
+		ActorID m_actorId;
+		WorldTransformComponent m_pTransform;
+	};
+
+	GameActor::GameActor()
+		: m_pData(new GameActorData())
+	{
+		m_pData->m_actorId = ++ID; // Note: numbering starts from 1.
 	}
 
 	GameActor::GameActor(Vec3& startPosition)
-		: m_pTransform(new WorldTransformComponent())
+		: m_pData(new GameActorData())
 	{
-		actorId = ++ID;
-		m_pTransform->SetPosition(startPosition);
+		m_pData->m_actorId = ++ID;
+		m_pData->m_pTransform.SetPosition(startPosition);
 	}
 
-	void GameActor::SetWorldTransform(WorldTransformComponent *trans)
+	GameActor::~GameActor() { }
+
+	ActorID GameActor::GetID()
 	{
-		m_pTransform.reset(trans);
+		return m_pData->m_actorId;
 	}
 
-	std::shared_ptr<WorldTransformComponent> GameActor::GetWorldTransform()
+	void GameActor::SetWorldTransform(const WorldTransformComponent& trans)
 	{
-		return m_pTransform;
+		m_pData->m_pTransform = trans;
+	}
+
+	WorldTransformComponent& GameActor::GetWorldTransform()
+	{
+		return m_pData->m_pTransform;
 	}
 }

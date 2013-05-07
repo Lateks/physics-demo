@@ -167,11 +167,7 @@ namespace GameEngine
 		Vec3 cameraPos = pDisplay->VGetCameraPosition();
 
 		StrongActorPtr cube(new GameActor(cameraPos));
-		std::shared_ptr<WorldTransformComponent> pTransform = cube->GetWorldTransform();
-		if (pTransform)
-		{
-			pTransform->SetRotation(pDisplay->VGetCameraRotation());
-		}
+		cube->GetWorldTransform().SetRotation(pDisplay->VGetCameraRotation());
 		pGame->AddActor(cube);
 
 		pDisplay->VAddCubeSceneNode(15.f, cube, WOODBOX_TEXTURE, true);

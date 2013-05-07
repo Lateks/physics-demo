@@ -136,6 +136,7 @@
     <ClCompile Include="Mat4.cpp" />
     <ClCompile Include="Vec3.cpp" />
     <ClCompile Include="Vec4.cpp" />
+    <ClCompile Include="WorldTransformComponent.cpp" />
     <ClCompile Include="XMLPhysicsData.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

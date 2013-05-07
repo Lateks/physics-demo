@@ -12,7 +12,7 @@ namespace GameEngine
 		DemoGameLogic();
 		virtual ~DemoGameLogic();
 		virtual void VUpdate(float deltaSec) override;
-		virtual void VSetupInitialScene() override;
+		virtual bool VSetupInitialScene() override;
 	private:
 		std::unique_ptr<DemoGameLogicData> m_pData;
 	};

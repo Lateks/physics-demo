@@ -104,7 +104,8 @@ namespace GameEngine
 		if (!pDisplay || !pPhysics || !pEvents || !pGameLogic)
 			return false;
 
-		pGameLogic->VSetupInitialScene();
+		if (!pGameLogic->VSetupInitialScene())
+			return false;
 
 		unsigned int timeBegin = pGameData->CurrentTimeMs();
 		unsigned int timeEnd;

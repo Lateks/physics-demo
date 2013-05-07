@@ -1,34 +1,38 @@
-// Disable warnings about fopen. (Would be better to use a more
-// secure method for reading files here, but this was quick to do.)
-#define _CRT_SECURE_NO_WARNINGS
-
 #include "BspLoaderFactory.h"
+#include <fstream>
+#include <string>
+#include <iostream>
 
 namespace GameEngine
 {
+	struct raw_pointer_deleter
+	{
+		void operator()(void* ptr) { free(ptr); }
+	};
+
 	std::unique_ptr<BspLoader> CreateBspLoader(const std::string& bspFilePath)
 	{
 		std::unique_ptr<BspLoader> bspLoader;
-		FILE *file = fopen(bspFilePath.c_str(), "r");
-		if (file)
+		std::ifstream bspFile(bspFilePath, std::ios::binary);
+		if (bspFile.fail())
 		{
-			size_t fileSize;
-			if (fseek(file, 0, SEEK_END) ||
-			   (fileSize = ftell(file)) == EOF ||
-			   fseek(file, 0, SEEK_SET))
-			{
-				std::cerr << "Failed to get file size from " << bspFilePath << "." << std::endl;
-			}
-			else
-			{
-				void *memoryBuffer = malloc(fileSize + 1);
-				fread(memoryBuffer, 1, fileSize, file);
-
-				bspLoader.reset(new BspLoader());
-				bspLoader->loadBSPFile(memoryBuffer);
-			}
-			fclose(file);
+			std::cerr << "Failed to open BSP file in path " << bspFilePath << std::endl;
 		}
+		else
+		{
+			bspFile.seekg(0, std::ios::end);
+			std::size_t fileSize = bspFile.tellg();
+			bspFile.seekg(0, std::ios::beg);
+
+			std::unique_ptr<void, raw_pointer_deleter> memoryBuffer(malloc(fileSize + 1));
+			if (bspFile.is_open())
+			{
+				bspFile.read((char*) memoryBuffer.get(), fileSize);
+			}
+			bspLoader.reset(new BspLoader());
+			bspLoader->loadBSPFile(memoryBuffer.get());
+		}
+		bspFile.close();
 		return bspLoader;
 	}
 }

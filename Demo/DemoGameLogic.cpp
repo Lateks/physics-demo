@@ -199,13 +199,17 @@ namespace GameEngine
 	 * (Also note that the concept of handedness does not affect quaternions
 	 * used for handling rotations.)
 	 */
-	void DemoGameLogic::VSetupInitialScene()
+	bool DemoGameLogic::VSetupInitialScene()
 	{
 		auto pGame = GameData::GetInstance();
 		auto pDisplay = pGame->GetDisplayComponent();
 		auto pPhysics = pGame->GetPhysicsEngine();
 		auto pEventMgr = pGame->GetEventManager();
 		auto pMessages = pDisplay->VGetMessageWindow();
+		assert(pDisplay && pPhysics && pEventMgr && pMessages);
+		if (!pDisplay || !pPhysics || !pEventMgr || !pMessages)
+			return false;
+
 		pMessages->VSetFont("..\\assets\\fontcourier.bmp");
 		pMessages->VSetVisible(true);
 		pMessages->VSetWidth(600);
@@ -217,6 +221,10 @@ namespace GameEngine
 		pGame->AddActor(world);
 		pDisplay->VLoadMap("..\\assets\\map-20kdm2.pk3", "20kdm2.bsp", mapPosition);
 		std::unique_ptr<BspLoader> pBspLoader = CreateBspLoader("..\\assets\\20kdm2.bsp");
+		assert(pBspLoader);
+		if (!pBspLoader)
+			return false;
+
 		pPhysics->VLoadBspMap(*pBspLoader, world);
 
 		pDisplay->VSetCameraPosition(Vec3(80,40,60));
@@ -271,6 +279,8 @@ namespace GameEngine
 		pEventMgr->VRegisterHandler(Events::EventType::EXIT_TRIGGER, eventPrinter);
 		pEventMgr->VRegisterHandler(Events::EventType::COLLISION_EVENT, debugPrinter);
 		pEventMgr->VRegisterHandler(Events::EventType::SEPARATION_EVENT, debugPrinter);
+
+		return true;
 	}
 
 	void DemoGameLogic::VUpdate(float deltaSec)

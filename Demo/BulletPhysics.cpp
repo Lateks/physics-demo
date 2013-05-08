@@ -32,6 +32,8 @@ namespace GameEngine
 		typedef std::pair<const btRigidBody *, const btRigidBody *> CollisionPair;
 		typedef std::set<CollisionPair> CollisionPairs;
 
+		class CollisionObjectConstructionStrategy;
+
 		struct BulletPhysicsData
 		{
 			// CONSTRUCTORS / DESTRUCTORS:
@@ -68,13 +70,10 @@ namespace GameEngine
 			// METHODS:
 			virtual bool VInitializeSystems();
 
-			void AddShape(ActorPtr pActor, btCollisionShape *shape, float volume,
-				IPhysicsEngine::PhysicsObjectType type, const std::string& physicsDensity = "",
-				const std::string& physicsMaterial = "",
-				std::function<float(float friction)> rollingFrictionCalculationStrategy = [] (float friction) { return friction; } );
+			void AddShape(ActorPtr pActor, btCollisionShape *shape,
+				IPhysicsEngine::PhysicsObjectType type, CollisionObjectConstructionStrategy& strategy);
 			void AddDynamicShape(ActorPtr pActor, btCollisionShape *shape,
-				float volume, const std::string& physicsDensity, const std::string& physicsMaterial,
-				std::function<float(float friction)> rollingFrictionCalculationStrategy);
+				CollisionObjectConstructionStrategy& strategy);
 			void AddStaticShape(ActorPtr pActor, btCollisionShape *shape, bool trigger = false);
 
 			void SendNewCollisionEvent(const btPersistentManifold * manifold,
@@ -90,6 +89,97 @@ namespace GameEngine
 			static void BulletInternalTickCallback(btDynamicsWorld * const pWorld, const btScalar timeStep);
 			void HandleCallback();
 		};
+
+		class CollisionObjectConstructionStrategy
+		{
+		public:
+			CollisionObjectConstructionStrategy(std::weak_ptr<BulletPhysicsData> pBulletPhysicsData,
+												const std::string& material,
+												const std::string& density,
+												const std::function<float()>& volumeCalculationStrategy,
+												const std::function<float(float)>& rollingFrictionCalculationStrategy = [] (float friction) { return friction; })
+												: m_pBulletPhysicsData(pBulletPhysicsData),
+												m_materialId(material), m_densityId(density),
+												m_volumeCalculationStrategy(volumeCalculationStrategy),
+												m_rollingFrictionCalculationStrategy(rollingFrictionCalculationStrategy),
+												m_materialDataFetched(false), m_densityFetched(false),
+												m_materialData(0.f, 0.f), m_density(0.f) { }
+			bool HasMaterial() const
+			{
+				return !m_materialId.empty();
+			}
+			bool HasDensity() const
+			{
+				return !m_densityId.empty();
+			}
+			MaterialData& FindMaterial()
+			{
+				if (m_materialDataFetched)
+					return m_materialData;
+
+				m_materialDataFetched = true;
+				if (!HasMaterial() || m_pBulletPhysicsData.expired())
+					return m_materialData;
+
+				auto pBulletPhysics = m_pBulletPhysicsData.lock();
+				return pBulletPhysics->m_physicsMaterialData->LookupMaterial(m_materialId);
+			}
+			float FindDensity()
+			{
+				if (m_densityFetched)
+					return m_density;
+
+				m_densityFetched = true;
+				if (!HasDensity() || m_pBulletPhysicsData.expired())
+				{
+					return 0.f;
+				}
+				auto pBulletPhysics = m_pBulletPhysicsData.lock();
+				return pBulletPhysics->m_physicsMaterialData->LookupDensity(m_densityId);
+			}
+			float CalculateVolume() const
+			{
+				return m_volumeCalculationStrategy();
+			}
+			float CalculateRollingFriction() // this could possibly also take the size of the object into account
+			{
+				return m_rollingFrictionCalculationStrategy(FindMaterial().m_friction);
+			}
+		private:
+			const std::weak_ptr<BulletPhysicsData> m_pBulletPhysicsData;
+			const std::string m_materialId;
+			const std::string m_densityId;
+			const std::function<float()> m_volumeCalculationStrategy;
+			const std::function<float(float)> m_rollingFrictionCalculationStrategy;
+			bool m_materialDataFetched;
+			bool m_densityFetched;
+			MaterialData m_materialData;
+			float m_density;
+		};
+
+		/* The following functions can be used as volume calculation strategies
+		 * for CollisionObjectConstructionStrategy.
+		 */
+		inline float SphereVolume(float radius)
+		{
+			return (4.f/3.f) * 3.14159f * pow(radius, 3);
+		}
+
+		inline float BoxVolume(const btVector3& dimensions)
+		{
+			return dimensions.x() * dimensions.y() * dimensions.z();
+		}
+
+		// Calculates the axis-aligned bounding box of the given shape
+		// and the volume for it.
+		float AABBVolume(btCollisionShape *shape)
+		{
+			btVector3 aabbMin, aabbMax;
+			shape->getAabb(btTransform::getIdentity(), aabbMin, aabbMax);
+
+			const btVector3 dimensions = aabbMax - aabbMin;
+			return BoxVolume(dimensions);
+		}
 
 		BulletPhysics::BulletPhysics(float worldScale) : m_pData(new BulletPhysicsData(worldScale)) { }
 
@@ -165,10 +255,10 @@ namespace GameEngine
 			float btRadius = m_pData->m_worldScaleConst * radius;
 			btSphereShape * const sphereShape = new btSphereShape(btRadius);
 
-			const float sphereVolume = (4.f/3.f) * 3.14159f * pow(btRadius, 3);
-
-			m_pData->AddShape(pActor, sphereShape, sphereVolume, type, density, material,
+			CollisionObjectConstructionStrategy strategy(m_pData,
+				material, density, [btRadius] () { return SphereVolume(btRadius); },
 				[] (float friction) { return friction / 2.f; });
+			m_pData->AddShape(pActor, sphereShape, type, strategy);
 		}
 
 		void BulletPhysics::VAddBox(ActorPtr pActor, const Vec3& dimensions,
@@ -179,9 +269,10 @@ namespace GameEngine
 
 			btVector3 btDimensions = Vec3_to_btVector3(dimensions, m_pData->m_worldScaleConst);
 			btBoxShape * const boxShape = new btBoxShape(0.5f * btDimensions);
-			const float boxVolume = btDimensions.x() * btDimensions.y() * btDimensions.z();
 
-			m_pData->AddShape(pActor, boxShape, boxVolume, type, density, material);
+			CollisionObjectConstructionStrategy strategy(m_pData,
+				material, density, [btDimensions] () { return BoxVolume(btDimensions); });
+			m_pData->AddShape(pActor, boxShape, type, strategy);
 		}
 
 		void BulletPhysics::VAddConvexMesh(ActorPtr pActor, std::vector<Vec3>& vertices,
@@ -197,14 +288,9 @@ namespace GameEngine
 				[&convexShape, this] (Vec3& vertex) { convexShape->addPoint(
 				Vec3_to_btVector3(vertex, this->m_pData->m_worldScaleConst)); });
 
-			// Mass is approximated using an axis-aligned bounding box.
-			btVector3 aabbMin, aabbMax;
-			convexShape->getAabb(btTransform::getIdentity(), aabbMin, aabbMax);
-
-			const btVector3 dimensions = aabbMax - aabbMin;
-			const float aabbVolume = dimensions.x() * dimensions.y() * dimensions.z();
-
-			m_pData->AddShape(pActor, convexShape, aabbVolume, type, density, material);
+			CollisionObjectConstructionStrategy strategy(m_pData,
+				material, density, [convexShape] () { return AABBVolume(convexShape); });
+			m_pData->AddShape(pActor, convexShape, type, strategy);
 		}
 
 		void BulletPhysics::VAddConvexMesh(ActorPtr pActor, std::vector<Vec4>& planeEquations,
@@ -227,14 +313,9 @@ namespace GameEngine
 
 			btConvexHullShape *convexShape = new btConvexHullShape(&(vertices[0].getX()), vertices.size());
 
-			// Mass is approximated using an axis-aligned bounding box.
-			btVector3 aabbMin, aabbMax;
-			convexShape->getAabb(btTransform::getIdentity(), aabbMin, aabbMax);
-
-			const btVector3 dimensions = aabbMax - aabbMin;
-			const float aabbVolume = dimensions.x() * dimensions.y() * dimensions.z();
-
-			m_pData->AddShape(pActor, convexShape, aabbVolume, type, density, material);
+			CollisionObjectConstructionStrategy strategy(m_pData,
+				material, density, [convexShape] () { return AABBVolume(convexShape); });
+			m_pData->AddShape(pActor, convexShape, type, strategy);
 		}
 
 		void BulletPhysics::VLoadBspMap(BspLoader& bspLoad, ActorPtr pActor)
@@ -731,9 +812,8 @@ namespace GameEngine
 			}
 		}
 
-		void BulletPhysicsData::AddShape(ActorPtr pActor, btCollisionShape *shape, float volume,
-			IPhysicsEngine::PhysicsObjectType type, const std::string& physicsDensity,
-			const std::string& physicsMaterial, std::function<float(float friction)> rollingFrictionCalculationStrategy)
+		void BulletPhysicsData::AddShape(ActorPtr pActor, btCollisionShape *shape,
+			IPhysicsEngine::PhysicsObjectType type, CollisionObjectConstructionStrategy& strategy)
 		{
 			assert (pActor);
 			if (!pActor)
@@ -742,14 +822,14 @@ namespace GameEngine
 			switch (type)
 			{
 			case IPhysicsEngine::PhysicsObjectType::DYNAMIC:
-				if (physicsDensity.empty() || physicsMaterial.empty())
+				if (!(strategy.HasDensity() && strategy.HasMaterial()))
 				{
 					std::cerr << "Dynamic objects must be given material and density identifiers." << std::endl;
 					delete shape;
 					return;
 				}
 
-				AddDynamicShape(pActor, shape, volume, physicsDensity, physicsMaterial, rollingFrictionCalculationStrategy);
+				AddDynamicShape(pActor, shape, strategy);
 				break;
 			case IPhysicsEngine::PhysicsObjectType::STATIC:
 				AddStaticShape(pActor, shape);
@@ -763,8 +843,7 @@ namespace GameEngine
 		}
 
 		void BulletPhysicsData::AddDynamicShape(ActorPtr pActor, btCollisionShape *shape,
-			float volume, const std::string& physicsDensity, const std::string& physicsMaterial,
-			std::function<float(float friction)> rollingFrictionCalculationStrategy)
+			CollisionObjectConstructionStrategy& strategy)
 		{
 			assert(pActor);
 			// There can be only one rigid body per (non-static) actor currently in this implementation.
@@ -774,9 +853,9 @@ namespace GameEngine
 
 			btMotionState *motionState = GetMotionStateFrom(pActor->GetWorldTransform());
 
-			MaterialData matData(m_physicsMaterialData->LookupMaterial(physicsMaterial));
-			float density = m_physicsMaterialData->LookupDensity(physicsDensity);
-			float mass = volume * density;
+			MaterialData matData(strategy.FindMaterial());
+			float density = strategy.FindDensity();
+			float mass = strategy.CalculateVolume() * density;
 
 			btVector3 localInertia(0, 0, 0);
 			if (mass > 0.f)
@@ -787,11 +866,14 @@ namespace GameEngine
 
 			rbInfo.m_restitution = matData.m_restitution;
 			rbInfo.m_friction = matData.m_friction; // this is the sliding friction (as opposed to rolling friction)
-			rbInfo.m_rollingFriction = rollingFrictionCalculationStrategy(matData.m_friction);
+			rbInfo.m_rollingFriction = strategy.CalculateRollingFriction();
 
 			btRigidBody * const body = new btRigidBody(rbInfo);
-			body->setAnisotropicFriction(shape->getAnisotropicRollingFrictionDirection(),
-				btCollisionObject::CF_ANISOTROPIC_ROLLING_FRICTION);
+			if (body->getRollingFriction() > 0.f)
+			{
+				body->setAnisotropicFriction(shape->getAnisotropicRollingFrictionDirection(),
+					btCollisionObject::CF_ANISOTROPIC_ROLLING_FRICTION);
+			}
 
 			m_pDynamicsWorld->addRigidBody(body);
 

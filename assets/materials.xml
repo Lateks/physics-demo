@@ -1,5 +1,6 @@
 ﻿<Physics>
     <PhysicsMaterials>
+	<Tarmac restitution="0.2" friction="1.0"/>
         <PlayDough restitution="0.05" friction="0.9"/>
         <Normal restitution="0.25" friction="0.5"/>
         <Bouncy restitution = "0.95" friction = "0.7"/>

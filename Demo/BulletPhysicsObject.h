@@ -1,6 +1,7 @@
 #pragma once
 
 #include "enginefwd.h"
+#include "IPhysicsEngine.h"
 #include "BulletPhysicsConstraint.h"
 #include <btBulletCollisionCommon.h>
 #include <btBulletDynamicsCommon.h>
@@ -14,15 +15,9 @@ namespace GameEngine
 		class BulletPhysicsObject
 		{
 		public:
-			enum class PhysicsType
-			{
-				STATIC,
-				DYNAMIC,
-				KINEMATIC,
-				TRIGGER // is also static
-			};
+			typedef IPhysicsEngine::PhysicsObjectType ObjectType;
 
-			BulletPhysicsObject(ActorID actorId, PhysicsType type = PhysicsType::DYNAMIC)
+			BulletPhysicsObject(ActorID actorId, ObjectType type = ObjectType::DYNAMIC)
 				: m_type(type), m_actorId(actorId) { }
 
 			ActorID GetActorId()
@@ -30,29 +25,29 @@ namespace GameEngine
 				return m_actorId;
 			}
 
-			void SetPhysicsType(PhysicsType type)
+			void SetPhysicsType(ObjectType type)
 			{
 				m_type = type;
 			}
 
 			bool IsDynamic() const
 			{
-				return m_type == PhysicsType::DYNAMIC;
+				return m_type == ObjectType::DYNAMIC;
 			}
 
 			bool IsKinematic() const
 			{
-				return m_type == PhysicsType::KINEMATIC;
+				return m_type == ObjectType::KINEMATIC;
 			}
 
 			bool IsTrigger() const
 			{
-				return m_type == PhysicsType::TRIGGER;
+				return m_type == ObjectType::TRIGGER;
 			}
 
 			bool IsStatic() const
 			{
-				return m_type == PhysicsType::TRIGGER || m_type == PhysicsType::STATIC;
+				return m_type == ObjectType::TRIGGER || m_type == ObjectType::STATIC;
 			}
 
 			const std::vector<btRigidBody*>& GetRigidBodies() const
@@ -82,7 +77,7 @@ namespace GameEngine
 			}
 		private:
 			static ConstraintID constraintId;
-			PhysicsType m_type;
+			ObjectType m_type;
 			ActorID m_actorId;
 			std::vector<btRigidBody*> m_rigidBodies;
 			std::map<ConstraintID, std::shared_ptr<BulletPhysicsConstraint>> m_pConstraints;

@@ -28,7 +28,7 @@ namespace GameEngine
 			virtual void VAddConvexMesh(ActorPtr pActor, std::vector<Vec4>& planeEquations,
 				PhysicsObjectType type, const std::string& density = "", const std::string& material = "") override;
 
-			virtual void VLoadBspMap(BspLoader& bspLoad, ActorPtr pActor) override;
+			virtual void VLoadBspMap(BspLoader& bspLoad, ActorPtr pActor, const std::string& material) override;
 
 			virtual void VRemoveActor(ActorID id) override;
 

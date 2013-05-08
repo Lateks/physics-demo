@@ -48,7 +48,7 @@ namespace GameEngine
 				PhysicsObjectType type, const std::string& density = "", const std::string& material = "") = 0;
 
 			// Adding e.g. Quake maps from bsp files.
-			virtual void VLoadBspMap(BspLoader& bspLoad, ActorPtr pActor) = 0;
+			virtual void VLoadBspMap(BspLoader& bspLoad, ActorPtr pActor, const std::string& material) = 0;
 
 			virtual void VRemoveActor(ActorID id) = 0;
 

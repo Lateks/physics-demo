@@ -77,7 +77,15 @@ namespace GameEngine
 					(istreambuf_iterator<char>()));
 
 				xml_document<> doc;
-				doc.parse<0>(const_cast<char*>(matData.c_str()));
+				try
+				{
+					doc.parse<0>(const_cast<char*>(matData.c_str()));
+				}
+				catch(rapidxml::parse_error &e)
+				{
+					std::cerr << "XML parse error: " << e.what() << std::endl;
+					return;
+				}
 				xml_node<> *root = doc.first_node();
 
 				xml_node<> *materialNode = root->first_node("PhysicsMaterials");

@@ -61,6 +61,7 @@ namespace GameEngine
 			 */
 			std::map<ActorID, std::shared_ptr<BulletPhysicsObject>> m_actorToBulletPhysicsObjectMap;
 			std::map<const btRigidBody*, ActorID> m_rigidBodyToActorMap;
+			std::map<IPhysicsEngine::PhysicsObjectType, int> m_collisionFlags;
 
 			std::shared_ptr<BulletPhysicsObject> GetPhysicsObject(ActorID id) const;
 			ActorID GetActorID(const btRigidBody *pBody) const;
@@ -72,18 +73,21 @@ namespace GameEngine
 
 			void AddShape(ActorPtr pActor, btCollisionShape *shape,
 				IPhysicsEngine::PhysicsObjectType type, CollisionObjectConstructionStrategy& strategy);
-			void AddDynamicShape(ActorPtr pActor, btCollisionShape *shape,
-				CollisionObjectConstructionStrategy& strategy);
-			void AddStaticShape(ActorPtr pActor, btCollisionShape *shape, bool trigger = false);
+			void AddSingleBodyShape(ActorPtr pActor, btCollisionShape *shape,
+				CollisionObjectConstructionStrategy& strategy, IPhysicsEngine::PhysicsObjectType type);
+			void AddMultiBodyShape(ActorPtr pActor, btCollisionShape *shape,
+				CollisionObjectConstructionStrategy& strategy, IPhysicsEngine::PhysicsObjectType type);
 
 			void SendNewCollisionEvent(const btPersistentManifold * manifold,
-			const btRigidBody * pBody1, const btRigidBody * pBody2);
+				const btRigidBody * pBody1, const btRigidBody * pBody2);
 			void SendSeparationEvent(const btRigidBody * pBody1, const btRigidBody * pBody2);
 			void RemoveCollisionObject(btCollisionObject *obj);
 			void SetupSystems();
 			void CleanUpRigidBodies();
 			void HandleNewCollisions(CollisionPairs& currentTickCollisions);
 			btMotionState *GetMotionStateFrom(const WorldTransformComponent& transform);
+			void CreateRigidBody(ActorPtr pActor, btCollisionShape *shape,
+				CollisionObjectConstructionStrategy& strategy, int collisionFlags = 0);
 
 			// Bullet callback handling.
 			static void BulletInternalTickCallback(btDynamicsWorld * const pWorld, const btScalar timeStep);
@@ -97,7 +101,7 @@ namespace GameEngine
 												const std::string& material,
 												const std::string& density,
 												const std::function<float()>& volumeCalculationStrategy,
-												const std::function<float(float)>& rollingFrictionCalculationStrategy = [] (float friction) { return friction; })
+												const std::function<float(float)>& rollingFrictionCalculationStrategy = [] (float friction) { return friction / 3.f; })
 												: m_pBulletPhysicsData(pBulletPhysicsData),
 												m_materialId(material), m_densityId(density),
 												m_volumeCalculationStrategy(volumeCalculationStrategy),
@@ -114,28 +118,29 @@ namespace GameEngine
 			}
 			MaterialData& FindMaterial()
 			{
-				if (m_materialDataFetched)
-					return m_materialData;
-
-				m_materialDataFetched = true;
-				if (!HasMaterial() || m_pBulletPhysicsData.expired())
-					return m_materialData;
-
-				auto pBulletPhysics = m_pBulletPhysicsData.lock();
-				return pBulletPhysics->m_physicsMaterialData->LookupMaterial(m_materialId);
+				if (!m_materialDataFetched)
+				{
+					m_materialDataFetched = true;
+					if (HasMaterial() && !m_pBulletPhysicsData.expired())
+					{
+						auto pBulletPhysics = m_pBulletPhysicsData.lock();
+						m_materialData = pBulletPhysics->m_physicsMaterialData->LookupMaterial(m_materialId);
+					}
+				}
+				return m_materialData;
 			}
 			float FindDensity()
 			{
-				if (m_densityFetched)
-					return m_density;
-
-				m_densityFetched = true;
-				if (!HasDensity() || m_pBulletPhysicsData.expired())
+				if (!m_densityFetched)
 				{
-					return 0.f;
+					m_densityFetched = true;
+					if (HasDensity() && !m_pBulletPhysicsData.expired())
+					{
+						auto pBulletPhysics = m_pBulletPhysicsData.lock();
+						m_density = pBulletPhysics->m_physicsMaterialData->LookupDensity(m_densityId);
+					}
 				}
-				auto pBulletPhysics = m_pBulletPhysicsData.lock();
-				return pBulletPhysics->m_physicsMaterialData->LookupDensity(m_densityId);
+				return m_density;
 			}
 			float CalculateVolume() const
 			{
@@ -257,7 +262,7 @@ namespace GameEngine
 
 			CollisionObjectConstructionStrategy strategy(m_pData,
 				material, density, [btRadius] () { return SphereVolume(btRadius); },
-				[] (float friction) { return friction / 2.f; });
+				[] (float friction) { return friction / 5.f; });
 			m_pData->AddShape(pActor, sphereShape, type, strategy);
 		}
 
@@ -318,16 +323,16 @@ namespace GameEngine
 			m_pData->AddShape(pActor, convexShape, type, strategy);
 		}
 
-		void BulletPhysics::VLoadBspMap(BspLoader& bspLoad, ActorPtr pActor)
+		void BulletPhysics::VLoadBspMap(BspLoader& bspLoad, ActorPtr pActor, const std::string& material)
 		{
 			if (!pActor)
 				return;
 
 			Utils::ConvertBsp(bspLoad,
-				[this, pActor] (std::vector<Vec4> planeEquations)
+				[this, pActor, &material] (std::vector<Vec4> planeEquations)
 			{
 				this->VAddConvexMesh(pActor, planeEquations,
-					IPhysicsEngine::PhysicsObjectType::STATIC);
+					IPhysicsEngine::PhysicsObjectType::STATIC, "", material);
 			});
 		}
 		
@@ -665,7 +670,7 @@ namespace GameEngine
 		bool BulletPhysicsData::VInitializeSystems()
 		{
 			m_physicsMaterialData.reset(new XMLPhysicsData());
-			m_physicsMaterialData->LoadDataFromXML("..\\assets\\materials.xml");
+			m_physicsMaterialData->LoadDataFromXML("..\\assets\\materials.xml"); // TODO: get this as a parameter
 
 			SetupSystems();
 
@@ -678,6 +683,11 @@ namespace GameEngine
 
 			m_pDynamicsWorld->setInternalTickCallback(BulletInternalTickCallback);
 			m_pDynamicsWorld->setWorldUserInfo(this);
+
+			m_collisionFlags[IPhysicsEngine::PhysicsObjectType::DYNAMIC] = 0;
+			m_collisionFlags[IPhysicsEngine::PhysicsObjectType::STATIC] = btRigidBody::CF_STATIC_OBJECT;
+			m_collisionFlags[IPhysicsEngine::PhysicsObjectType::TRIGGER] =
+				btRigidBody::CF_STATIC_OBJECT | btRigidBody::CF_NO_CONTACT_RESPONSE;
 
 			return true;
 		}
@@ -829,34 +839,55 @@ namespace GameEngine
 					return;
 				}
 
-				AddDynamicShape(pActor, shape, strategy);
+				AddSingleBodyShape(pActor, shape, strategy, type);
 				break;
 			case IPhysicsEngine::PhysicsObjectType::STATIC:
-				AddStaticShape(pActor, shape);
+				AddMultiBodyShape(pActor, shape, strategy, type);
 				break;
 			case IPhysicsEngine::PhysicsObjectType::TRIGGER:
-				AddStaticShape(pActor, shape, true);
+				AddSingleBodyShape(pActor, shape, strategy, type);
 				break;
 			default: // Note: Kinematic objects are not supported.
 				std::cerr << "Unsupported physics object type given." << std::endl;
 			}
 		}
 
-		void BulletPhysicsData::AddDynamicShape(ActorPtr pActor, btCollisionShape *shape,
-			CollisionObjectConstructionStrategy& strategy)
+		void BulletPhysicsData::AddSingleBodyShape(ActorPtr pActor, btCollisionShape *shape,
+			CollisionObjectConstructionStrategy& strategy, IPhysicsEngine::PhysicsObjectType type)
 		{
-			assert(pActor);
-			// There can be only one rigid body per (non-static) actor currently in this implementation.
 			ActorID id = pActor->GetID();
 			assert(m_actorToBulletPhysicsObjectMap.find(id) == m_actorToBulletPhysicsObjectMap.end());
-			m_actorToBulletPhysicsObjectMap[id].reset(new BulletPhysicsObject(id)); // creates a dynamic object
+			m_actorToBulletPhysicsObjectMap[id].reset(new BulletPhysicsObject(id, type));
 
-			btMotionState *motionState = GetMotionStateFrom(pActor->GetWorldTransform());
+			CreateRigidBody(pActor, shape, strategy, m_collisionFlags[type]);
+		}
 
+		// Note: (currently) in this implementation, only static non-trigger objects may have
+		// several rigid bodies.
+		void BulletPhysicsData::AddMultiBodyShape(ActorPtr pActor, btCollisionShape *shape,
+			CollisionObjectConstructionStrategy& strategy, IPhysicsEngine::PhysicsObjectType type)
+		{
+			assert(type == IPhysicsEngine::PhysicsObjectType::STATIC);
+			ActorID id = pActor->GetID();
+
+			auto objectIt = m_actorToBulletPhysicsObjectMap.find(id);
+			if (objectIt == m_actorToBulletPhysicsObjectMap.end())
+			{
+				m_actorToBulletPhysicsObjectMap[id].reset(
+					new BulletPhysicsObject(id, type));
+			}
+
+			CreateRigidBody(pActor, shape, strategy, m_collisionFlags[type]);
+		}
+
+		void BulletPhysicsData::CreateRigidBody(ActorPtr pActor, btCollisionShape *shape,
+			CollisionObjectConstructionStrategy& strategy, int collisionFlags)
+		{
 			MaterialData matData(strategy.FindMaterial());
 			float density = strategy.FindDensity();
 			float mass = strategy.CalculateVolume() * density;
 
+			btMotionState *motionState = GetMotionStateFrom(pActor->GetWorldTransform());
 			btVector3 localInertia(0, 0, 0);
 			if (mass > 0.f)
 				shape->calculateLocalInertia(mass, localInertia);
@@ -868,67 +899,20 @@ namespace GameEngine
 			rbInfo.m_friction = matData.m_friction; // this is the sliding friction (as opposed to rolling friction)
 			rbInfo.m_rollingFriction = strategy.CalculateRollingFriction();
 
-			btRigidBody * const body = new btRigidBody(rbInfo);
-			if (body->getRollingFriction() > 0.f)
+			btRigidBody * const pBody = new btRigidBody(rbInfo);
+			if (pBody->getRollingFriction() > 0.f)
 			{
-				body->setAnisotropicFriction(shape->getAnisotropicRollingFrictionDirection(),
+				pBody->setAnisotropicFriction(shape->getAnisotropicRollingFrictionDirection(),
 					btCollisionObject::CF_ANISOTROPIC_ROLLING_FRICTION);
 			}
 
-			m_pDynamicsWorld->addRigidBody(body);
+			pBody->setCollisionFlags(pBody->getCollisionFlags() | collisionFlags);
 
-			m_actorToBulletPhysicsObjectMap[id]->AddRigidBody(body);
-			m_rigidBodyToActorMap[body] = id;
-		}
+			m_pDynamicsWorld->addRigidBody(pBody);
 
-		void BulletPhysicsData::AddStaticShape(
-			ActorPtr pActor, btCollisionShape *shape, bool isTrigger)
-		{
-			assert(pActor);
 			ActorID id = pActor->GetID();
-
-			// Triggers may have only one rigid body but other static actors may have several.
-			auto objectIt = m_actorToBulletPhysicsObjectMap.find(id);
-			assert(!isTrigger || objectIt == m_actorToBulletPhysicsObjectMap.end());
-
-			if (objectIt == m_actorToBulletPhysicsObjectMap.end())
-			{
-				m_actorToBulletPhysicsObjectMap[id].reset(new BulletPhysicsObject(id,
-					isTrigger
-					? BulletPhysicsObject::PhysicsType::TRIGGER
-					: BulletPhysicsObject::PhysicsType::STATIC));
-			}
-
-			btMotionState *motionState = GetMotionStateFrom(pActor->GetWorldTransform());
-
-			// Objects that have 0 mass are regarded as immovable by Bullet.
-			btScalar const mass = 0;
-			btRigidBody::btRigidBodyConstructionInfo rbInfo(
-				mass, motionState, shape, btVector3(0, 0, 0));
-			btRigidBody * const body = new btRigidBody(rbInfo);
-
-			m_pDynamicsWorld->addRigidBody(body);
-			body->setCollisionFlags(body->getCollisionFlags() | btRigidBody::CF_STATIC_OBJECT);
-
-			if (isTrigger) // triggers may intersect with other objects (this causes a trigger related event, not a collision event)
-			{
-				body->setCollisionFlags(
-					body->getCollisionFlags() | btRigidBody::CF_NO_CONTACT_RESPONSE);
-			}
-			else
-			{
-				// Set the same restitution, friction and rolling friction for all static objects.
-				// This could possibly be based on the the material of the static object.
-				// (Can this data be parsed from the bsp file?)
-				body->setRestitution(0.2f);
-				body->setFriction(1.f);
-				body->setRollingFriction(0.2f);
-				body->setAnisotropicFriction(shape->getAnisotropicRollingFrictionDirection(),
-					btCollisionObject::CF_ANISOTROPIC_ROLLING_FRICTION);
-			}
-
-			m_actorToBulletPhysicsObjectMap[id]->AddRigidBody(body);
-			m_rigidBodyToActorMap[body] = id;
+			m_actorToBulletPhysicsObjectMap[id]->AddRigidBody(pBody);
+			m_rigidBodyToActorMap[pBody] = id;
 		}
 
 		btMotionState *BulletPhysicsData::GetMotionStateFrom(const WorldTransformComponent& worldTransform)

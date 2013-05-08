@@ -172,7 +172,7 @@ namespace GameEngine
 
 		pDisplay->VAddCubeSceneNode(15.f, cube, WOODBOX_TEXTURE, true);
 		auto physics = pGame->GetPhysicsEngine();
-		physics->VAddBox(Vec3(15.f, 15.f, 15.f), cube, "Titanium", "Bouncy");
+		physics->VAddBox(cube, Vec3(15.f, 15.f, 15.f), Physics::IPhysicsEngine::PhysicsObjectType::DYNAMIC, "Titanium", "Bouncy");
 
 		Vec3 throwDirection = throwTowards - cameraPos;
 
@@ -249,18 +249,18 @@ namespace GameEngine
 		auto ball = std::make_shared<GameActor>(Vec3(0, 50, 60));
 		pGame->AddActor(ball);
 		pDisplay->VAddSphereSceneNode(10.f, ball, MUD_TEXTURE, true);
-		pPhysics->VAddSphere(10.f, ball, "Titanium", "Bouncy");
+		pPhysics->VAddSphere(ball, 10.f, Physics::IPhysicsEngine::PhysicsObjectType::DYNAMIC, "Titanium", "Bouncy");
 
 		auto cube = std::make_shared<GameActor>(Vec3(0, 80, 60));
 		pGame->AddActor(cube);
 		pDisplay->VAddCubeSceneNode(25.f, cube, WOODBOX_TEXTURE, true);
-		pPhysics->VAddBox(Vec3(25.f, 25.f, 25.f), cube, "manganese", "Normal");
+		pPhysics->VAddBox(cube, Vec3(25.f, 25.f, 25.f), Physics::IPhysicsEngine::PhysicsObjectType::DYNAMIC, "manganese", "Normal");
 
 		// Add a trigger node, rendered as a wireframe cube.
 		auto trigger = std::make_shared<GameActor>(Vec3(-100, 125, 450));
 		pGame->AddActor(trigger);
 		pDisplay->VAddCubeSceneNode(125.f, trigger, 0);
-		pPhysics->VCreateTrigger(trigger, 125.f);
+		pPhysics->VAddBox(trigger, Vec3(125.f, 125.f, 125.f), Physics::IPhysicsEngine::PhysicsObjectType::TRIGGER);
 
 		// Create an event handler to print out messages when a trigger event is detected.
 		Events::EventHandlerPtr eventPrinter(new std::function<void(Events::EventPtr)>

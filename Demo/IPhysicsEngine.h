@@ -16,6 +16,14 @@ namespace GameEngine
 		class IPhysicsEngine
 		{
 		public:
+			enum class PhysicsObjectType
+			{
+				DYNAMIC,
+				STATIC,
+				TRIGGER,
+				KINEMATIC
+			};
+
 			virtual ~IPhysicsEngine() { }
 
 			// Initialization routines.
@@ -25,19 +33,19 @@ namespace GameEngine
 			virtual void VUpdateSimulation(float deltaSec) = 0;
 			virtual void VSyncScene() = 0;
 
-			// Initializing different physics world objects.
-			virtual void VAddSphere(float radius, ActorPtr pActor,
-				const std::string& density, const std::string& material) = 0;
-			virtual void VAddBox(const Vec3& dimensions, ActorPtr pActor,
-				const std::string& density, const std::string& material) = 0;
-			virtual void VAddConvexMesh(std::vector<Vec3>& vertices,
-				ActorPtr pActor, const std::string& density, const std::string& material) = 0;
-
-			// These are used to add e.g. map parts and other static entities.
-			virtual void VAddConvexStaticColliderMesh(std::vector<Vec3>& vertices, ActorPtr pActor) = 0;
-			virtual void VAddConvexStaticColliderMesh(std::vector<Vec4>& planeEquations, ActorPtr pActor) = 0;
-
-			virtual void VCreateTrigger(ActorPtr gameActor, const float dim) = 0;
+			/* Initializing different physics world objects.
+			 * Density and material strings are used only if the PhysicsObjectType is
+			 * dynamic. (Would possibly be used for kinematic objects as well but these
+			 * are not actually implemented in the BulletPhysics class at the moment.)
+			 */
+			virtual void VAddSphere(ActorPtr pActor, float radius, PhysicsObjectType type,
+				const std::string& density = "", const std::string& material = "") = 0;
+			virtual void VAddBox(ActorPtr pActor, const Vec3& dimensions, PhysicsObjectType type,
+				const std::string& density = "", const std::string& material = "") = 0;
+			virtual void VAddConvexMesh(ActorPtr pActor, std::vector<Vec3>& vertices,
+				PhysicsObjectType type, const std::string& density = "", const std::string& material = "") = 0;
+			virtual void VAddConvexMesh(ActorPtr pActor, std::vector<Vec4>& planeEquations,
+				PhysicsObjectType type, const std::string& density = "", const std::string& material = "") = 0;
 
 			// Adding e.g. Quake maps from bsp files.
 			virtual void VLoadBspMap(BspLoader& bspLoad, ActorPtr pActor) = 0;

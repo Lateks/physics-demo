@@ -19,15 +19,14 @@ namespace GameEngine
 			virtual void VSyncScene() override;
 			virtual void VUpdateSimulation(float deltaSec) override;
 
-			virtual void VAddSphere(float radius, ActorPtr pActor,
-				const std::string& density, const std::string& material) override;
-			virtual void VAddBox(const Vec3& dimensions, ActorPtr pActor,
-				const std::string& density, const std::string& material) override;
-			virtual void VAddConvexMesh(std::vector<Vec3>& vertices,
-				ActorPtr pActor, const std::string& density, const std::string& material) override;
-			virtual void VAddConvexStaticColliderMesh(std::vector<Vec3>& vertices, ActorPtr pActor) override;
-			virtual void VAddConvexStaticColliderMesh(std::vector<Vec4>& planeEquations, ActorPtr pActor) override;
-			virtual void VCreateTrigger(ActorPtr pActor, const float dim) override;
+			virtual void VAddSphere(ActorPtr pActor, float radius, PhysicsObjectType type,
+				const std::string& density = "", const std::string& material = "") override;
+			virtual void VAddBox(ActorPtr pActor, const Vec3& dimensions, PhysicsObjectType type,
+				const std::string& density = "", const std::string& material = "") override;
+			virtual void VAddConvexMesh(ActorPtr pActor, std::vector<Vec3>& vertices,
+				PhysicsObjectType type, const std::string& density = "", const std::string& material = "") override;
+			virtual void VAddConvexMesh(ActorPtr pActor, std::vector<Vec4>& planeEquations,
+				PhysicsObjectType type, const std::string& density = "", const std::string& material = "") override;
 
 			virtual void VLoadBspMap(BspLoader& bspLoad, ActorPtr pActor) override;
 

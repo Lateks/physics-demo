@@ -9,12 +9,9 @@ namespace GameEngine
 
 	class GameData
 	{
-	private:
-		GameData();
-		GameData(const GameData&);
-		GameData& operator=(const GameData&);
-		std::unique_ptr<GameDataImpl> m_pData;
 	public:
+		friend class Game;
+
 		static std::shared_ptr<GameData> GetInstance();
 		~GameData();
 
@@ -22,24 +19,26 @@ namespace GameEngine
 		unsigned int CurrentTimeMs();
 
 		void AddActor(std::shared_ptr<GameActor> pActor);
+
 		std::shared_ptr<GameActor> GetActor(ActorID id);
+		std::shared_ptr<IGameLogic> GetInputHandler() const;
+		std::shared_ptr<Physics::IPhysicsEngine> GetPhysicsEngine() const;
+		std::shared_ptr<Display::IInputState> GetInputStateHandler() const;
+		std::shared_ptr<Display::IDisplay> GetDisplayComponent() const;
+		std::shared_ptr<ITimer> GetTimer() const;
+		std::shared_ptr<Events::IEventManager> GetEventManager() const;
+	private:
+		GameData();
+		GameData(const GameData&);
+		GameData& operator=(const GameData&);
 
 		void SetInputHandler(std::shared_ptr<IGameLogic> pInputHandler);
-		std::shared_ptr<IGameLogic> GetInputHandler() const;
-
 		void SetPhysicsEngine(std::shared_ptr<Physics::IPhysicsEngine> pPhysics);
-		std::shared_ptr<Physics::IPhysicsEngine> GetPhysicsEngine() const;
-
 		void SetInputStateHandler(std::shared_ptr<Display::IInputState> pInputState);
-		std::shared_ptr<Display::IInputState> GetInputStateHandler() const;
-
 		void SetDisplayComponent(std::shared_ptr<Display::IDisplay> pDisplay);
-		std::shared_ptr<Display::IDisplay> GetDisplayComponent() const;
-
 		void SetTimer(std::shared_ptr<ITimer> pTimer);
-		std::shared_ptr<ITimer> GetTimer() const;
-
 		void SetEventManager(std::shared_ptr<Events::IEventManager> pManager);
-		std::shared_ptr<Events::IEventManager> GetEventManager() const;
+
+		std::unique_ptr<GameDataImpl> m_pData;
 	};
 }

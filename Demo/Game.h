@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Demo
+namespace GameEngine
 {
 	class Game
 	{
@@ -8,5 +8,7 @@ namespace Demo
 		Game();
 		virtual ~Game();
 		bool Run();
+	private:
+		bool Setup();
 	};
 }

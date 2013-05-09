@@ -12,9 +12,7 @@
 #include <iostream>
 #include <memory>
 
-using namespace GameEngine;
-
-namespace Demo
+namespace GameEngine
 {
 	inline void PrintError(const std::string& message)
 	{
@@ -22,12 +20,12 @@ namespace Demo
 	}
 
 	// Sets up the GameData singleton.
-	bool Setup()
+	bool Game::Setup()
 	{
 		auto pGameData = GameData::GetInstance();
 
 		// Setup the display component (rendering and input handling).
-		auto pRenderer = CreateRenderer();
+		auto pRenderer = Demo::CreateRenderer();
 		if (!pRenderer)
 		{
 			PrintError("Failed to create rendering device.");
@@ -48,7 +46,7 @@ namespace Demo
 		pGameData->SetDisplayComponent(pRenderer);
 
 		// Setup timer.
-		auto pTimer = CreateTimer();
+		auto pTimer = Demo::CreateTimer();
 		if (!pTimer)
 		{
 			PrintError("Failed to create a timer.");
@@ -57,7 +55,7 @@ namespace Demo
 		pGameData->SetTimer(pTimer);
 
 		// Setup the main game logic handler (handles inputs etc.).
-		auto pGameLogic = CreateDemoGameLogic();
+		auto pGameLogic = Demo::CreateDemoGameLogic();
 		if (!pGameLogic)
 		{
 			PrintError("Failed to create demo input handler.");
@@ -66,7 +64,7 @@ namespace Demo
 		pGameData->SetInputHandler(pGameLogic);
 
 		// Setup event manager.
-		auto pEventManager = CreateEventManager();
+		auto pEventManager = Demo::CreateEventManager();
 		if (!pEventManager)
 		{
 			PrintError("Failed to create an event manager.");
@@ -76,7 +74,7 @@ namespace Demo
 
 		// Setup physics. World is scaled by the constant given as parameter
 		// (compared to the size of the rendered world).
-		auto pPhysics = CreatePhysicsEngine(0.05f);
+		auto pPhysics = Demo::CreatePhysicsEngine(0.05f);
 		if (!pPhysics || !pPhysics->VInitEngine("..\\assets\\materials.xml"))
 		{
 			PrintError("Failed to initialize physics engine.");

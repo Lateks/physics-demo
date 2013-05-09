@@ -2,10 +2,11 @@
 
 #include "enginefwd.h"
 
-namespace GameEngine
+namespace Demo
 {
-	std::unique_ptr<Display::IDisplay> CreateRenderer();
-	std::unique_ptr<Physics::IPhysicsEngine> CreatePhysicsEngine(float worldScale = 1.f);
-	std::unique_ptr<ITimer> CreateTimer();
-	std::unique_ptr<Events::IEventManager> CreateEventManager();
+	std::shared_ptr<GameEngine::Display::IDisplay> CreateRenderer();
+	std::shared_ptr<GameEngine::Physics::IPhysicsEngine> CreatePhysicsEngine(float worldScale = 1.f);
+	std::shared_ptr<GameEngine::ITimer> CreateTimer();
+	std::shared_ptr<GameEngine::Events::IEventManager> CreateEventManager();
+	std::shared_ptr<GameEngine::IGameLogic> CreateDemoGameLogic();
 }

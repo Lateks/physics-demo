@@ -3,28 +3,30 @@
 #include "IrrlichtDisplay.h"
 #include "GameData.h"
 #include "EventManager.h"
+#include "DemoGameLogic.h"
 
-namespace GameEngine
+using namespace GameEngine;
+
+namespace Demo
 {
-	std::unique_ptr<Display::IDisplay> CreateRenderer()
+	std::shared_ptr<Display::IDisplay> CreateRenderer()
 	{
-		return std::unique_ptr<Display::IDisplay>(new Display::IrrlichtDisplay());
+		return std::make_shared<Display::IrrlichtDisplay>();
 	}
 
-	std::unique_ptr<Events::IEventManager> CreateEventManager()
+	std::shared_ptr<Events::IEventManager> CreateEventManager()
 	{
-		return std::unique_ptr<Events::IEventManager>(new Events::EventManager());
+		return std::make_shared<Events::EventManager>();
 	}
 
-	std::unique_ptr<Physics::IPhysicsEngine> CreatePhysicsEngine(float worldScale)
+	std::shared_ptr<Physics::IPhysicsEngine> CreatePhysicsEngine(float worldScale)
 	{
-		std::unique_ptr<Physics::IPhysicsEngine> physics(new Physics::BulletPhysics(worldScale));
-		return physics;
+		return std::make_shared<Physics::BulletPhysics>(worldScale);
 	}
 
-	std::unique_ptr<ITimer> CreateTimer()
+	std::shared_ptr<ITimer> CreateTimer()
 	{
-		std::unique_ptr<ITimer> timer;
+		std::shared_ptr<ITimer> timer;
 		auto pDisplay = GameEngine::GameData::GetInstance()->GetDisplayComponent();
 
 		if (pDisplay)
@@ -37,5 +39,10 @@ namespace GameEngine
 			}
 		}
 		return timer;
+	}
+
+	std::shared_ptr<GameEngine::IGameLogic> CreateDemoGameLogic()
+	{
+		return std::make_shared<Demo::DemoGameLogic>();
 	}
 }

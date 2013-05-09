@@ -203,9 +203,6 @@
     <ClCompile Include="DemoGameLogic.cpp">
       <Filter>Source Files\BaseGameLogic</Filter>
     </ClCompile>
-    <ClCompile Include="IGameLogic.cpp">
-      <Filter>Source Files\BaseGameLogic</Filter>
-    </ClCompile>
     <ClCompile Include="EngineComponentFactories.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

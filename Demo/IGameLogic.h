@@ -13,8 +13,6 @@ namespace GameEngine
 		virtual void VUpdate(float deltaSec) = 0;
 		virtual bool VSetupInitialScene() = 0;
 	};
-
-	std::unique_ptr<IGameLogic> CreateDemoGameLogic();
 }
 
 #endif

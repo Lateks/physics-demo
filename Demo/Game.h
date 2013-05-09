@@ -1,6 +1,6 @@
 #pragma once
 
-namespace GameEngine
+namespace Demo
 {
 	class Game
 	{

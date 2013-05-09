@@ -12,13 +12,10 @@
 #include <iostream>
 #include <memory>
 
-namespace GameEngine
-{
-	using Display::IDisplay;
-	using Physics::IPhysicsEngine;
-	using Events::IEventManager;
-	using Events::EventManager;
+using namespace GameEngine;
 
+namespace Demo
+{
 	inline void PrintError(const std::string& message)
 	{
 		std::cerr << message << std::endl;
@@ -30,7 +27,7 @@ namespace GameEngine
 		auto pGameData = GameData::GetInstance();
 
 		// Setup the display component (rendering and input handling).
-		std::unique_ptr<IDisplay> pRenderer(CreateRenderer());
+		auto pRenderer = CreateRenderer();
 		if (!pRenderer)
 		{
 			PrintError("Failed to create rendering device.");
@@ -48,45 +45,44 @@ namespace GameEngine
 		pRenderer->VHideCursor();
 
 		pGameData->SetInputStateHandler(pRenderer->VGetInputState());
-		pGameData->SetDisplayComponent(std::shared_ptr<Display::IDisplay>(pRenderer.release()));
+		pGameData->SetDisplayComponent(pRenderer);
 
 		// Setup timer.
-		std::unique_ptr<ITimer> pTimer(CreateTimer());
+		auto pTimer = CreateTimer();
 		if (!pTimer)
 		{
 			PrintError("Failed to create a timer.");
 			return false;
 		}
-		pGameData->SetTimer(std::shared_ptr<ITimer>(pTimer.release()));
+		pGameData->SetTimer(pTimer);
 
 		// Setup the main game logic handler (handles inputs etc.).
-		std::unique_ptr<IGameLogic> pGameLogic(CreateDemoGameLogic());
+		auto pGameLogic = CreateDemoGameLogic();
 		if (!pGameLogic)
 		{
 			PrintError("Failed to create demo input handler.");
 			return false;
 		}
-		pGameData->SetInputHandler(std::shared_ptr<IGameLogic>(pGameLogic.release()));
+		pGameData->SetInputHandler(pGameLogic);
 
 		// Setup event manager.
-		std::unique_ptr<IEventManager> pEventManager(CreateEventManager());
+		auto pEventManager = CreateEventManager();
 		if (!pEventManager)
 		{
 			PrintError("Failed to create an event manager.");
 			return false;
 		}
-		pGameData->SetEventManager(std::shared_ptr<Events::IEventManager>(pEventManager.release()));
+		pGameData->SetEventManager(pEventManager);
 
 		// Setup physics. World is scaled by the constant given as parameter
 		// (compared to the size of the rendered world).
-		std::unique_ptr<Physics::IPhysicsEngine> physics(
-			CreatePhysicsEngine(0.05f));
-		if (!physics || !physics->VInitEngine("..\\assets\\materials.xml"))
+		auto pPhysics = CreatePhysicsEngine(0.05f);
+		if (!pPhysics || !pPhysics->VInitEngine("..\\assets\\materials.xml"))
 		{
 			PrintError("Failed to initialize physics engine.");
 			return false;
 		}
-		pGameData->SetPhysicsEngine(std::shared_ptr<Physics::IPhysicsEngine>(physics.release()));
+		pGameData->SetPhysicsEngine(pPhysics);
 		return true;
 	}
 

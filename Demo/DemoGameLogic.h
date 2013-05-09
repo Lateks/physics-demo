@@ -2,11 +2,11 @@
 
 #include "IGameLogic.h"
 
-namespace GameEngine
+namespace Demo
 {
 	struct DemoGameLogicData;
 
-	class DemoGameLogic : public IGameLogic
+	class DemoGameLogic : public GameEngine::IGameLogic
 	{
 	public:
 		DemoGameLogic();

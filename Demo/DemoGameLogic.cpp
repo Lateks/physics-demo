@@ -19,6 +19,8 @@
 #include <iostream>
 #include <cassert>
 
+using namespace GameEngine;
+
 namespace
 {
 	unsigned int WOODBOX_TEXTURE;
@@ -28,7 +30,7 @@ namespace
 	const float HL_UPDATE_INTERVAL = 1.f/60;
 }
 
-namespace GameEngine
+namespace Demo
 {
 	struct CameraState
 	{

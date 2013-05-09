@@ -126,7 +126,6 @@
     <ClCompile Include="EngineComponentFactories.cpp" />
     <ClCompile Include="EventManager.cpp" />
     <ClCompile Include="GameActor.cpp" />
-    <ClCompile Include="IGameLogic.cpp" />
     <ClCompile Include="IrrlichtDisplay.cpp" />
     <ClCompile Include="Demo.cpp" />
     <ClCompile Include="Game.cpp" />

@@ -5,7 +5,7 @@
 
 int main()
 {
-	GameEngine::Game game;
+	Demo::Game game;
 
 	if (!game.Run())
 		return 1;

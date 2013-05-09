@@ -15,7 +15,7 @@ namespace GameEngine
 			explicit BulletPhysics(float worldScale = 1.f);
 			virtual ~BulletPhysics();
 			
-			virtual bool VInitEngine() override;
+			virtual bool VInitEngine(const std::string& materialFileName) override;
 			virtual void VSyncScene() override;
 			virtual void VUpdateSimulation(float deltaSec) override;
 

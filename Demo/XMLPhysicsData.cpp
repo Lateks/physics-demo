@@ -63,12 +63,13 @@ namespace GameEngine
 			}
 		}
 
-		void XMLPhysicsData::LoadDataFromXML(const std::string& fileName)
+		bool XMLPhysicsData::LoadDataFromXML(const std::string& fileName)
 		{
 			ifstream matFile(fileName);
 			if (matFile.fail())
 			{
 				std::cerr << "Failed to read XML data from path " << fileName << std::endl;
+				return false;
 			}
 			else
 			{
@@ -84,7 +85,7 @@ namespace GameEngine
 				catch(rapidxml::parse_error &e)
 				{
 					std::cerr << "XML parse error: " << e.what() << std::endl;
-					return;
+					return false;
 				}
 				xml_node<> *root = doc.first_node();
 
@@ -105,6 +106,7 @@ namespace GameEngine
 				});
 			}
 			matFile.close();
+			return true;
 		}
 
 		MaterialData XMLPhysicsData::LookupMaterial(const std::string& materialName)

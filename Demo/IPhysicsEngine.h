@@ -27,7 +27,7 @@ namespace GameEngine
 			virtual ~IPhysicsEngine() { }
 
 			// Initialization routines.
-			virtual bool VInitEngine() = 0;
+			virtual bool VInitEngine(const std::string& materialFileName) = 0;
 
 			// Updating the simulation.
 			virtual void VUpdateSimulation(float deltaSec) = 0;

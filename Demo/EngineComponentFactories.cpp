@@ -19,10 +19,6 @@ namespace GameEngine
 	std::unique_ptr<Physics::IPhysicsEngine> CreatePhysicsEngine(float worldScale)
 	{
 		std::unique_ptr<Physics::IPhysicsEngine> physics(new Physics::BulletPhysics(worldScale));
-		if (!physics || !physics->VInitEngine())
-		{
-			physics.reset();
-		}
 		return physics;
 	}
 

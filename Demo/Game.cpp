@@ -8,13 +8,9 @@
 #include "IEventManager.h"
 #include "IPhysicsEngine.h"
 #include "EngineComponentFactories.h"
-#include "Vec3.h"
-
-#include <irrlicht.h>
 
 #include <iostream>
 #include <memory>
-#include <iostream>
 
 namespace GameEngine
 {
@@ -28,7 +24,8 @@ namespace GameEngine
 		std::cerr << message << std::endl;
 	}
 
-	Game::Game()
+	// Sets up the GameData singleton.
+	bool Setup()
 	{
 		auto pGameData = GameData::GetInstance();
 
@@ -37,14 +34,14 @@ namespace GameEngine
 		if (!pRenderer)
 		{
 			PrintError("Failed to create rendering device.");
-			return;
+			return false;
 		}
 
 		if (!pRenderer->VSetupAndOpenWindow(1024, 800,
 			Display::DRIVER_TYPE::OPEN_GL, Display::CAMERA_TYPE::FPS_WASD))
 		{
 			PrintError("Failed to open OpenGL device.");
-			return;
+			return false;
 		}
 
 		pRenderer->VSetCameraFOV(75.f);
@@ -58,7 +55,7 @@ namespace GameEngine
 		if (!pTimer)
 		{
 			PrintError("Failed to create a timer.");
-			return;
+			return false;
 		}
 		pGameData->SetTimer(std::shared_ptr<ITimer>(pTimer.release()));
 
@@ -67,7 +64,7 @@ namespace GameEngine
 		if (!pGameLogic)
 		{
 			PrintError("Failed to create demo input handler.");
-			return;
+			return false;
 		}
 		pGameData->SetInputHandler(std::shared_ptr<IGameLogic>(pGameLogic.release()));
 
@@ -76,7 +73,7 @@ namespace GameEngine
 		if (!pEventManager)
 		{
 			PrintError("Failed to create an event manager.");
-			return;
+			return false;
 		}
 		pGameData->SetEventManager(std::shared_ptr<Events::IEventManager>(pEventManager.release()));
 
@@ -84,25 +81,29 @@ namespace GameEngine
 		// (compared to the size of the rendered world).
 		std::unique_ptr<Physics::IPhysicsEngine> physics(
 			CreatePhysicsEngine(0.05f));
-		if (!physics)
+		if (!physics || !physics->VInitEngine("..\\assets\\materials.xml"))
 		{
 			PrintError("Failed to initialize physics engine.");
-			return;
+			return false;
 		}
 		pGameData->SetPhysicsEngine(std::shared_ptr<Physics::IPhysicsEngine>(physics.release()));
+		return true;
 	}
+
+	Game::Game() { }
 
 	Game::~Game() { }
 
 	bool Game::Run()
 	{
+		if (!Setup())
+			return false;
+
 		auto pGameData = GameData::GetInstance();
 		auto pDisplay = pGameData->GetDisplayComponent();
 		auto pPhysics = pGameData->GetPhysicsEngine();
 		auto pEvents = pGameData->GetEventManager();
 		auto pGameLogic = pGameData->GetInputHandler();
-		if (!pDisplay || !pPhysics || !pEvents || !pGameLogic)
-			return false;
 
 		if (!pGameLogic->VSetupInitialScene())
 			return false;

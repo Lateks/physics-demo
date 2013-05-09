@@ -69,7 +69,7 @@ namespace GameEngine
 			CollisionPairs m_previousTickCollisions;
 
 			// METHODS:
-			virtual bool VInitializeSystems();
+			bool VInitializeSystems(const std::string& materialFileName);
 
 			void AddShape(ActorPtr pActor, btCollisionShape *shape,
 				IPhysicsEngine::PhysicsObjectType type, CollisionObject& object);
@@ -98,16 +98,16 @@ namespace GameEngine
 		{
 		public:
 			CollisionObject(std::weak_ptr<BulletPhysicsData> pBulletPhysicsData,
-												const std::string& material,
-												const std::string& density,
-												const std::function<float()>& volumeCalculationStrategy,
-												const std::function<float(float)>& rollingFrictionCalculationStrategy = [] (float friction) { return friction / 3.f; })
-												: m_pBulletPhysicsData(pBulletPhysicsData),
-												m_materialId(material), m_densityId(density),
-												m_volumeCalculationStrategy(volumeCalculationStrategy),
-												m_rollingFrictionCalculationStrategy(rollingFrictionCalculationStrategy),
-												m_materialDataFetched(false), m_densityFetched(false),
-												m_materialData(0.f, 0.f), m_density(0.f) { }
+							const std::string& material,
+							const std::string& density,
+							const std::function<float()>& volumeCalculationStrategy,
+							const std::function<float(float)>& rollingFrictionCalculationStrategy = [] (float friction) { return friction / 3.f; })
+							: m_pBulletPhysicsData(pBulletPhysicsData),
+							m_materialId(material), m_densityId(density),
+							m_volumeCalculationStrategy(volumeCalculationStrategy),
+							m_rollingFrictionCalculationStrategy(rollingFrictionCalculationStrategy),
+							m_materialDataFetched(false), m_densityFetched(false),
+							m_materialData(0.f, 0.f), m_density(0.f) { }
 			bool HasMaterial() const
 			{
 				return !m_materialId.empty();
@@ -190,9 +190,9 @@ namespace GameEngine
 
 		BulletPhysics::~BulletPhysics() { }
 
-		bool BulletPhysics::VInitEngine()
+		bool BulletPhysics::VInitEngine(const std::string& materialFileName)
 		{
-			return m_pData->VInitializeSystems();
+			return m_pData->VInitializeSystems(materialFileName);
 		}
 
 		void UpdateWorldTransform(ActorPtr pActor, const Vec3& pos, const Quaternion& rot)
@@ -667,10 +667,13 @@ namespace GameEngine
 			return 0;
 		}
 
-		bool BulletPhysicsData::VInitializeSystems()
+		bool BulletPhysicsData::VInitializeSystems(const std::string& materialFileName)
 		{
 			m_physicsMaterialData.reset(new XMLPhysicsData());
-			m_physicsMaterialData->LoadDataFromXML("..\\assets\\materials.xml"); // TODO: get this as a parameter
+			if (!m_physicsMaterialData->LoadDataFromXML(materialFileName))
+			{
+				return false; // XML parsing failed
+			}
 
 			SetupSystems();
 

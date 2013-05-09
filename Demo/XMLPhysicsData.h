@@ -28,7 +28,7 @@ namespace GameEngine
 			std::map<std::string, float> m_densities;
 			std::map<std::string, MaterialData> m_materialTable;
 			
-			void LoadDataFromXML(const std::string& fileName);
+			bool LoadDataFromXML(const std::string& fileName);
 			MaterialData LookupMaterial(const std::string& materialName);
 			float LookupDensity(const std::string& materialName);
 		};

@@ -835,13 +835,6 @@ namespace GameEngine
 			switch (type)
 			{
 			case IPhysicsEngine::PhysicsObjectType::DYNAMIC:
-				if (!(object.HasDensity() && object.HasMaterial()))
-				{
-					std::cerr << "Dynamic objects must be given material and density identifiers." << std::endl;
-					delete shape;
-					return;
-				}
-
 				AddSingleBodyShape(pActor, shape, object, type);
 				break;
 			case IPhysicsEngine::PhysicsObjectType::STATIC:

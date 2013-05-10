@@ -100,7 +100,7 @@ namespace DemoTest
 			MockEventReceiver moveHandler;
 			moveHandler.RegisterTo(EventType::ACTOR_MOVED, eventMgr);
 
-			eventMgr->VQueueEvent(std::make_shared<ActorMoveEvent>(0.f, 1));
+			eventMgr->VQueueEvent(std::make_shared<ActorMoveEvent>(0, 1));
 			eventMgr->VDispatchEvents();
 			Assert::AreEqual(1, moveHandler.num_valid_calls);
 		}
@@ -111,7 +111,7 @@ namespace DemoTest
 			MockEventReceiver moveHandler;
 			moveHandler.RegisterTo(EventType::ACTOR_MOVED, eventMgr);
 
-			eventMgr->VDispatchEvent(std::make_shared<ActorMoveEvent>(0.f, 1));
+			eventMgr->VDispatchEvent(std::make_shared<ActorMoveEvent>(0, 1));
 			Assert::AreEqual(1, moveHandler.num_valid_calls);
 		}
 
@@ -121,7 +121,7 @@ namespace DemoTest
 			MockEventReceiver moveHandler;
 			moveHandler.RegisterTo(EventType::ACTOR_MOVED, eventMgr);
 
-			eventMgr->VQueueEvent(std::make_shared<ActorMoveEvent>(0.f, 1));
+			eventMgr->VQueueEvent(std::make_shared<ActorMoveEvent>(0, 1));
 			eventMgr->VDispatchEvents();
 			eventMgr->VDispatchEvents();
 			eventMgr->VDispatchEvents();
@@ -134,7 +134,7 @@ namespace DemoTest
 			MockEventReceiver moveHandler;
 			moveHandler.RegisterTo(EventType::CAMERA_MOVED, eventMgr);
 
-			eventMgr->VQueueEvent(std::make_shared<ActorMoveEvent>(0.f, 1));
+			eventMgr->VQueueEvent(std::make_shared<ActorMoveEvent>(0, 1));
 			eventMgr->VDispatchEvents();
 			Assert::AreEqual(0, moveHandler.num_calls);
 		}
@@ -148,7 +148,7 @@ namespace DemoTest
 			MockEventReceiver triggerHandler2;
 			triggerHandler2.RegisterTo(eventType, eventMgr);
 
-			eventMgr->VQueueEvent(std::make_shared<TriggerEntryEvent>(0.f, 1, 2));
+			eventMgr->VQueueEvent(std::make_shared<TriggerEntryEvent>(0, 1, 2));
 			eventMgr->VDispatchEvents();
 			Assert::AreEqual(1, triggerHandler1.num_valid_calls);
 			Assert::AreEqual(1, triggerHandler2.num_valid_calls);
@@ -164,7 +164,7 @@ namespace DemoTest
 			triggerHandler2.RegisterTo(eventType, eventMgr);
 
 			triggerHandler1.DeregisterFrom(eventType, eventMgr);
-			eventMgr->VQueueEvent(std::make_shared<TriggerEntryEvent>(0.f, 1, 2));
+			eventMgr->VQueueEvent(std::make_shared<TriggerEntryEvent>(0, 1, 2));
 			eventMgr->VDispatchEvents();
 			Assert::AreEqual(0, triggerHandler1.num_calls);
 			Assert::AreEqual(1, triggerHandler2.num_valid_calls);
@@ -179,7 +179,7 @@ namespace DemoTest
 			moveHandler.RegisterTo(eventType, eventMgr);
 			moveHandler.RegisterTo(eventType, eventMgr);
 
-			eventMgr->VDispatchEvent(std::make_shared<ActorMoveEvent>(0.f, 1));
+			eventMgr->VDispatchEvent(std::make_shared<ActorMoveEvent>(0, 1));
 			Assert::AreEqual(1, moveHandler.num_valid_calls);
 		}
 
@@ -191,9 +191,9 @@ namespace DemoTest
 			eventHandler.RegisterTo(EventType::ENTER_TRIGGER, eventMgr);
 			eventHandler.RegisterTo(EventType::EXIT_TRIGGER, eventMgr);
 
-			eventMgr->VQueueEvent(std::make_shared<ActorMoveEvent>(0.f, 1));
-			eventMgr->VQueueEvent(std::make_shared<TriggerEntryEvent>(0.f, 1, 2));
-			eventMgr->VQueueEvent(std::make_shared<TriggerExitEvent>(0.f, 1, 2));
+			eventMgr->VQueueEvent(std::make_shared<ActorMoveEvent>(0, 1));
+			eventMgr->VQueueEvent(std::make_shared<TriggerEntryEvent>(0, 1, 2));
+			eventMgr->VQueueEvent(std::make_shared<TriggerExitEvent>(0, 1, 2));
 			eventMgr->VDispatchEvents();
 			Assert::AreEqual(3, eventHandler.num_valid_calls);
 		}
@@ -205,11 +205,11 @@ namespace DemoTest
 			auto eventAdder = std::make_shared<std::function<void(EventPtr)>>(
 				[&eventMgr, &eventAdderCalled] (EventPtr event) {
 					eventAdderCalled = true;
-					eventMgr->VQueueEvent(std::make_shared<ActorMoveEvent>(0.f, 1));
+					eventMgr->VQueueEvent(std::make_shared<ActorMoveEvent>(0, 1));
 			});
 
 			eventMgr->VRegisterHandler(EventType::ENTER_TRIGGER, eventAdder);
-			eventMgr->VQueueEvent(std::make_shared<TriggerEntryEvent>(0.f, 1, 2));
+			eventMgr->VQueueEvent(std::make_shared<TriggerEntryEvent>(0, 1, 2));
 			eventMgr->VDispatchEvents();
 			Assert::IsTrue(eventAdderCalled);
 			eventMgr->VDeregisterHandler(EventType::ENTER_TRIGGER, eventAdder);
@@ -227,7 +227,7 @@ namespace DemoTest
 			bool eventAdderCalled = false;
 			auto eventAdder = std::make_shared<std::function<void(EventPtr)>>(
 				[&eventMgr, &eventAdderCalled] (EventPtr event) {
-					eventAdderCalled = true; eventMgr->VQueueEvent(std::make_shared<ActorMoveEvent>(0.f, 1));
+					eventAdderCalled = true; eventMgr->VQueueEvent(std::make_shared<ActorMoveEvent>(0, 1));
 			});
 			bool eventRemoverCalled = false;
 			auto eventRemover = std::make_shared<std::function<void(EventPtr)>>(
@@ -237,7 +237,7 @@ namespace DemoTest
 
 			eventMgr->VRegisterHandler(EventType::ACTOR_MOVED, eventAdder);
 			eventMgr->VRegisterHandler(EventType::ACTOR_MOVED, eventRemover);
-			eventMgr->VQueueEvent(std::make_shared<ActorMoveEvent>(0.f, 1));
+			eventMgr->VQueueEvent(std::make_shared<ActorMoveEvent>(0, 1));
 			eventMgr->VDispatchEvents();
 			Assert::IsTrue(eventAdderCalled && eventRemoverCalled);
 
@@ -260,8 +260,8 @@ namespace DemoTest
 			MockEventReceiver eventHandler;
 			eventHandler.RegisterTo(EventType::ACTOR_MOVED, eventMgr);
 
-			eventMgr->VQueueEvent(std::make_shared<TriggerEntryEvent>(0.f, 1, 2));
-			eventMgr->VQueueEvent(std::make_shared<ActorMoveEvent>(0.f, 1));
+			eventMgr->VQueueEvent(std::make_shared<TriggerEntryEvent>(0, 1, 2));
+			eventMgr->VQueueEvent(std::make_shared<ActorMoveEvent>(0, 1));
 			eventMgr->VDispatchEvents();
 			Assert::IsTrue(customHandlerCalled);
 			Assert::AreEqual(1, eventHandler.num_valid_calls);

@@ -23,7 +23,7 @@ namespace GameEngine
 		public:
 			virtual ~IEventData() { };
 			virtual EventType VGetEventType() const = 0;
-			virtual float VGetTimestamp() const = 0;
+			virtual unsigned int VGetTimestamp() const = 0;
 		};
 
 		typedef std::shared_ptr<IEventData> EventPtr;

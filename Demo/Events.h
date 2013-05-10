@@ -12,17 +12,17 @@ namespace GameEngine
 		class BaseEventData : public IEventData
 		{
 		public:
-			explicit BaseEventData(const float timeStamp) : m_timeStamp(timeStamp) { }
+			explicit BaseEventData(const unsigned int timeStamp) : m_timeStamp(timeStamp) { }
 			virtual EventType VGetEventType() const = 0;
-			virtual float VGetTimestamp() const override { return m_timeStamp; }
+			virtual unsigned int VGetTimestamp() const override { return m_timeStamp; }
 		private:
-			const float m_timeStamp;
+			const unsigned int m_timeStamp;
 		};
 
 		class CollisionEvent : public BaseEventData
 		{
 		public:
-			CollisionEvent(const float timeStamp, ActorID first, ActorID second)
+			CollisionEvent(const unsigned int timeStamp, ActorID first, ActorID second)
 				: BaseEventData(timeStamp), m_collisionPair(first, second) { }
 			virtual ~CollisionEvent() { };
 			std::pair<ActorID, ActorID> GetCollisionPair()
@@ -36,7 +36,7 @@ namespace GameEngine
 		class ActorCollideEvent : public CollisionEvent
 		{
 		public:
-			ActorCollideEvent(const float timeStamp, ActorID first, ActorID second,
+			ActorCollideEvent(const unsigned int timeStamp, ActorID first, ActorID second,
 				std::vector<Vec3> collisionManifold, Vec3 sumNormalForce, Vec3 sumFrictionForce)
 				: CollisionEvent(timeStamp, first, second), m_collisionManifold(collisionManifold),
 				m_sumNormalForce(sumNormalForce), m_sumFrictionForce(sumFrictionForce)
@@ -68,7 +68,7 @@ namespace GameEngine
 		class ActorSeparationEvent : public CollisionEvent
 		{
 		public:
-			ActorSeparationEvent(const float timeStamp, ActorID first, ActorID second)
+			ActorSeparationEvent(const unsigned int timeStamp, ActorID first, ActorID second)
 				: CollisionEvent(timeStamp, first, second) { }
 			virtual ~ActorSeparationEvent() { };
 			virtual EventType VGetEventType() const override
@@ -82,7 +82,7 @@ namespace GameEngine
 		class TriggerEvent : public BaseEventData
 		{
 		public:
-			TriggerEvent(const float timeStamp, ActorID trigger, ActorID actorId)
+			TriggerEvent(const unsigned int timeStamp, ActorID trigger, ActorID actorId)
 				: BaseEventData(timeStamp), m_triggerId(trigger), m_actorId(actorId) { }
 			virtual ~TriggerEvent() { };
 			ActorID GetTriggerId() { return m_triggerId; }
@@ -95,7 +95,7 @@ namespace GameEngine
 		class TriggerEntryEvent : public TriggerEvent
 		{
 		public:
-			TriggerEntryEvent(const float timeStamp, ActorID trigger, ActorID actorId)
+			TriggerEntryEvent(const unsigned int timeStamp, ActorID trigger, ActorID actorId)
 				: TriggerEvent(timeStamp, trigger, actorId) { }
 			virtual ~TriggerEntryEvent() { };
 			virtual EventType VGetEventType() const override
@@ -109,7 +109,7 @@ namespace GameEngine
 		class TriggerExitEvent : public TriggerEvent
 		{
 		public:
-			TriggerExitEvent(const float timeStamp, ActorID trigger, ActorID actorId)
+			TriggerExitEvent(const unsigned int timeStamp, ActorID trigger, ActorID actorId)
 				: TriggerEvent(timeStamp, trigger, actorId) { }
 			virtual ~TriggerExitEvent() { };
 			virtual EventType VGetEventType() const override
@@ -123,7 +123,7 @@ namespace GameEngine
 		class ActorMoveEvent : public BaseEventData
 		{
 		public:
-			ActorMoveEvent(const float timeStamp, ActorID actorId)
+			ActorMoveEvent(const unsigned int timeStamp, ActorID actorId)
 				: BaseEventData(timeStamp), m_actorId(actorId) { }
 			virtual ~ActorMoveEvent() { };
 			virtual EventType VGetEventType() const override
@@ -142,7 +142,7 @@ namespace GameEngine
 		class CameraMoveEvent : public BaseEventData
 		{
 		public:
-			CameraMoveEvent(const float timeStamp, Vec3 cameraPos, Vec3 cameraTarget)
+			CameraMoveEvent(const unsigned int timeStamp, Vec3 cameraPos, Vec3 cameraTarget)
 				: BaseEventData(timeStamp), m_cameraPos(cameraPos), m_cameraTarget(cameraTarget) { }
 			virtual ~CameraMoveEvent() { }
 			virtual EventType VGetEventType() const override

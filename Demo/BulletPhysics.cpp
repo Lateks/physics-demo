@@ -161,7 +161,7 @@ namespace GameEngine
 			if (changed)
 			{
 				Events::EventPtr event;
-				event.reset(new Events::ActorMoveEvent(pGame->CurrentTimeSec(), pActor->GetID()));
+				event.reset(new Events::ActorMoveEvent(pGame->CurrentTimeMs(), pActor->GetID()));
 				pGame->GetEventManager()->VQueueEvent(event);
 			}
 		}
@@ -884,7 +884,7 @@ namespace GameEngine
 			{
 				ActorID triggerId = firstIsTrigger ? GetActorID(pBody1) : GetActorID(pBody2);
 				ActorID actorId = firstIsTrigger ? GetActorID(pBody2) : GetActorID(pBody1);
-				event.reset(new Events::TriggerEntryEvent(pGameData->CurrentTimeSec(),
+				event.reset(new Events::TriggerEntryEvent(pGameData->CurrentTimeMs(),
 					triggerId, actorId));
 				pEventManager->VQueueEvent(event);
 			}
@@ -902,7 +902,7 @@ namespace GameEngine
 					sumNormalForce += point.m_combinedRestitution * point.m_normalWorldOnB;
 					sumFrictionForce += point.m_combinedFriction * point.m_lateralFrictionDir1;
 				}
-				event.reset(new Events::ActorCollideEvent(pGameData->CurrentTimeSec(),
+				event.reset(new Events::ActorCollideEvent(pGameData->CurrentTimeMs(),
 					id1, id2, collisionPoints, btVector3_to_Vec3(sumNormalForce, m_worldScaleConst),
 					btVector3_to_Vec3(sumFrictionForce, m_worldScaleConst)));
 				pEventManager->VQueueEvent(event);
@@ -927,14 +927,14 @@ namespace GameEngine
 			{
 				ActorID triggerId = firstIsTrigger ? GetActorID(pBody1) : GetActorID(pBody2);
 				ActorID actorId = firstIsTrigger ? GetActorID(pBody2) : GetActorID(pBody1);
-				event.reset(new Events::TriggerExitEvent(pGameData->CurrentTimeSec(),
+				event.reset(new Events::TriggerExitEvent(pGameData->CurrentTimeMs(),
 					triggerId, actorId));
 				pEventManager->VQueueEvent(event);
 			}
 			else
 			{
 				event.reset(new Events::ActorSeparationEvent(
-					pGameData->CurrentTimeSec(), id1, id2));
+					pGameData->CurrentTimeMs(), id1, id2));
 				pEventManager->VQueueEvent(event);
 			}
 		}

@@ -114,4 +114,14 @@ namespace GameEngine
 	{
 		return m_pData->m_w;
 	}
+
+	std::wostream& operator<<(std::wostream& stream, const Vec4& vec)
+	{
+		stream << L"("
+				<< vec.x() << L" "
+				<< vec.y() << L" "
+				<< vec.z() << L" "
+				<< vec.w() << L")";
+		return stream;
+	}
 }

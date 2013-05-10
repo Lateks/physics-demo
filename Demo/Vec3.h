@@ -39,5 +39,7 @@ namespace GameEngine
 		CSHandedness m_handedness;
 	};
 
-	std::ostream& operator<<(std::ostream& stream, const Vec3& vec);
+	std::wostream& operator<<(std::wostream& stream, const CSHandedness& handedness);
+
+	std::wostream& operator<<(std::wostream& stream, const Vec3& vec);
 }

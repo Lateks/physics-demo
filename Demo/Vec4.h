@@ -5,6 +5,9 @@ namespace GameEngine
 {
 	struct Vec4Data;
 
+	// Unlike Vec3, Vec4 currently has no handedness since it is only used
+	// for representing data that does not depend on handedness (quaternions
+	// and colors).
 	class Vec4
 	{
 	public:
@@ -36,4 +39,9 @@ namespace GameEngine
 	private:
 		std::unique_ptr<Vec4Data> m_pData;
 	};
+
+	typedef Vec4 RGBAColor;
+	typedef Vec4 Quaternion;
+
+	std::wostream& operator<<(std::wostream& stream, const Vec4& vec);
 }

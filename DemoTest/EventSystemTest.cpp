@@ -10,14 +10,39 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace GameEngine::Events;
 
 namespace DemoTest
-{		
+{
+	typedef std::shared_ptr<IEventManager> EventManagerPtr;
+	typedef std::map<EventManagerPtr, std::vector<EventType>> EventManagerToTypeMap;
+	typedef std::map<EventType, std::vector<EventManagerPtr>> EventTypeToManagerMap;
+
+	template < typename E, typename T >
+	void RemoveFromVectorMap(std::map<E, std::vector<T>>& map, E key, T value)
+	{
+		auto iter = map.find(key);
+		if (iter != map.end())
+		{
+			std::remove_if(iter->second.begin(), iter->second.end(),
+				[&value] (T other) { return value == other; });
+			if (iter->second.empty())
+			{
+				map.erase(key);
+			}
+		}
+	}
+
+	template < typename E, typename T >
+	void AddToVectorMap(std::map<E, std::vector<T>>& map, E key, T value)
+	{
+		auto &vec = map[key];
+		if (std::find(vec.begin(), vec.end(), value) == vec.end())
+		{
+			map[key].push_back(value);
+		}
+	}
+
 	TEST_CLASS(EventSystemTest)
 	{
 	public:
-		typedef std::shared_ptr<IEventManager> EventManagerPtr;
-		typedef std::map<EventManagerPtr, std::vector<EventType>> EventManagerToTypeMap;
-		typedef std::map<EventType, std::vector<EventManagerPtr>> EventTypeToManagerMap;
-
 		struct MockEventReceiver
 		{
 			MockEventReceiver()
@@ -30,42 +55,15 @@ namespace DemoTest
 			void RegisterTo(EventType type, EventManagerPtr pEventManager)
 			{
 				pEventManager->VRegisterHandler(type, eventHandler);
-				auto &registeredTypes = currentRegistrations[pEventManager];
-				if (std::find(registeredTypes.begin(), registeredTypes.end(), type) == registeredTypes.end())
-				{
-					currentRegistrations[pEventManager].push_back(type);
-				}
-				auto &registeredManagers = expectedEventTypes[type];
-				if (std::find(registeredManagers.begin(), registeredManagers.end(), pEventManager) == registeredManagers.end())
-				{
-					expectedEventTypes[type].push_back(pEventManager);
-				}
+				AddToVectorMap<EventManagerPtr, EventType>(currentRegistrations, pEventManager, type);
+				AddToVectorMap<EventType, EventManagerPtr>(expectedEventTypes, type, pEventManager);
 			}
 
 			void DeregisterFrom(EventType type, EventManagerPtr pEventManager)
 			{
 				pEventManager->VDeregisterHandler(type, eventHandler);
-				auto registeredManager = currentRegistrations.find(pEventManager);
-				if (registeredManager != currentRegistrations.end())
-				{
-					std::remove_if(registeredManager->second.begin(), registeredManager->second.end(),
-						[type] (EventType other) { return type == other; });
-					if (registeredManager->second.empty())
-					{
-						currentRegistrations.erase(registeredManager);
-					}
-				}
-
-				auto registeredType = expectedEventTypes.find(type);
-				if (registeredType != expectedEventTypes.end())
-				{
-					std::remove_if(registeredType->second.begin(), registeredType->second.end(),
-						[pEventManager] (EventManagerPtr other) { return pEventManager == other; });
-					if (registeredType->second.empty())
-					{
-						expectedEventTypes.erase(registeredType);
-					}
-				}
+				RemoveFromVectorMap<EventManagerPtr, EventType>(currentRegistrations, pEventManager, type);
+				RemoveFromVectorMap<EventType, EventManagerPtr>(expectedEventTypes, type, pEventManager);
 			}
 
 			void HandleEvent(EventPtr event)

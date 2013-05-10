@@ -33,6 +33,8 @@ namespace GameEngine
 
 			virtual void VSetCameraPosition(Vec3& newPosition) override;
 			virtual void VSetCameraTarget(Vec3& newTarget) override;
+			virtual void VSetCameraUpVector(Vec3& newUpVector) override;
+			virtual void VSetCameraRotation(Quaternion newRotation) override;
 			virtual void VSetCameraFOV(float degrees) override;
 			virtual void VSetCameraNearPlaneDistance(float distance) override;
 			virtual void VSetCameraFarPlaneDistance(float distance) override;
@@ -42,9 +44,13 @@ namespace GameEngine
 			virtual Vec3 VGetCameraUpVector() const override;
 			virtual Vec3 VGetCameraRightVector() const override;
 			virtual Quaternion VGetCameraRotation() const override;
+			virtual float VGetCameraFOV() const override;
+			virtual float VGetCameraNearPlaneDistance() const override;
+			virtual float VGetCameraFarPlaneDistance() const override;
 
 			virtual void VHideCursor() override;
 			virtual void VShowCursor() override;
+			virtual bool VCursorVisible() const override;
 
 			virtual unsigned int VLoadTexture(const std::string& filePath) override;
 

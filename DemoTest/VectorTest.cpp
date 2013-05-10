@@ -28,8 +28,10 @@ namespace DemoTest
 		TEST_METHOD(Vec3EqualityComparisonTakesHandednessIntoAccount)
 		{
 			GameEngine::Vec3 rhVector(1, 1, 1, GameEngine::CSHandedness::RIGHT);
+			GameEngine::Vec3 rhVector2(1, 1, 1, GameEngine::CSHandedness::RIGHT);
 			GameEngine::Vec3 lhVector(1, 1, 1, GameEngine::CSHandedness::LEFT);
 			Assert::AreNotEqual(rhVector, lhVector);
+			Assert::AreEqual(rhVector, rhVector2);
 		}
 
 		TEST_METHOD(Vec3FlipHandednessFromRightToLeft)

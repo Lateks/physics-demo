@@ -338,7 +338,7 @@ namespace Demo
 			auto pEventMgr = pGame->GetEventManager();
 			if (pEventMgr)
 			{
-				std::shared_ptr<Events::IEventData> event(new Events::CameraMoveEvent(pGame->CurrentTimeSec(),
+				std::shared_ptr<Events::IEventData> event(new Events::CameraMoveEvent(pGame->CurrentTimeMs(),
 					m_pData->m_currentCameraState.cameraPos, m_pData->m_currentCameraState.cameraTarget));
 				pEventMgr->VQueueEvent(event);
 			}

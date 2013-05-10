@@ -124,19 +124,38 @@ namespace GameEngine
 		}
 
 		// This assumes left-handed coordinate system for the input vector.
-		Vec3 ConvertVector(const vector3df& vector)
+		inline Vec3 ConvertVector(const vector3df& vector)
 		{
 			return Vec3(vector.X, vector.Y, -vector.Z);
 		}
 
-		quaternion ConvertQuaternion(const Quaternion& quat)
+		inline quaternion ConvertQuaternion(const Quaternion& quat)
 		{
 			return quaternion(quat.x(), quat.y(), quat.z(), quat.w());
 		}
 
-		Quaternion ConvertQuaternion(const irr::core::quaternion& quat)
+		inline Quaternion ConvertQuaternion(const irr::core::quaternion& quat)
 		{
 			return Quaternion(quat.X, quat.Y, quat.Z, quat.W);
+		}
+
+		// return value is in degrees
+		vector3df QuaternionToEuler(const quaternion& quat)
+		{
+			vector3df eulerRot;
+			quat.toEuler(eulerRot);
+			return eulerRot * irr::core::RADTODEG;
+		}
+
+		// return value is in degrees
+		vector3df QuaternionToEuler(const Quaternion& quat)
+		{
+			return QuaternionToEuler(ConvertQuaternion(quat));
+		}
+
+		inline Quaternion EulerToQuaternion(const vector3df& euler)
+		{
+			return ConvertQuaternion(quaternion(euler * irr::core::DEGTORAD));
 		}
 
 		irr::video::SColorf ConvertRGBAColorToSColorf(const RGBAColor& color)
@@ -211,6 +230,8 @@ namespace GameEngine
 				return E_DRIVER_TYPE::EDT_OPENGL;
 			case DRIVER_TYPE::SOFTWARE:
 				return E_DRIVER_TYPE::EDT_SOFTWARE;
+			case DRIVER_TYPE::NO_WINDOW:
+				return E_DRIVER_TYPE::EDT_NULL;
 			default:
 				return E_DRIVER_TYPE::EDT_SOFTWARE;
 			}
@@ -296,6 +317,24 @@ namespace GameEngine
 			}
 		}
 
+		void IrrlichtDisplay::VSetCameraUpVector(Vec3& newUpVector)
+		{
+			assert(m_pData->m_pCamera);
+			if (m_pData->m_pCamera)
+			{
+				m_pData->m_pCamera->setUpVector(ConvertVector(newUpVector));
+			}
+		}
+
+		void IrrlichtDisplay::VSetCameraRotation(Quaternion newRotation)
+		{
+			assert(m_pData->m_pCamera);
+			if (m_pData->m_pCamera)
+			{
+				m_pData->m_pCamera->setRotation(QuaternionToEuler(newRotation));
+			}
+		}
+
 		void IrrlichtDisplay::VSetCameraFOV(float degrees)
 		{
 			assert(m_pData->m_pCamera);
@@ -331,6 +370,11 @@ namespace GameEngine
 		void IrrlichtDisplay::VShowCursor()
 		{
 			m_pData->SetCursorVisible(true);
+		}
+
+		bool IrrlichtDisplay::VCursorVisible() const
+		{
+			return m_pData->m_pDevice->getCursorControl()->isVisible();
 		}
 
 		void IrrlichtDisplayData::SetCursorVisible(bool value)
@@ -475,12 +519,14 @@ namespace GameEngine
 
 		Vec3 IrrlichtDisplay::VGetCameraUpVector() const
 		{
+			assert(m_pData->m_pCamera);
 			auto cameraUp = m_pData->m_pCamera->getUpVector();
 			return ConvertVector(cameraUp);
 		}
 
 		Vec3 IrrlichtDisplay::VGetCameraRightVector() const
 		{
+			assert(m_pData->m_pCamera);
 			auto camera = m_pData->m_pCamera;
 			auto up = camera->getUpVector();
 			auto forward = camera->getTarget() - camera->getAbsolutePosition();
@@ -491,9 +537,25 @@ namespace GameEngine
 
 		Quaternion IrrlichtDisplay::VGetCameraRotation() const
 		{
-			vector3df cameraRotEuler = m_pData->m_pCamera->getRotation();
-			quaternion quaternionRot(cameraRotEuler * irr::core::DEGTORAD);
-			return ConvertQuaternion(quaternionRot);
+			return EulerToQuaternion(m_pData->m_pCamera->getRotation());
+		}
+
+		float IrrlichtDisplay::VGetCameraFOV() const
+		{
+			assert(m_pData->m_pCamera);
+			return m_pData->m_pCamera->getFOV() * irr::core::RADTODEG;
+		}
+
+		float IrrlichtDisplay::VGetCameraNearPlaneDistance() const
+		{
+			assert(m_pData->m_pCamera);
+			return m_pData->m_pCamera->getNearValue();
+		}
+
+		float IrrlichtDisplay::VGetCameraFarPlaneDistance() const
+		{
+			assert(m_pData->m_pCamera);
+			return m_pData->m_pCamera->getFarValue();
 		}
 
 		/*
@@ -562,12 +624,7 @@ namespace GameEngine
 		void IrrlichtDisplayData::SetNodeTransform(
 			irr::scene::ISceneNode *pNode, const WorldTransformComponent& worldTransform)
 		{
-			quaternion rot = ConvertQuaternion(worldTransform.GetRotation());
-			vector3df eulerRot;
-			rot.toEuler(eulerRot);
-			eulerRot *= irr::core::RADTODEG;
-			pNode->setRotation(eulerRot);
-
+			pNode->setRotation(QuaternionToEuler(worldTransform.GetRotation()));
 			pNode->setPosition(ConvertVector(worldTransform.GetPosition()));
 			pNode->setScale(ConvertVector(worldTransform.GetScale()));
 		}

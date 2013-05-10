@@ -10,6 +10,7 @@ namespace GameEngine
 	{
 		enum class DRIVER_TYPE : uint8_t
 		{
+			NO_WINDOW,
 			OPEN_GL,
 			DIRECT_3D9,
 			SOFTWARE
@@ -40,6 +41,8 @@ namespace GameEngine
 
 			virtual void VSetCameraPosition(Vec3& newPosition) = 0;
 			virtual void VSetCameraTarget(Vec3& newTarget) = 0;
+			virtual void VSetCameraUpVector(Vec3& newUpVector) = 0;
+			virtual void VSetCameraRotation(Quaternion newRotation) = 0;
 			virtual void VSetCameraFOV(float degrees) = 0;
 			virtual void VSetCameraNearPlaneDistance(float distance) = 0;
 			virtual void VSetCameraFarPlaneDistance(float distance) = 0;
@@ -49,9 +52,13 @@ namespace GameEngine
 			virtual Vec3 VGetCameraUpVector() const = 0;
 			virtual Vec3 VGetCameraRightVector() const = 0;
 			virtual Quaternion VGetCameraRotation() const = 0;
+			virtual float VGetCameraFOV() const = 0;
+			virtual float VGetCameraNearPlaneDistance() const = 0;
+			virtual float VGetCameraFarPlaneDistance() const = 0;
 
 			virtual void VHideCursor() = 0;
 			virtual void VShowCursor() = 0;
+			virtual bool VCursorVisible() const = 0;
 
 			// Returns a unique id that can be used to refer to the texture.
 			// Returns 0 if loading fails.

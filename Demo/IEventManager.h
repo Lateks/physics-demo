@@ -7,10 +7,6 @@ namespace GameEngine
 {
 	namespace Events
 	{
-		// Just some event types needed for communication between
-		// the physics system and other parts of the game engine.
-		// Would need to be extended in an actual, more fleshed
-		// out game engine.
 		enum class EventType : uint8_t
 		{
 			NONE = 0, // this can be used as a default value for variables of this enum type

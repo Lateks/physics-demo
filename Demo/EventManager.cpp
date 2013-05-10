@@ -33,15 +33,15 @@ namespace GameEngine
 
 		void EventManager::VDispatchEvents()
 		{
-			auto processingQueue = &m_pData->m_eventQueues[m_pData->m_activeQueue];
+			auto &processingQueue = m_pData->m_eventQueues[m_pData->m_activeQueue];
 			m_pData->m_activeQueue = (m_pData->m_activeQueue + 1) % EventManagerData::NUM_QUEUES;
 			m_pData->m_eventQueues[m_pData->m_activeQueue].clear();
 
-			while (!processingQueue->empty())
+			while (!processingQueue.empty())
 			{
-				EventPtr event = processingQueue->front();
+				EventPtr event = processingQueue.front();
 				VDispatchEvent(event);
-				processingQueue->pop_front();
+				processingQueue.pop_front();
 			}
 		}
 
@@ -59,7 +59,7 @@ namespace GameEngine
 
 		void EventManager::VDequeueFirst(EventType type)
 		{
-			auto activeQueue = m_pData->m_eventQueues[m_pData->m_activeQueue];
+			auto &activeQueue = m_pData->m_eventQueues[m_pData->m_activeQueue];
 			auto it = std::find_if(activeQueue.begin(), activeQueue.end(),
 				[&type] (EventPtr event) { return event->VGetEventType() == type; });
 			if (it != activeQueue.end())
@@ -70,12 +70,12 @@ namespace GameEngine
 
 		void EventManager::VRegisterHandler(EventType type, EventHandlerPtr handler)
 		{
-			auto handlers = &m_pData->m_eventHandlers[type];
-			auto it = std::find_if(handlers->begin(), handlers->end(),
+			auto &handlers = m_pData->m_eventHandlers[type];
+			auto it = std::find_if(handlers.begin(), handlers.end(),
 				[&handler] (EventHandlerPtr storedHandler) { return handler == storedHandler; });
-			if (it == handlers->end()) // only add the handler if it's not already in the list
+			if (it == handlers.end()) // only add the handler if it's not already in the list
 			{
-				handlers->push_back(handler);
+				handlers.push_back(handler);
 			}
 		}
 

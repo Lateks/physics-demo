@@ -111,13 +111,14 @@ namespace GameEngine
 
 		const MaterialData& XMLPhysicsData::LookupMaterial(const std::string& materialName)
 		{
+			static MaterialData defaultValue = MaterialData(0.f, 0.f);
 			auto it = m_materialTable.find(materialName);
 			assert(it != m_materialTable.end());
 			if (it != m_materialTable.end())
 			{
 				return it->second;
 			}
-			return MaterialData(0.f, 0.f);
+			return defaultValue;
 		}
 
 		float XMLPhysicsData::LookupDensity(const std::string& materialName)

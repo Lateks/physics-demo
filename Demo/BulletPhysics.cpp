@@ -116,7 +116,7 @@ namespace GameEngine
 			{
 				return !m_densityId.empty();
 			}
-			MaterialData& FindMaterial()
+			const MaterialData& FindMaterial()
 			{
 				if (!m_materialDataFetched)
 				{
@@ -879,9 +879,9 @@ namespace GameEngine
 		void BulletPhysicsData::CreateRigidBody(ActorPtr pActor, btCollisionShape *shape,
 			CollisionObject& object, int collisionFlags)
 		{
-			MaterialData matData(object.FindMaterial());
+			const MaterialData& matData = object.FindMaterial();
 			float density = object.FindDensity();
-			float mass = object.CalculateVolume() * density;
+			float mass = density > 0.f ? object.CalculateVolume() * density : 0.f;
 
 			btMotionState *motionState = GetMotionStateFrom(pActor->GetWorldTransform());
 			btVector3 localInertia(0, 0, 0);

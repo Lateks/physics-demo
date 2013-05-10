@@ -32,7 +32,7 @@ namespace GameEngine
 		typedef std::pair<const btRigidBody *, const btRigidBody *> CollisionPair;
 		typedef std::set<CollisionPair> CollisionPairs;
 
-		class CollisionObject;
+		struct CollisionObject;
 
 		struct BulletPhysicsData
 		{
@@ -71,12 +71,9 @@ namespace GameEngine
 			// METHODS:
 			bool VInitializeSystems(const std::string& materialFileName);
 
-			void AddShape(ActorPtr pActor, btCollisionShape *shape,
-				IPhysicsEngine::PhysicsObjectType type, CollisionObject& object);
-			void AddSingleBodyShape(ActorPtr pActor, btCollisionShape *shape,
-				CollisionObject& object, IPhysicsEngine::PhysicsObjectType type);
-			void AddMultiBodyShape(ActorPtr pActor, btCollisionShape *shape,
-				CollisionObject& object, IPhysicsEngine::PhysicsObjectType type);
+			void AddShape(ActorPtr pActor, btCollisionShape *shape, CollisionObject& object);
+			void AddSingleBodyShape(ActorPtr pActor, btCollisionShape *shape, CollisionObject& object);
+			void AddMultiBodyShape(ActorPtr pActor, btCollisionShape *shape, CollisionObject& object);
 
 			void SendNewCollisionEvent(const btPersistentManifold * manifold,
 				const btRigidBody * pBody1, const btRigidBody * pBody2);
@@ -86,80 +83,30 @@ namespace GameEngine
 			void CleanUpRigidBodies();
 			void HandleNewCollisions(CollisionPairs& currentTickCollisions);
 			btMotionState *GetMotionStateFrom(const WorldTransformComponent& transform);
-			void CreateRigidBody(ActorPtr pActor, btCollisionShape *shape,
-				CollisionObject& object, int collisionFlags = 0);
+			void CreateRigidBody(ActorPtr pActor, btCollisionShape *shape, CollisionObject& object);
 
 			// Bullet callback handling.
 			static void BulletInternalTickCallback(btDynamicsWorld * const pWorld, const btScalar timeStep);
 			void HandleCallback();
 		};
 
-		class CollisionObject
+		struct CollisionObject
 		{
-		public:
-			CollisionObject(std::weak_ptr<BulletPhysicsData> pBulletPhysicsData,
+			CollisionObject(IPhysicsEngine::PhysicsObjectType type,
 							const std::string& material,
 							const std::string& density,
 							const std::function<float()>& volumeCalculationStrategy,
 							const std::function<float(float)>& rollingFrictionCalculationStrategy = [] (float friction) { return friction / 3.f; })
-							: m_pBulletPhysicsData(pBulletPhysicsData),
-							m_materialId(material), m_densityId(density),
-							m_volumeCalculationStrategy(volumeCalculationStrategy),
-							m_rollingFrictionCalculationStrategy(rollingFrictionCalculationStrategy),
-							m_materialDataFetched(false), m_densityFetched(false),
-							m_materialData(0.f, 0.f), m_density(0.f) { }
-			bool HasMaterial() const
-			{
-				return !m_materialId.empty();
-			}
-			bool HasDensity() const
-			{
-				return !m_densityId.empty();
-			}
-			const MaterialData& FindMaterial()
-			{
-				if (!m_materialDataFetched)
-				{
-					m_materialDataFetched = true;
-					if (HasMaterial() && !m_pBulletPhysicsData.expired())
-					{
-						auto pBulletPhysics = m_pBulletPhysicsData.lock();
-						m_materialData = pBulletPhysics->m_physicsMaterialData->LookupMaterial(m_materialId);
-					}
-				}
-				return m_materialData;
-			}
-			float FindDensity()
-			{
-				if (!m_densityFetched)
-				{
-					m_densityFetched = true;
-					if (HasDensity() && !m_pBulletPhysicsData.expired())
-					{
-						auto pBulletPhysics = m_pBulletPhysicsData.lock();
-						m_density = pBulletPhysics->m_physicsMaterialData->LookupDensity(m_densityId);
-					}
-				}
-				return m_density;
-			}
-			float CalculateVolume() const
-			{
-				return m_volumeCalculationStrategy();
-			}
-			float CalculateRollingFriction() // this could possibly also take the size of the object into account
-			{
-				return m_rollingFrictionCalculationStrategy(FindMaterial().m_friction);
-			}
-		private:
-			const std::weak_ptr<BulletPhysicsData> m_pBulletPhysicsData;
-			const std::string m_materialId;
-			const std::string m_densityId;
-			const std::function<float()> m_volumeCalculationStrategy;
-			const std::function<float(float)> m_rollingFrictionCalculationStrategy;
-			bool m_materialDataFetched;
-			bool m_densityFetched;
-			MaterialData m_materialData;
-			float m_density;
+							: m_objectType(type),
+							m_calculateVolume(volumeCalculationStrategy),
+							m_calculateRollingFriction(rollingFrictionCalculationStrategy),
+							m_material(material), m_density(density) { }
+
+			const IPhysicsEngine::PhysicsObjectType m_objectType;
+			const std::function<float()> m_calculateVolume;
+			const std::function<float(float)> m_calculateRollingFriction;
+			const std::string m_material;
+			const std::string m_density;
 		};
 
 		/* The following functions can be used as volume calculation strategies
@@ -260,10 +207,10 @@ namespace GameEngine
 			float btRadius = m_pData->m_worldScaleConst * radius;
 			btSphereShape * const sphereShape = new btSphereShape(btRadius);
 
-			CollisionObject object(m_pData,
-				material, density, [btRadius] () { return SphereVolume(btRadius); },
+			CollisionObject object(type, material, density,
+				[btRadius] () { return SphereVolume(btRadius); },
 				[] (float friction) { return friction / 5.f; });
-			m_pData->AddShape(pActor, sphereShape, type, object);
+			m_pData->AddShape(pActor, sphereShape, object);
 		}
 
 		void BulletPhysics::VAddBox(ActorPtr pActor, const Vec3& dimensions,
@@ -275,9 +222,9 @@ namespace GameEngine
 			btVector3 btDimensions = Vec3_to_btVector3(dimensions, m_pData->m_worldScaleConst);
 			btBoxShape * const boxShape = new btBoxShape(0.5f * btDimensions);
 
-			CollisionObject object(m_pData,
-				material, density, [btDimensions] () { return BoxVolume(btDimensions); });
-			m_pData->AddShape(pActor, boxShape, type, object);
+			CollisionObject object(type, material, density,
+				[btDimensions] () { return BoxVolume(btDimensions); });
+			m_pData->AddShape(pActor, boxShape, object);
 		}
 
 		void BulletPhysics::VAddConvexMesh(ActorPtr pActor, std::vector<Vec3>& vertices,
@@ -293,9 +240,9 @@ namespace GameEngine
 				[&convexShape, this] (Vec3& vertex) { convexShape->addPoint(
 				Vec3_to_btVector3(vertex, this->m_pData->m_worldScaleConst)); });
 
-			CollisionObject object(m_pData,
-				material, density, [convexShape] () { return AABBVolume(convexShape); });
-			m_pData->AddShape(pActor, convexShape, type, object);
+			CollisionObject object(type, material, density,
+				[convexShape] () { return AABBVolume(convexShape); });
+			m_pData->AddShape(pActor, convexShape, object);
 		}
 
 		void BulletPhysics::VAddConvexMesh(ActorPtr pActor, std::vector<Vec4>& planeEquations,
@@ -318,9 +265,9 @@ namespace GameEngine
 
 			btConvexHullShape *convexShape = new btConvexHullShape(&(vertices[0].getX()), vertices.size());
 
-			CollisionObject object(m_pData,
-				material, density, [convexShape] () { return AABBVolume(convexShape); });
-			m_pData->AddShape(pActor, convexShape, type, object);
+			CollisionObject object(type, material, density,
+				[convexShape] () { return AABBVolume(convexShape); });
+			m_pData->AddShape(pActor, convexShape, object);
 		}
 
 		void BulletPhysics::VLoadBspMap(BspLoader& bspLoad, ActorPtr pActor, const std::string& material)
@@ -825,63 +772,62 @@ namespace GameEngine
 			}
 		}
 
-		void BulletPhysicsData::AddShape(ActorPtr pActor, btCollisionShape *shape,
-			IPhysicsEngine::PhysicsObjectType type, CollisionObject& object)
+		void BulletPhysicsData::AddShape(ActorPtr pActor, btCollisionShape *shape, CollisionObject& object)
 		{
 			assert (pActor);
 			if (!pActor)
 				return;
 
-			switch (type)
+			switch (object.m_objectType)
 			{
 			case IPhysicsEngine::PhysicsObjectType::DYNAMIC:
-				AddSingleBodyShape(pActor, shape, object, type);
+				AddSingleBodyShape(pActor, shape, object);
 				break;
 			case IPhysicsEngine::PhysicsObjectType::STATIC:
-				AddMultiBodyShape(pActor, shape, object, type);
+				AddMultiBodyShape(pActor, shape, object);
 				break;
 			case IPhysicsEngine::PhysicsObjectType::TRIGGER:
-				AddSingleBodyShape(pActor, shape, object, type);
+				AddSingleBodyShape(pActor, shape, object);
 				break;
 			default: // Note: Kinematic objects are not supported.
 				std::cerr << "Unsupported physics object type given." << std::endl;
 			}
 		}
 
-		void BulletPhysicsData::AddSingleBodyShape(ActorPtr pActor, btCollisionShape *shape,
-			CollisionObject& object, IPhysicsEngine::PhysicsObjectType type)
+		void BulletPhysicsData::AddSingleBodyShape(ActorPtr pActor, btCollisionShape *shape, CollisionObject& object)
 		{
 			ActorID id = pActor->GetID();
 			assert(m_actorToBulletPhysicsObjectMap.find(id) == m_actorToBulletPhysicsObjectMap.end());
-			m_actorToBulletPhysicsObjectMap[id].reset(new BulletPhysicsObject(id, type));
+			m_actorToBulletPhysicsObjectMap[id].reset(new BulletPhysicsObject(id, object.m_objectType));
 
-			CreateRigidBody(pActor, shape, object, m_collisionFlags[type]);
+			CreateRigidBody(pActor, shape, object);
 		}
 
 		// Note: (currently) in this implementation, only static non-trigger objects may have
 		// several rigid bodies.
-		void BulletPhysicsData::AddMultiBodyShape(ActorPtr pActor, btCollisionShape *shape,
-			CollisionObject& object, IPhysicsEngine::PhysicsObjectType type)
+		void BulletPhysicsData::AddMultiBodyShape(ActorPtr pActor, btCollisionShape *shape, CollisionObject& object)
 		{
-			assert(type == IPhysicsEngine::PhysicsObjectType::STATIC);
+			assert(object.m_objectType == IPhysicsEngine::PhysicsObjectType::STATIC);
 			ActorID id = pActor->GetID();
 
 			auto objectIt = m_actorToBulletPhysicsObjectMap.find(id);
 			if (objectIt == m_actorToBulletPhysicsObjectMap.end())
 			{
 				m_actorToBulletPhysicsObjectMap[id].reset(
-					new BulletPhysicsObject(id, type));
+					new BulletPhysicsObject(id, object.m_objectType));
 			}
 
-			CreateRigidBody(pActor, shape, object, m_collisionFlags[type]);
+			CreateRigidBody(pActor, shape, object);
 		}
 
-		void BulletPhysicsData::CreateRigidBody(ActorPtr pActor, btCollisionShape *shape,
-			CollisionObject& object, int collisionFlags)
+		void BulletPhysicsData::CreateRigidBody(ActorPtr pActor, btCollisionShape *shape, CollisionObject& object)
 		{
-			const MaterialData& matData = object.FindMaterial();
-			float density = object.FindDensity();
-			float mass = density > 0.f ? object.CalculateVolume() * density : 0.f;
+			static MaterialData defaultMaterial = MaterialData(0.f, 0.f);
+			const MaterialData& matData = object.m_material.empty() ?
+				defaultMaterial : m_physicsMaterialData->LookupMaterial(object.m_material);
+			float density = object.m_density.empty() ?
+				0.f : m_physicsMaterialData->LookupDensity(object.m_density);
+			float mass = density > 0.f ? object.m_calculateVolume() * density : 0.f;
 
 			btMotionState *motionState = GetMotionStateFrom(pActor->GetWorldTransform());
 			btVector3 localInertia(0, 0, 0);
@@ -893,7 +839,7 @@ namespace GameEngine
 
 			rbInfo.m_restitution = matData.m_restitution;
 			rbInfo.m_friction = matData.m_friction; // this is the sliding friction (as opposed to rolling friction)
-			rbInfo.m_rollingFriction = object.CalculateRollingFriction();
+			rbInfo.m_rollingFriction = object.m_calculateRollingFriction(matData.m_friction);
 
 			btRigidBody * const pBody = new btRigidBody(rbInfo);
 			if (pBody->getRollingFriction() > 0.f)
@@ -902,7 +848,7 @@ namespace GameEngine
 					btCollisionObject::CF_ANISOTROPIC_ROLLING_FRICTION);
 			}
 
-			pBody->setCollisionFlags(pBody->getCollisionFlags() | collisionFlags);
+			pBody->setCollisionFlags(pBody->getCollisionFlags() | m_collisionFlags[object.m_objectType]);
 
 			m_pDynamicsWorld->addRigidBody(pBody);
 

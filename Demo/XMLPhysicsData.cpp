@@ -109,14 +109,15 @@ namespace GameEngine
 			return true;
 		}
 
-		MaterialData XMLPhysicsData::LookupMaterial(const std::string& materialName)
+		const MaterialData& XMLPhysicsData::LookupMaterial(const std::string& materialName)
 		{
 			auto it = m_materialTable.find(materialName);
+			assert(it != m_materialTable.end());
 			if (it != m_materialTable.end())
 			{
 				return it->second;
 			}
-			return MaterialData(0, 0);
+			return MaterialData(0.f, 0.f);
 		}
 
 		float XMLPhysicsData::LookupDensity(const std::string& materialName)
@@ -127,7 +128,7 @@ namespace GameEngine
 			{
 				return it->second;
 			}
-			return 0;
+			return 0.f;
 		}
 	}
 }

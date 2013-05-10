@@ -29,7 +29,7 @@ namespace GameEngine
 			std::map<std::string, MaterialData> m_materialTable;
 			
 			bool LoadDataFromXML(const std::string& fileName);
-			MaterialData LookupMaterial(const std::string& materialName);
+			const MaterialData& LookupMaterial(const std::string& materialName);
 			float LookupDensity(const std::string& materialName);
 		};
 	}

@@ -3,12 +3,19 @@
 
 namespace GameEngine
 {
+	bool Vec3::operator==(const Vec3& other) const
+	{
+		return Eigen::Vector3f::operator==(other) &&
+			m_handedness == other.m_handedness;
+	}
+
 	std::wostream& operator<<(std::wostream& stream, const Vec3& vec)
 	{
 		stream << L"("
 				<< vec.x() << L" "
 				<< vec.y() << L" "
-				<< vec.z() << L")";
+				<< vec.z() << L") "
+				<< vec.GetHandedness();
 		return stream;
 	}
 
@@ -17,13 +24,13 @@ namespace GameEngine
 		switch(handedness)
 		{
 		case CSHandedness::LEFT:
-			stream << L"LEFT-HANDED";
+			stream << L"LH";
 			break;
 		case CSHandedness::RIGHT:
-			stream << L"RIGHT-HANDED";
+			stream << L"RH";
 			break;
 		case CSHandedness::NONE:
-			stream << L"NO HANDEDNESS";
+			stream << L"NH";
 			break;
 		}
 		return stream;

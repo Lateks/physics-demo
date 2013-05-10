@@ -25,24 +25,27 @@ namespace DemoTest
 			Assert::AreEqual(vector.GetHandedness(), GameEngine::CSHandedness::RIGHT);
 		}
 
-		TEST_METHOD(Vec3FlipHandednessFromLeftToRight)
+		TEST_METHOD(Vec3EqualityComparisonTakesHandednessIntoAccount)
 		{
-			GameEngine::Vec3 rhVector(1, 1, 1);
-			GameEngine::Vec3 lhVector = rhVector.FlipHandedness();
-			Assert::AreEqual(lhVector.GetHandedness(), GameEngine::CSHandedness::LEFT);
-			Assert::AreEqual(rhVector.x(), lhVector.x());
-			Assert::AreEqual(rhVector.y(), lhVector.y());
-			Assert::AreEqual(-rhVector.z(), lhVector.z());
+			GameEngine::Vec3 rhVector(1, 1, 1, GameEngine::CSHandedness::RIGHT);
+			GameEngine::Vec3 lhVector(1, 1, 1, GameEngine::CSHandedness::LEFT);
+			Assert::AreNotEqual(rhVector, lhVector);
 		}
 
 		TEST_METHOD(Vec3FlipHandednessFromRightToLeft)
 		{
+			GameEngine::Vec3 rhVector(1, 1, 1);
+			GameEngine::Vec3 lhVector = rhVector.FlipHandedness();
+			GameEngine::Vec3 expected(1, 1, -1, GameEngine::CSHandedness::LEFT);
+			Assert::AreEqual(expected, lhVector);
+		}
+
+		TEST_METHOD(Vec3FlipHandednessFromLeftToRight)
+		{
 			GameEngine::Vec3 lhVector(1, 1, 1, GameEngine::CSHandedness::LEFT);
 			GameEngine::Vec3 rhVector = lhVector.FlipHandedness();
-			Assert::AreEqual(rhVector.GetHandedness(), GameEngine::CSHandedness::RIGHT);
-			Assert::AreEqual(lhVector.x(), rhVector.x());
-			Assert::AreEqual(lhVector.y(), rhVector.y());
-			Assert::AreEqual(-lhVector.z(), rhVector.z());
+			GameEngine::Vec3 expected(1, 1, -1, GameEngine::CSHandedness::RIGHT);
+			Assert::AreEqual(expected, rhVector);
 		}
 
 		TEST_METHOD(Vec3HandednessFlipHasNoEffectWhenVectorHasNoHandedness)

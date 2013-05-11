@@ -152,6 +152,16 @@ namespace DemoTest
 			Vec3 negativeXAxis(-1, 0, 0);
 			Assert::AreEqual(negativeXAxis, pDisplay->VGetCameraRightVector());
 		}
+
+		TEST_METHOD(LoadingANonExistentTexture)
+		{
+			Assert::AreEqual(0u, pDisplay->VLoadTexture("foo.png"));
+		}
+
+		TEST_METHOD(LoadingAValidTexture)
+		{
+			Assert::AreEqual(1u, pDisplay->VLoadTexture("..\\assets\\woodbox2.jpg"));
+		}
 	private:
 		IDisplay *pDisplay;
 		bool AreEqual(Quaternion expectedValue, Quaternion actualValue, float errorTerm)

@@ -9,9 +9,11 @@ using namespace GameEngine;
 
 namespace Demo
 {
-	std::shared_ptr<Display::IDisplay> CreateRenderer()
+	std::shared_ptr<Display::IDisplay> CreateRenderer(int width, int height,
+		Display::DriverType driverType, Display::CameraType cameraType)
 	{
-		return std::make_shared<Display::IrrlichtDisplay>();
+		Display::IrrlichtDisplayFactory factory;
+		return factory.VSetupAndOpenWindow(width, height, driverType, cameraType);
 	}
 
 	std::shared_ptr<Events::IEventManager> CreateEventManager()

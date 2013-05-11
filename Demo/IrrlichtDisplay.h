@@ -9,6 +9,13 @@ namespace GameEngine
 {
 	namespace Display
 	{
+		class IrrlichtDisplayFactory : public IDisplayFactory
+		{
+		public:
+			virtual std::shared_ptr<IDisplay> VSetupAndOpenWindow(unsigned int width,
+				unsigned int height, DriverType driverType, CameraType cameraType) override;
+		};
+
 		struct IrrlichtDisplayData;
 		class IrrlichtTimer;
 
@@ -16,8 +23,8 @@ namespace GameEngine
 		{
 		public:
 			friend class IrrlichtTimer;
+			friend class IrrlichtDisplayFactory;
 
-			IrrlichtDisplay();
 			~IrrlichtDisplay();
 
 			virtual std::shared_ptr<IInputState> VGetInputState() const override;
@@ -25,8 +32,6 @@ namespace GameEngine
 			virtual void VYieldDevice() override;
 			virtual bool VRunning() override;
 			virtual bool VWindowActive() override;
-			virtual bool VSetupAndOpenWindow(unsigned int width, unsigned int height,
-				DriverType driverType, CameraType cameraType) override;
 			virtual void VDrawScene() override;
 
 			virtual std::shared_ptr<MessagingWindow> VGetMessageWindow() override;
@@ -53,6 +58,7 @@ namespace GameEngine
 			virtual bool VCursorVisible() const override;
 
 			virtual unsigned int VLoadTexture(const std::string& filePath) override;
+			virtual void VLoadMap(const std::string& mapFilePath, const std::string& meshName, Vec3& position) override;
 
 			// If no texture id is given as a parameter (the texture parameter is 0),
 			// the scene node is rendered as a wireframe).
@@ -67,11 +73,12 @@ namespace GameEngine
 			virtual void VSetSceneNodeLightColors(ActorID actorId, const RGBAColor& specularColor,
 				const RGBAColor& ambientColor, const RGBAColor& diffuseColor) override;
 			virtual void VSetSceneNodeShininess(ActorID actorId, float shininess) override;
-
-			virtual void VLoadMap(const std::string& mapFilePath, const std::string& meshName, Vec3& position) override;
 		private:
+			IrrlichtDisplay();
 			IrrlichtDisplay(IrrlichtDisplay& other);
 			IrrlichtDisplay& operator=(IrrlichtDisplay& other);
+			bool IrrlichtDisplay::VSetupAndOpenWindow(unsigned int width, unsigned int height,
+				DriverType driverType, CameraType cameraType);
 			std::unique_ptr<IrrlichtDisplayData> m_pData;
 		};
 

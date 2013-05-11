@@ -251,6 +251,17 @@ namespace GameEngine
 			return wasdKeyMap;
 		}
 
+		std::shared_ptr<IDisplay> IrrlichtDisplayFactory::VSetupAndOpenWindow(unsigned int width,
+			unsigned int height, DriverType driverType, CameraType cameraType)
+		{
+			auto pDisplay = std::shared_ptr<IrrlichtDisplay>(new IrrlichtDisplay());
+			if (pDisplay && !pDisplay->VSetupAndOpenWindow(width, height, driverType, cameraType))
+			{
+				pDisplay.reset();
+			}
+			return pDisplay;
+		}
+
 		bool IrrlichtDisplay::VSetupAndOpenWindow(unsigned int width, unsigned int height,
 			DriverType driverType, CameraType cameraType)
 		{
@@ -301,65 +312,44 @@ namespace GameEngine
 		void IrrlichtDisplay::VSetCameraPosition(Vec3& newPosition)
 		{
 			assert(m_pData->m_pCamera);
-			if (m_pData->m_pCamera)
-			{
-				m_pData->m_pCamera->setPosition(ConvertVector(newPosition));
-				m_pData->m_pCamera->updateAbsolutePosition();
-			}
+			m_pData->m_pCamera->setPosition(ConvertVector(newPosition));
+			m_pData->m_pCamera->updateAbsolutePosition();
 		}
 
 		void IrrlichtDisplay::VSetCameraTarget(Vec3& newTarget)
 		{
 			assert(m_pData->m_pCamera);
-			if (m_pData->m_pCamera)
-			{
-				m_pData->m_pCamera->setTarget(ConvertVector(newTarget));
-			}
+			m_pData->m_pCamera->setTarget(ConvertVector(newTarget));
 		}
 
 		void IrrlichtDisplay::VSetCameraUpVector(Vec3& newUpVector)
 		{
 			assert(m_pData->m_pCamera);
-			if (m_pData->m_pCamera)
-			{
-				m_pData->m_pCamera->setUpVector(ConvertVector(newUpVector));
-			}
+			m_pData->m_pCamera->setUpVector(ConvertVector(newUpVector));
 		}
 
 		void IrrlichtDisplay::VSetCameraRotation(Quaternion newRotation)
 		{
 			assert(m_pData->m_pCamera);
-			if (m_pData->m_pCamera)
-			{
-				m_pData->m_pCamera->setRotation(QuaternionToEuler(newRotation));
-			}
+			m_pData->m_pCamera->setRotation(QuaternionToEuler(newRotation));
 		}
 
 		void IrrlichtDisplay::VSetCameraFOV(float degrees)
 		{
 			assert(m_pData->m_pCamera);
-			if (m_pData->m_pCamera)
-			{
-				m_pData->m_pCamera->setFOV(irr::core::degToRad(degrees));
-			}
+			m_pData->m_pCamera->setFOV(irr::core::degToRad(degrees));
 		}
 
 		void IrrlichtDisplay::VSetCameraNearPlaneDistance(float distance)
 		{
 			assert(m_pData->m_pCamera);
-			if (m_pData->m_pCamera)
-			{
-				m_pData->m_pCamera->setNearValue(distance);
-			}
+			m_pData->m_pCamera->setNearValue(distance);
 		}
 
 		void IrrlichtDisplay::VSetCameraFarPlaneDistance(float distance)
 		{
 			assert(m_pData->m_pCamera);
-			if (m_pData->m_pCamera)
-			{
-				m_pData->m_pCamera->setFarValue(distance);
-			}
+			m_pData->m_pCamera->setFarValue(distance);
 		}
 
 		void IrrlichtDisplay::VHideCursor()
@@ -374,6 +364,7 @@ namespace GameEngine
 
 		bool IrrlichtDisplay::VCursorVisible() const
 		{
+			assert(m_pData->m_pCamera);
 			return m_pData->m_pDevice->getCursorControl()->isVisible();
 		}
 
@@ -388,6 +379,7 @@ namespace GameEngine
 
 		bool IrrlichtDisplay::VRunning()
 		{
+			assert(m_pData->m_pDevice);
 			if (!m_pData->m_pDevice)
 				return false;
 			return m_pData->m_pDevice->run();
@@ -395,6 +387,7 @@ namespace GameEngine
 
 		bool IrrlichtDisplay::VWindowActive()
 		{
+			assert(m_pData->m_pDevice);
 			if (!m_pData->m_pDevice)
 				return false;
 			return m_pData->m_pDevice->isWindowActive();
@@ -418,18 +411,21 @@ namespace GameEngine
 
 		void IrrlichtDisplay::VAddSphereSceneNode(float radius, ActorPtr pActor, unsigned int texture, bool lightingOn)
 		{
+			assert(m_pData->m_pSmgr);
 			auto node = m_pData->m_pSmgr->addSphereSceneNode(radius);
 			m_pData->AddSceneNode(pActor, node, texture, lightingOn);
 		}
 
 		void IrrlichtDisplay::VAddCubeSceneNode(float dim, ActorPtr pActor, unsigned int texture, bool lightingOn)
 		{
+			assert(m_pData->m_pSmgr);
 			auto node = m_pData->m_pSmgr->addCubeSceneNode(dim);
 			m_pData->AddSceneNode(pActor, node, texture, lightingOn);
 		}
 
 		void IrrlichtDisplay::VAddMeshSceneNode(const std::string& meshFilePath, ActorPtr pActor, unsigned int texture, bool lightingOn)
 		{
+			assert(m_pData->m_pSmgr);
 			auto mesh = m_pData->m_pSmgr->getMesh(meshFilePath.c_str());
 			if (mesh)
 			{
@@ -440,12 +436,14 @@ namespace GameEngine
 
 		void IrrlichtDisplay::VAddLightSceneNode(const Vec3& position, const RGBAColor& color, float lightRadius)
 		{
+			assert(m_pData->m_pSmgr);
 			irr::video::SColorf irrColor(color.r(), color.g(), color.b(), color.a());
 			m_pData->m_pSmgr->addLightSceneNode(0, ConvertVector(position), irrColor, lightRadius);
 		}
 
 		void IrrlichtDisplay::VSetGlobalAmbientLight(const RGBAColor& color)
 		{
+			assert(m_pData->m_pSmgr);
 			m_pData->m_pSmgr->setAmbientLight(ConvertRGBAColorToSColorf(color));
 		}
 
@@ -493,6 +491,7 @@ namespace GameEngine
 		void IrrlichtDisplay::VLoadMap(const std::string& mapFilePath,
 			const std::string& meshName, Vec3& position)
 		{
+			assert(m_pData->m_pDevice && m_pData->m_pSmgr);
 			if (!m_pData->m_pDevice || !m_pData->m_pSmgr)
 				return;
 			m_pData->m_pDevice->getFileSystem()->addFileArchive(mapFilePath.c_str());
@@ -513,6 +512,7 @@ namespace GameEngine
 
 		Vec3 IrrlichtDisplay::VGetCameraTarget() const
 		{
+			assert(m_pData->m_pCamera);
 			auto cameraLookAt = m_pData->m_pCamera->getTarget();
 			return ConvertVector(cameraLookAt);
 		}
@@ -537,6 +537,7 @@ namespace GameEngine
 
 		Quaternion IrrlichtDisplay::VGetCameraRotation() const
 		{
+			assert(m_pData->m_pCamera);
 			return EulerToQuaternion(m_pData->m_pCamera->getRotation());
 		}
 
@@ -572,6 +573,7 @@ namespace GameEngine
 
 		unsigned int IrrlichtDisplayData::GetTime()
 		{
+			assert(m_pDevice);
 			return m_pDevice->getTimer()->getTime();
 		}
 
@@ -580,7 +582,7 @@ namespace GameEngine
 		{
 			if (!pActor)
 			{
-				pNode->drop();
+				pNode->remove();
 				return;
 			}
 

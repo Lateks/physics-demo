@@ -33,8 +33,6 @@ namespace GameEngine
 			virtual void VYieldDevice() = 0;
 			virtual bool VRunning() = 0;
 			virtual bool VWindowActive() = 0;
-			virtual bool VSetupAndOpenWindow(unsigned int width, unsigned int height,
-				DriverType driverType, CameraType cameraType) = 0;
 			virtual void VDrawScene() = 0;
 
 			virtual std::shared_ptr<MessagingWindow> VGetMessageWindow() = 0;
@@ -63,6 +61,7 @@ namespace GameEngine
 			// Returns a unique id that can be used to refer to the texture.
 			// Returns 0 if loading fails.
 			virtual unsigned int VLoadTexture(const std::string& filePath) = 0;
+			virtual void VLoadMap(const std::string& mapFilePath, const std::string& meshName, Vec3& position) = 0;
 
 			virtual void VAddSphereSceneNode(float radius, ActorPtr pActor, unsigned int texture = 0, bool lightingOn = false) = 0;
 			virtual void VAddCubeSceneNode(float dim, ActorPtr pActor, unsigned int texture = 0, bool lightingOn = false) = 0;
@@ -77,8 +76,12 @@ namespace GameEngine
 			virtual void VSetSceneNodeShininess(ActorID actorId, float shininess) = 0;
 
 			virtual void VSetGlobalAmbientLight(const RGBAColor& color) = 0;
+		};
 
-			virtual void VLoadMap(const std::string& mapFilePath, const std::string& meshName, Vec3& position) = 0;
+		class IDisplayFactory
+		{
+			virtual std::shared_ptr<IDisplay> VSetupAndOpenWindow(unsigned int width,
+				unsigned int height, DriverType driverType, CameraType cameraType) = 0;
 		};
 	}
 }

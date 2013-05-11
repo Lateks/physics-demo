@@ -4,6 +4,7 @@
 #include <Vec3.h>
 #include <Vec4.h>
 #include <vector>
+#include <memory>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace GameEngine::Display;
@@ -17,13 +18,13 @@ namespace DemoTest
 	public:
 		TEST_METHOD_INITIALIZE(InitializeIrrlichtDisplay)
 		{
-			pDisplay = new IrrlichtDisplay();
-			pDisplay->VSetupAndOpenWindow(0, 0, DriverType::NO_WINDOW, CameraType::FPS_WASD);
+			IrrlichtDisplayFactory factory;
+			pDisplay = factory.VSetupAndOpenWindow(0, 0, DriverType::NO_WINDOW, CameraType::FPS_WASD);
 		}
 
 		TEST_METHOD_CLEANUP(CleanUpIrrlichtDisplay)
 		{
-			delete pDisplay;
+			pDisplay.reset();
 		}
 
 		TEST_METHOD(IrrlichtCursorIsVisibleByDefault)
@@ -163,7 +164,7 @@ namespace DemoTest
 			Assert::AreEqual(1u, pDisplay->VLoadTexture("..\\assets\\woodbox2.jpg"));
 		}
 	private:
-		IDisplay *pDisplay;
+		std::shared_ptr<IDisplay> pDisplay;
 		bool AreEqual(Quaternion expectedValue, Quaternion actualValue, float errorTerm)
 		{
 			return AreEqual(expectedValue.x(), actualValue.x(), errorTerm)

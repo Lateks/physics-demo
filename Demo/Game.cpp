@@ -25,17 +25,11 @@ namespace GameEngine
 		auto pGameData = GameData::GetInstance();
 
 		// Setup the display component (rendering and input handling).
-		auto pRenderer = Demo::CreateRenderer();
+		auto pRenderer = Demo::CreateRenderer(1024, 800,
+			Display::DriverType::OPEN_GL, Display::CameraType::FPS_WASD);
 		if (!pRenderer)
 		{
 			PrintError("Failed to create rendering device.");
-			return false;
-		}
-
-		if (!pRenderer->VSetupAndOpenWindow(1024, 800,
-			Display::DriverType::OPEN_GL, Display::CameraType::FPS_WASD))
-		{
-			PrintError("Failed to open OpenGL device.");
 			return false;
 		}
 

@@ -30,8 +30,17 @@ namespace DemoTest
 			GameEngine::Vec3 rhVector(1, 1, 1, GameEngine::CSHandedness::RIGHT);
 			GameEngine::Vec3 rhVector2(1, 1, 1, GameEngine::CSHandedness::RIGHT);
 			GameEngine::Vec3 lhVector(1, 1, 1, GameEngine::CSHandedness::LEFT);
-			Assert::AreNotEqual(rhVector, lhVector);
 			Assert::AreEqual(rhVector, rhVector2);
+			Assert::AreNotEqual(rhVector, lhVector);
+		}
+
+		TEST_METHOD(Vec3NonEqualityComparisonTakesHandednessIntoAccount)
+		{
+			GameEngine::Vec3 rhVector(1, 1, 1, GameEngine::CSHandedness::RIGHT);
+			GameEngine::Vec3 rhVector2(1, 1, 1, GameEngine::CSHandedness::RIGHT);
+			GameEngine::Vec3 lhVector(1, 1, 1, GameEngine::CSHandedness::LEFT);
+			Assert::IsFalse(rhVector != rhVector2);
+			Assert::IsTrue(rhVector != lhVector);
 		}
 
 		TEST_METHOD(Vec3FlipHandednessFromRightToLeft)

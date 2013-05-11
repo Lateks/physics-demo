@@ -9,6 +9,11 @@ namespace GameEngine
 			m_handedness == other.m_handedness;
 	}
 
+	bool Vec3::operator!=(const Vec3& other) const
+	{
+		return !(*this == other);
+	}
+
 	std::wostream& operator<<(std::wostream& stream, const Vec3& vec)
 	{
 		stream << L"("

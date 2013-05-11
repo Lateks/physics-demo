@@ -309,7 +309,7 @@ namespace GameEngine
 		 * applied repeatedly for several simulation steps for it to have an
 		 * effect.
 		 */
-		void BulletPhysics::VApplyForce(const Vec3& direction, float newtons, ActorID id)
+		void BulletPhysics::VApplyForce(const Vec3& direction, float magnitude, ActorID id)
 		{
 			std::shared_ptr<BulletPhysicsObject> pObject = m_pData->GetPhysicsObject(id);
 			// Could e.g. log an error if the body is not found.
@@ -317,7 +317,7 @@ namespace GameEngine
 			{
 				assert(pObject->GetNumBodies() == 1); // only static actors can have many bodies
 				const btVector3 dir = Vec3_to_btVector3(direction);
-				pObject->GetRigidBodies()[0]->applyCentralImpulse(dir.normalized() * newtons);
+				pObject->GetRigidBodies()[0]->applyCentralImpulse(dir.normalized() * magnitude);
 			}
 		}
 

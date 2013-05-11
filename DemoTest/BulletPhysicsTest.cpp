@@ -1,5 +1,6 @@
 #include "CppUnitTest.h"
 #include "ToString.h"
+#include "MockEventReceiver.h"
 #include <BulletPhysics.h>
 #include <EventManager.h>
 #include <GameActor.h>
@@ -43,6 +44,7 @@ namespace DemoTest
 			auto pGame = GameData::GetInstance();
 			pGame->AddActor(pActor);
 			pGame->SetEventManager(pEvents);
+			pGame->SetPhysicsEngine(pPhysics);
 		}
 
 		TEST_METHOD_CLEANUP(CleanupBulletPhysics)
@@ -68,6 +70,27 @@ namespace DemoTest
 			Vec3 gravityVector = (actorPosition - actorStartPosition).normalized();
 			Assert::AreEqual(Vec3(0, -1, 0), gravityVector);
 		}
+
+		// TODO: Test applying a linear force on an object.
+		// TODO: Test applying an angular force on an object.
+		// TODO: Test applying an impulse (force and torque).
+		// TODO: Test removing a physics object.
+		// TODO: Test effects of different materials?
+		// TODO: Test collision events.
+		// TODO: Test separation events.
+		// TODO: Test trigger entry events.
+		// TODO: Test trigger exit events.
+		// TODO: Test stopping an actor.
+		// TODO: Test raycasts:
+		// - subtask: trying to select a trigger
+		// - subtask: trying to select a static object
+		// - subtask: trying to select a dynamic object behind a static object
+		// - subtask: trying to select a dynamic object behind a trigger
+		// - subtask: trying to select a dynamic object inside a trigger
+		//   (from outside the trigger)
+		// TODO: Test adding a pick constraint and sending camera move events.
+		// - subtask: refactor pick constraints
+		// TODO: Test removing a pick constraint and sending camera move events.
 	private:
 		std::shared_ptr<IPhysicsEngine> pPhysics;
 		std::shared_ptr<IEventManager> pEvents;

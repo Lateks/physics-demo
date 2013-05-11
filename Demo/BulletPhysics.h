@@ -32,7 +32,7 @@ namespace GameEngine
 
 			virtual void VRemoveActor(ActorID id) override;
 
-			virtual void VApplyForce(const Vec3& direction, float newtons, ActorID id) override;
+			virtual void VApplyForce(const Vec3& direction, float magnitude, ActorID id) override;
 			virtual void VApplyTorque(const Vec3& direction, float magnitude, ActorID id) override;
 			virtual void VStopActor(ActorID id) override;
 			virtual void VSetLinearVelocity(ActorID id, const Vec3& direction, float magnitude) override;

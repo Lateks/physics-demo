@@ -1,9 +1,8 @@
 #include "CppUnitTest.h"
+#include "MockEventReceiver.h"
 #include <EventManager.h>
 #include <Events.h>
 #include <vector>
-#include <map>
-#include <algorithm>
 #include <functional>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
@@ -12,85 +11,10 @@ using namespace GameEngine::Events;
 namespace DemoTest
 {
 	typedef std::shared_ptr<IEventManager> EventManagerPtr;
-	typedef std::map<EventManagerPtr, std::vector<EventType>> EventManagerToTypeMap;
-	typedef std::map<EventType, std::vector<EventManagerPtr>> EventTypeToManagerMap;
-
-	template < typename E, typename T >
-	void RemoveFromVectorMap(std::map<E, std::vector<T>>& map, E key, T value)
-	{
-		auto iter = map.find(key);
-		if (iter != map.end())
-		{
-			std::remove_if(iter->second.begin(), iter->second.end(),
-				[&value] (T other) { return value == other; });
-			if (iter->second.empty())
-			{
-				map.erase(key);
-			}
-		}
-	}
-
-	template < typename E, typename T >
-	void AddToVectorMap(std::map<E, std::vector<T>>& map, E key, T value)
-	{
-		auto &vec = map[key];
-		if (std::find(vec.begin(), vec.end(), value) == vec.end())
-		{
-			map[key].push_back(value);
-		}
-	}
 
 	TEST_CLASS(EventSystemTest)
 	{
 	public:
-		struct MockEventReceiver
-		{
-			MockEventReceiver()
-				: num_calls(0), num_valid_calls(0), num_invalid_calls(0),
-				eventHandler(), currentRegistrations(), expectedEventTypes()
-			{
-				eventHandler.reset(new std::function<void(EventPtr)>([this] (EventPtr event) { HandleEvent(event); }));
-			}
-
-			void RegisterTo(EventType type, EventManagerPtr pEventManager)
-			{
-				pEventManager->VRegisterHandler(type, eventHandler);
-				AddToVectorMap<EventManagerPtr, EventType>(currentRegistrations, pEventManager, type);
-				AddToVectorMap<EventType, EventManagerPtr>(expectedEventTypes, type, pEventManager);
-			}
-
-			void DeregisterFrom(EventType type, EventManagerPtr pEventManager)
-			{
-				pEventManager->VDeregisterHandler(type, eventHandler);
-				RemoveFromVectorMap<EventManagerPtr, EventType>(currentRegistrations, pEventManager, type);
-				RemoveFromVectorMap<EventType, EventManagerPtr>(expectedEventTypes, type, pEventManager);
-			}
-
-			void HandleEvent(EventPtr event)
-			{
-				if (IsExpectedType(event->VGetEventType()) && !currentRegistrations.empty())
-				{
-					++num_valid_calls;
-				}
-				else
-				{
-					++num_invalid_calls;
-				}
-				++num_calls;
-			}
-
-			bool IsExpectedType(EventType type)
-			{
-				return expectedEventTypes.find(type) != expectedEventTypes.end();
-			}
-
-			int num_calls;
-			int num_valid_calls;
-			int num_invalid_calls; // calls that should not have come to this event handler
-			EventHandlerPtr eventHandler;
-			EventManagerToTypeMap currentRegistrations;
-			EventTypeToManagerMap expectedEventTypes;
-		};
 
 		TEST_METHOD(SingleHandlerReceivesEventsRegisteredTo)
 		{
@@ -100,7 +24,7 @@ namespace DemoTest
 
 			eventMgr->VQueueEvent(std::make_shared<ActorMoveEvent>(0, 1));
 			eventMgr->VDispatchEvents();
-			Assert::AreEqual(1, moveHandler.num_valid_calls);
+			Assert::AreEqual(1, moveHandler.NumValidCallsReceived());
 		}
 
 		TEST_METHOD(SingleHandlerReceivesEventsWithImmediateDispatch)
@@ -110,7 +34,7 @@ namespace DemoTest
 			moveHandler.RegisterTo(EventType::ACTOR_MOVED, eventMgr);
 
 			eventMgr->VDispatchEvent(std::make_shared<ActorMoveEvent>(0, 1));
-			Assert::AreEqual(1, moveHandler.num_valid_calls);
+			Assert::AreEqual(1, moveHandler.NumValidCallsReceived());
 		}
 
 		TEST_METHOD(EventsAreClearedAfterDispatch)
@@ -123,7 +47,7 @@ namespace DemoTest
 			eventMgr->VDispatchEvents();
 			eventMgr->VDispatchEvents();
 			eventMgr->VDispatchEvents();
-			Assert::AreEqual(1, moveHandler.num_valid_calls);
+			Assert::AreEqual(1, moveHandler.NumValidCallsReceived());
 		}
 
 		TEST_METHOD(HandlerDoesNotReceiveEventsNotRegisteredTo)
@@ -134,7 +58,7 @@ namespace DemoTest
 
 			eventMgr->VQueueEvent(std::make_shared<ActorMoveEvent>(0, 1));
 			eventMgr->VDispatchEvents();
-			Assert::AreEqual(0, moveHandler.num_calls);
+			Assert::AreEqual(0, moveHandler.NumCallsReceived());
 		}
 
 		TEST_METHOD(MultipleHandlersCanReceiveTheSameEvent)
@@ -148,8 +72,8 @@ namespace DemoTest
 
 			eventMgr->VQueueEvent(std::make_shared<TriggerEntryEvent>(0, 1, 2));
 			eventMgr->VDispatchEvents();
-			Assert::AreEqual(1, triggerHandler1.num_valid_calls);
-			Assert::AreEqual(1, triggerHandler2.num_valid_calls);
+			Assert::AreEqual(1, triggerHandler1.NumValidCallsReceived());
+			Assert::AreEqual(1, triggerHandler2.NumValidCallsReceived());
 		}
 
 		TEST_METHOD(HandlerDoesNotReceiveEventsAfterDeregistering)
@@ -164,8 +88,8 @@ namespace DemoTest
 			triggerHandler1.DeregisterFrom(eventType, eventMgr);
 			eventMgr->VQueueEvent(std::make_shared<TriggerEntryEvent>(0, 1, 2));
 			eventMgr->VDispatchEvents();
-			Assert::AreEqual(0, triggerHandler1.num_calls);
-			Assert::AreEqual(1, triggerHandler2.num_valid_calls);
+			Assert::AreEqual(0, triggerHandler1.NumCallsReceived());
+			Assert::AreEqual(1, triggerHandler2.NumValidCallsReceived());
 		}
 
 		TEST_METHOD(HandlerIsOnlyEverRegisteredOnce)
@@ -178,7 +102,7 @@ namespace DemoTest
 			moveHandler.RegisterTo(eventType, eventMgr);
 
 			eventMgr->VDispatchEvent(std::make_shared<ActorMoveEvent>(0, 1));
-			Assert::AreEqual(1, moveHandler.num_valid_calls);
+			Assert::AreEqual(1, moveHandler.NumValidCallsReceived());
 		}
 
 		TEST_METHOD(SameHandlerMayRegisterForSeveralDifferentEvents)
@@ -193,7 +117,7 @@ namespace DemoTest
 			eventMgr->VQueueEvent(std::make_shared<TriggerEntryEvent>(0, 1, 2));
 			eventMgr->VQueueEvent(std::make_shared<TriggerExitEvent>(0, 1, 2));
 			eventMgr->VDispatchEvents();
-			Assert::AreEqual(3, eventHandler.num_valid_calls);
+			Assert::AreEqual(3, eventHandler.NumValidCallsReceived());
 		}
 
 		TEST_METHOD(NewEventsQueuedDuringEventDispatchAreSentAtNextDispatch)
@@ -215,7 +139,7 @@ namespace DemoTest
 			MockEventReceiver eventHandler;
 			eventHandler.RegisterTo(EventType::ACTOR_MOVED, eventMgr);
 			eventMgr->VDispatchEvents();
-			Assert::AreEqual(1, eventHandler.num_valid_calls);
+			Assert::AreEqual(1, eventHandler.NumValidCallsReceived());
 
 		}
 
@@ -242,7 +166,7 @@ namespace DemoTest
 			MockEventReceiver eventHandler;
 			eventHandler.RegisterTo(EventType::ACTOR_MOVED, eventMgr);
 			eventMgr->VDispatchEvents();
-			Assert::AreEqual(0, eventHandler.num_calls);
+			Assert::AreEqual(0, eventHandler.NumValidCallsReceived());
 		}
 
 		TEST_METHOD(DequeuingEventsDuringDispatchDoesNotAffectEventsBeingDispatched)
@@ -262,7 +186,7 @@ namespace DemoTest
 			eventMgr->VQueueEvent(std::make_shared<ActorMoveEvent>(0, 1));
 			eventMgr->VDispatchEvents();
 			Assert::IsTrue(customHandlerCalled);
-			Assert::AreEqual(1, eventHandler.num_valid_calls);
+			Assert::AreEqual(1, eventHandler.NumValidCallsReceived());
 		}
 	};
 }

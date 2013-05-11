@@ -1,6 +1,7 @@
 #include "CppUnitTest.h"
 #include "ToString.h"
 #include <BulletPhysics.h>
+#include <EventManager.h>
 #include <GameActor.h>
 #include <GameData.h>
 #include <WorldTransformComponent.h>
@@ -16,6 +17,8 @@ using GameEngine::WorldTransformComponent;
 using GameEngine::Vec3;
 using GameEngine::Quaternion;
 using GameEngine::GameData;
+using GameEngine::Events::EventManager;
+using GameEngine::Events::IEventManager;
 
 namespace
 {
@@ -33,8 +36,13 @@ namespace DemoTest
 			// to ensure initialization before use.
 			pPhysics.reset(new BulletPhysics(0.05f));
 			pPhysics->VInitEngine("..\\assets\\materials.xml");
+
 			pActor.reset(new GameActor());
-			GameData::GetInstance()->AddActor(pActor);
+			pEvents.reset(new EventManager());
+
+			auto pGame = GameData::GetInstance();
+			pGame->AddActor(pActor);
+			pGame->SetEventManager(pEvents);
 		}
 
 		TEST_METHOD_CLEANUP(CleanupBulletPhysics)
@@ -42,6 +50,7 @@ namespace DemoTest
 			pPhysics.reset();
 			GameData::GetInstance()->RemoveActor(pActor->GetID());
 			pActor.reset();
+			pEvents.reset();
 		}
 
 		TEST_METHOD(DefaultGravityPointsTowardNegativeYAxis)
@@ -61,6 +70,7 @@ namespace DemoTest
 		}
 	private:
 		std::shared_ptr<IPhysicsEngine> pPhysics;
+		std::shared_ptr<IEventManager> pEvents;
 		std::shared_ptr<GameActor> pActor;
 	};
 }

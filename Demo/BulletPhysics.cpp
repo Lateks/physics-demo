@@ -160,9 +160,13 @@ namespace GameEngine
 			}
 			if (changed)
 			{
-				Events::EventPtr event;
-				event.reset(new Events::ActorMoveEvent(pGame->CurrentTimeMs(), pActor->GetID()));
-				pGame->GetEventManager()->VQueueEvent(event);
+				auto pEventManager = pGame->GetEventManager();
+				if (pEventManager)
+				{
+					std::shared_ptr<Events::IEventData> event = std::make_shared<Events::ActorMoveEvent>(
+						pGame->CurrentTimeMs(), pActor->GetID());
+					pEventManager->VQueueEvent(event);
+				}
 			}
 		}
 

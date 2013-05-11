@@ -52,6 +52,15 @@ namespace GameEngine
 		m_pData->m_actors[pActor->GetID()] = pActor; 
 	}
 
+	void GameData::RemoveActor(ActorID id)
+	{
+		auto iter = m_pData->m_actors.find(id);
+		if (iter != m_pData->m_actors.end())
+		{
+			m_pData->m_actors.erase(iter);
+		}
+	}
+
 	std::shared_ptr<GameData> GameData::GetInstance()
 	{
 		if (!pInstance)

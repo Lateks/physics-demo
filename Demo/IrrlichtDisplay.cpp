@@ -220,17 +220,17 @@ namespace GameEngine
 			m_pData->m_pDriver->endScene();
 		}
 
-		inline E_DRIVER_TYPE GetDriverType(DRIVER_TYPE type)
+		inline E_DRIVER_TYPE GetDriverType(DriverType type)
 		{
 			switch (type)
 			{
-			case DRIVER_TYPE::DIRECT_3D9:
+			case DriverType::DIRECT_3D9:
 				return E_DRIVER_TYPE::EDT_DIRECT3D9;
-			case DRIVER_TYPE::OPEN_GL:
+			case DriverType::OPEN_GL:
 				return E_DRIVER_TYPE::EDT_OPENGL;
-			case DRIVER_TYPE::SOFTWARE:
+			case DriverType::SOFTWARE:
 				return E_DRIVER_TYPE::EDT_SOFTWARE;
-			case DRIVER_TYPE::NO_WINDOW:
+			case DriverType::NO_WINDOW:
 				return E_DRIVER_TYPE::EDT_NULL;
 			default:
 				return E_DRIVER_TYPE::EDT_SOFTWARE;
@@ -252,7 +252,7 @@ namespace GameEngine
 		}
 
 		bool IrrlichtDisplay::VSetupAndOpenWindow(unsigned int width, unsigned int height,
-			DRIVER_TYPE driverType, CAMERA_TYPE cameraType)
+			DriverType driverType, CameraType cameraType)
 		{
 			m_pData->m_pDevice = irr::createDevice(GetDriverType(driverType),
 				irr::core::dimension2d<u32>(width, height),
@@ -271,10 +271,10 @@ namespace GameEngine
 
 			switch (cameraType)
 			{
-			case CAMERA_TYPE::STATIC:
+			case CameraType::STATIC:
 				m_pData->m_pCamera = m_pData->m_pSmgr->addCameraSceneNode();
 				break;
-			case CAMERA_TYPE::FPS_WASD:
+			case CameraType::FPS_WASD:
 				m_pData->m_pCamera = m_pData->m_pSmgr->addCameraSceneNodeFPS(
 					0, 100.f, 0.5f, -1, CreateWASDKeyMap().get(), 4);
 				break;
@@ -530,7 +530,7 @@ namespace GameEngine
 			auto camera = m_pData->m_pCamera;
 			auto up = camera->getUpVector();
 			auto forward = camera->getTarget() - camera->getAbsolutePosition();
-			auto rightVector = up.crossProduct(forward);
+			auto rightVector = up.crossProduct(forward).normalize();
 
 			return ConvertVector(rightVector);
 		}

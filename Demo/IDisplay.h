@@ -8,7 +8,7 @@ namespace GameEngine
 {
 	namespace Display
 	{
-		enum class DRIVER_TYPE : uint8_t
+		enum class DriverType : uint8_t
 		{
 			NO_WINDOW,
 			OPEN_GL,
@@ -16,7 +16,7 @@ namespace GameEngine
 			SOFTWARE
 		};
 
-		enum class CAMERA_TYPE : uint8_t
+		enum class CameraType : uint8_t
 		{
 			FPS,
 			FPS_WASD,
@@ -34,7 +34,7 @@ namespace GameEngine
 			virtual bool VRunning() = 0;
 			virtual bool VWindowActive() = 0;
 			virtual bool VSetupAndOpenWindow(unsigned int width, unsigned int height,
-				DRIVER_TYPE driverType, CAMERA_TYPE cameraType) = 0;
+				DriverType driverType, CameraType cameraType) = 0;
 			virtual void VDrawScene() = 0;
 
 			virtual std::shared_ptr<MessagingWindow> VGetMessageWindow() = 0;
@@ -70,10 +70,12 @@ namespace GameEngine
 			virtual void VAddLightSceneNode(const Vec3& position, const RGBAColor& color, float lightRadius) = 0;
 
 			virtual void VRemoveSceneNode(ActorID actorId) = 0;
+
 			virtual void VSetSceneNodeLighting(ActorID actorId, bool lightingOn) = 0;
 			virtual void VSetSceneNodeLightColors(ActorID actorId, const RGBAColor& specularColor = RGBAColor::White,
 				const RGBAColor& ambientColor = RGBAColor::White, const RGBAColor& diffuseColor = RGBAColor::White) = 0;
 			virtual void VSetSceneNodeShininess(ActorID actorId, float shininess) = 0;
+
 			virtual void VSetGlobalAmbientLight(const RGBAColor& color) = 0;
 
 			virtual void VLoadMap(const std::string& mapFilePath, const std::string& meshName, Vec3& position) = 0;

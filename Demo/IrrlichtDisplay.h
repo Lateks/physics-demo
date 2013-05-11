@@ -26,7 +26,7 @@ namespace GameEngine
 			virtual bool VRunning() override;
 			virtual bool VWindowActive() override;
 			virtual bool VSetupAndOpenWindow(unsigned int width, unsigned int height,
-				DRIVER_TYPE driverType, CAMERA_TYPE cameraType) override;
+				DriverType driverType, CameraType cameraType) override;
 			virtual void VDrawScene() override;
 
 			virtual std::shared_ptr<MessagingWindow> VGetMessageWindow() override;

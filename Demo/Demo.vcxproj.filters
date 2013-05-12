@@ -153,6 +153,9 @@
     <ClInclude Include="EngineComponentFactories.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="IrrlichtConversions.h">
+      <Filter>Header Files\Display</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Demo.cpp">
@@ -208,6 +211,9 @@
     </ClCompile>
     <ClCompile Include="WorldTransformComponent.cpp">
       <Filter>Source Files\GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="IrrlichtConversions.cpp">
+      <Filter>Source Files\Display</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

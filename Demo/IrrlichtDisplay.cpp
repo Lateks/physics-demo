@@ -1,14 +1,21 @@
 #include "IrrlichtDisplay.h"
+#include "IrrlichtConversions.h"
 #include "IInputState.h"
 #include "MessagingWindow.h"
+
 #include "GameActor.h"
 #include "WorldTransformComponent.h"
+
 #include "GameData.h"
+
 #include "EventManager.h"
 #include "Events.h"
+
 #include "Vec3.h"
 #include "Vec4.h"
+
 #include <irrlicht.h>
+
 #include <iostream>
 #include <cassert>
 #include <memory>
@@ -37,7 +44,6 @@ using GameEngine::Events::ActorMoveEvent;
 namespace
 {
 	unsigned int TEXTURE_ID = 0;
-	const unsigned int RGB_MAX = 255;
 }
 
 namespace GameEngine
@@ -108,66 +114,6 @@ namespace GameEngine
 			irr::video::SColor m_color;
 			void SetFontHeight();
 		};
-
-		/*
-		* Conversion functions between Irrlicht linear algebra types and the game engine's
-		* corresponding types.
-		*/
-		vector3df ConvertVector(const Vec3& vector)
-		{
-			vector3df converted(vector.x(), vector.y(), vector.z());
-			if (vector.GetHandedness() == CSHandedness::RIGHT)
-			{
-				converted.Z = -converted.Z;
-			}
-			return converted;
-		}
-
-		// This assumes left-handed coordinate system for the input vector.
-		inline Vec3 ConvertVector(const vector3df& vector)
-		{
-			return Vec3(vector.X, vector.Y, -vector.Z);
-		}
-
-		inline quaternion ConvertQuaternion(const Quaternion& quat)
-		{
-			return quaternion(quat.x(), quat.y(), quat.z(), quat.w());
-		}
-
-		inline Quaternion ConvertQuaternion(const irr::core::quaternion& quat)
-		{
-			return Quaternion(quat.X, quat.Y, quat.Z, quat.W);
-		}
-
-		// return value is in degrees
-		vector3df QuaternionToEuler(const quaternion& quat)
-		{
-			vector3df eulerRot;
-			quat.toEuler(eulerRot);
-			return eulerRot * irr::core::RADTODEG;
-		}
-
-		// return value is in degrees
-		vector3df QuaternionToEuler(const Quaternion& quat)
-		{
-			return QuaternionToEuler(ConvertQuaternion(quat));
-		}
-
-		inline Quaternion EulerToQuaternion(const vector3df& euler)
-		{
-			return ConvertQuaternion(quaternion(euler * irr::core::DEGTORAD));
-		}
-
-		irr::video::SColorf ConvertRGBAColorToSColorf(const RGBAColor& color)
-		{
-			return irr::video::SColorf(color.r(), color.g(), color.b(), color.a());
-		}
-
-		SColor ConvertRGBAColorToSColor(const RGBAColor& color)
-		{
-			return irr::video::SColor((u32) color.a() * RGB_MAX,
-				(u32) color.r() * RGB_MAX, (u32) color.g() * RGB_MAX, (u32) color.b() * RGB_MAX);
-		}
 
 		/*
 		 * Implementation of the IrrlichtTimer class.
@@ -331,7 +277,7 @@ namespace GameEngine
 		void IrrlichtDisplay::VSetCameraRotation(Quaternion newRotation)
 		{
 			assert(m_pData->m_pCamera);
-			m_pData->m_pCamera->setRotation(QuaternionToEuler(newRotation));
+			m_pData->m_pCamera->setRotation(QuaternionToEuler(newRotation) * irr::core::RADTODEG);
 		}
 
 		void IrrlichtDisplay::VSetCameraFOV(float degrees)
@@ -626,7 +572,7 @@ namespace GameEngine
 		void IrrlichtDisplayData::SetNodeTransform(
 			irr::scene::ISceneNode *pNode, const WorldTransformComponent& worldTransform)
 		{
-			pNode->setRotation(QuaternionToEuler(worldTransform.GetRotation()));
+			pNode->setRotation(QuaternionToEuler(worldTransform.GetRotation()) * irr::core::RADTODEG);
 			pNode->setPosition(ConvertVector(worldTransform.GetPosition()));
 			pNode->setScale(ConvertVector(worldTransform.GetScale()));
 		}

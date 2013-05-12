@@ -9,7 +9,7 @@
 #include <WorldTransformComponent.h>
 #include <Vec3.h>
 #include <Vec4.h>
-#include <irrlicht.h> // Use irrlicht types to get conversions between quaternions and euler angles.
+#include <IrrlichtConversions.h> // used for conversions between quaternions and euler angles
 #include <memory>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
@@ -118,8 +118,8 @@ namespace DemoTest
 		{
 			Vec3 actorStartPosition(0, 100, 0);
 			pActor->GetWorldTransform().SetPosition(actorStartPosition);
-			irr::core::vector3df startRotation;
-			ConvertQuaternion(pActor->GetWorldTransform().GetRotation()).toEuler(startRotation);
+			Vec3 startRotation = GameEngine::ConvertVector(
+				GameEngine::QuaternionToEuler(pActor->GetWorldTransform().GetRotation()));
 			pPhysics->VAddSphere(pActor, 10.f,
 				GameEngine::Physics::IPhysicsEngine::PhysicsObjectType::DYNAMIC,
 				"balsa", "Normal");
@@ -131,20 +131,20 @@ namespace DemoTest
 			pPhysics->VUpdateSimulation(DELTA_TIME_STEP);
 			pPhysics->VSyncScene();
 
-			irr::core::vector3df actorRotation;
-			ConvertQuaternion(pActor->GetWorldTransform().GetRotation()).toEuler(actorRotation);
-			irr::core::vector3df difference = actorRotation-startRotation;
-			Assert::AreEqual(0.f, difference.Y);
-			Assert::AreEqual(0.f, difference.Z);
-			Assert::IsTrue(AreEqual(PI*DELTA_TIME_STEP, difference.X, 0.00001f));
+			Vec3 actorRotation = GameEngine::ConvertVector(
+				GameEngine::QuaternionToEuler(pActor->GetWorldTransform().GetRotation()));
+			Vec3 difference = actorRotation-startRotation;
+			Assert::AreEqual(0.f, difference.y());
+			Assert::AreEqual(0.f, difference.z());
+			Assert::IsTrue(AreEqual(PI*DELTA_TIME_STEP, difference.x(), 0.00001f));
 		}
 
 		TEST_METHOD(ApplyingATorque)
 		{
 			Vec3 actorStartPosition(0, 100, 0);
 			pActor->GetWorldTransform().SetPosition(actorStartPosition);
-			irr::core::vector3df startRotation;
-			ConvertQuaternion(pActor->GetWorldTransform().GetRotation()).toEuler(startRotation);
+			Vec3 startRotation = GameEngine::ConvertVector(
+				GameEngine::QuaternionToEuler(pActor->GetWorldTransform().GetRotation()));
 			pPhysics->VAddSphere(pActor, 10.f,
 				GameEngine::Physics::IPhysicsEngine::PhysicsObjectType::DYNAMIC,
 				"balsa", "Normal");
@@ -155,12 +155,12 @@ namespace DemoTest
 			pPhysics->VUpdateSimulation(DELTA_TIME_STEP);
 			pPhysics->VSyncScene();
 
-			irr::core::vector3df actorRotation;
-			ConvertQuaternion(pActor->GetWorldTransform().GetRotation()).toEuler(actorRotation);
-			irr::core::vector3df difference = actorRotation-startRotation;
-			Assert::AreEqual(0.f, difference.Y);
-			Assert::AreEqual(0.f, difference.Z);
-			Assert::IsTrue(difference.X > 0.f);
+			Vec3 actorRotation = GameEngine::ConvertVector(
+				GameEngine::QuaternionToEuler(pActor->GetWorldTransform().GetRotation()));
+			Vec3 difference = actorRotation - startRotation;
+			Assert::AreEqual(0.f, difference.y());
+			Assert::AreEqual(0.f, difference.z());
+			Assert::IsTrue(difference.x() > 0.f);
 		}
 
 		TEST_METHOD(StopAMovingActor)
@@ -233,9 +233,5 @@ namespace DemoTest
 		std::shared_ptr<IPhysicsEngine> pPhysics;
 		std::shared_ptr<IEventManager> pEvents;
 		std::shared_ptr<GameActor> pActor;
-		irr::core::quaternion ConvertQuaternion(Quaternion& quat)
-		{
-			return irr::core::quaternion(quat.x(), quat.y(), quat.z(), quat.w());
-		}
 	};
 }

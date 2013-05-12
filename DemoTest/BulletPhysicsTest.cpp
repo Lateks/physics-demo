@@ -271,12 +271,9 @@ namespace DemoTest
 			MockEventReceiver receiver;
 			receiver.RegisterTo(EventType::COLLISION_EVENT, pGame->GetEventManager());
 
-			for (int i = 0; i < 60; ++i)
-			{
-				pPhysics->VUpdateSimulation(DELTA_TIME_STEP);
-				pPhysics->VSyncScene();
-				pGame->GetEventManager()->VDispatchEvents();
-			}
+			SimulateSteps(30);
+			Assert::AreEqual(0, receiver.NumCallsReceived());
+			SimulateSteps(30);
 			Assert::AreEqual(1, receiver.NumValidCallsReceived());
 		}
 
@@ -302,17 +299,64 @@ namespace DemoTest
 			MockEventReceiver receiver;
 			receiver.RegisterTo(EventType::SEPARATION_EVENT, pGame->GetEventManager());
 
-			for (int i = 0; i < 30; ++i)
-			{
-				pPhysics->VUpdateSimulation(DELTA_TIME_STEP);
-				pPhysics->VSyncScene();
-				pGame->GetEventManager()->VDispatchEvents();
-			}
+			SimulateSteps(30);
 			Assert::AreEqual(1, receiver.NumValidCallsReceived());
 		}
 
-		// TODO: Test trigger entry events.
-		// TODO: Test trigger exit events.
+		TEST_METHOD(TriggerEntryEventIsSentWhenObjectIsCloseEnoughToTrigger)
+		{
+			auto pGame = GameData::GetInstance();
+			Vec3 actorStartPosition(0, 100, 0);
+			pActor->GetWorldTransform().SetPosition(actorStartPosition);
+			pPhysics->VAddSphere(pActor, 10.f, IPhysicsEngine::PhysicsObjectType::DYNAMIC,
+				"balsa", "Normal");
+
+			auto pActor2 = std::make_shared<GameActor>();
+			pGame->AddActor(pActor);
+			Vec3 distance(75.f, 0, 0);
+			Vec3 actor2StartPosition(actorStartPosition + distance);
+			pActor2->GetWorldTransform().SetPosition(actor2StartPosition);
+			pPhysics->VAddBox(pActor2, Vec3(100.f, 100.f, 100.f),
+				IPhysicsEngine::PhysicsObjectType::TRIGGER);
+
+			pPhysics->VSetGlobalGravity(Vec3(0, 0, 0));
+			pPhysics->VSetLinearVelocity(pActor->GetID(), distance, 20.f);
+
+			MockEventReceiver receiver;
+			receiver.RegisterTo(EventType::ENTER_TRIGGER, pGame->GetEventManager());
+
+			SimulateSteps(30);
+			Assert::AreEqual(0, receiver.NumCallsReceived());
+			SimulateSteps(30);
+			Assert::AreEqual(1, receiver.NumValidCallsReceived());
+		}
+
+		TEST_METHOD(TriggerExitEventIsSentWhenObjectMovesFarEnoughFromTrigger)
+		{
+			auto pGame = GameData::GetInstance();
+			Vec3 actorStartPosition(0, 100, 0);
+			pActor->GetWorldTransform().SetPosition(actorStartPosition);
+			pPhysics->VAddSphere(pActor, 10.f,
+				IPhysicsEngine::PhysicsObjectType::DYNAMIC, "balsa", "Normal");
+
+			auto pActor2 = std::make_shared<GameActor>();
+			pGame->AddActor(pActor);
+			Vec3 distance(40.f, 0, 0);
+			Vec3 actor2StartPosition(actorStartPosition + distance);
+			pActor2->GetWorldTransform().SetPosition(actor2StartPosition);
+			pPhysics->VAddBox(pActor2,
+				Vec3(80.f, 80.f, 80.f), IPhysicsEngine::PhysicsObjectType::TRIGGER);
+
+			pPhysics->VSetGlobalGravity(Vec3(0, 0, 0));
+			pPhysics->VSetLinearVelocity(pActor->GetID(), Vec3(-1.f * distance), 30.f);
+
+			MockEventReceiver receiver;
+			receiver.RegisterTo(EventType::EXIT_TRIGGER, pGame->GetEventManager());
+
+			SimulateSteps(30);
+			Assert::AreEqual(1, receiver.NumValidCallsReceived());
+		}
+
 		// TODO: Test raycasts:
 		// - subtask: trying to select a trigger
 		// - subtask: trying to select a static object
@@ -329,5 +373,14 @@ namespace DemoTest
 		std::shared_ptr<IPhysicsEngine> pPhysics;
 		std::shared_ptr<IEventManager> pEvents;
 		std::shared_ptr<GameActor> pActor;
+		void SimulateSteps(int steps)
+		{
+			for (int i = 0; i < steps; ++i)
+			{
+				pPhysics->VUpdateSimulation(DELTA_TIME_STEP);
+				pPhysics->VSyncScene();
+				pEvents->VDispatchEvents();
+			}
+		}
 	};
 }

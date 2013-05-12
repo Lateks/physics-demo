@@ -823,7 +823,18 @@ namespace GameEngine
 		void BulletPhysicsData::AddSingleBodyShape(ActorPtr pActor, btCollisionShape *shape, CollisionObject& object)
 		{
 			ActorID id = pActor->GetID();
-			assert(m_actorToBulletPhysicsObjectMap.find(id) == m_actorToBulletPhysicsObjectMap.end());
+			auto iter = m_actorToBulletPhysicsObjectMap.find(id);
+			assert(iter == m_actorToBulletPhysicsObjectMap.end());
+			if (iter != m_actorToBulletPhysicsObjectMap.end())
+			{
+				auto &rigidBodies = iter->second->GetRigidBodies();
+				std::for_each(rigidBodies.begin(), rigidBodies.end(),
+					[this] (btRigidBody *pBody)
+				{
+					m_rigidBodyToActorMap.erase(pBody);
+					RemoveCollisionObject(pBody);
+				});
+			}
 			m_actorToBulletPhysicsObjectMap[id].reset(new BulletPhysicsObject(id, object.m_objectType));
 
 			CreateRigidBody(pActor, shape, object);

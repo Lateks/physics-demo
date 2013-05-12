@@ -25,7 +25,8 @@ using GameEngine::Events::IEventManager;
 
 namespace
 {
-	const float deltaTimeStep = 1/60.f;
+	const float DELTA_TIME_STEP = 1/60.f;
+	const float PI = 3.14159f;
 }
 
 namespace DemoTest
@@ -65,7 +66,7 @@ namespace DemoTest
 				GameEngine::Physics::IPhysicsEngine::PhysicsObjectType::DYNAMIC,
 				"balsa", "Normal");
 
-			pPhysics->VUpdateSimulation(deltaTimeStep);
+			pPhysics->VUpdateSimulation(DELTA_TIME_STEP);
 			pPhysics->VSyncScene();
 
 			Vec3 actorPosition = pActor->GetWorldTransform().GetPosition();
@@ -85,7 +86,7 @@ namespace DemoTest
 			pPhysics->VApplyForce(directionOfForce, 10.f, pActor->GetID());
 			pPhysics->VSetGlobalGravity(Vec3(0, 0, 0)); // disregard gravity
 
-			pPhysics->VUpdateSimulation(deltaTimeStep);
+			pPhysics->VUpdateSimulation(DELTA_TIME_STEP);
 			pPhysics->VSyncScene();
 
 			Vec3 actorPosition = pActor->GetWorldTransform().GetPosition();
@@ -105,7 +106,7 @@ namespace DemoTest
 			pPhysics->VSetLinearVelocity(pActor->GetID(), directionOfVelocity, 10.f);
 			pPhysics->VSetGlobalGravity(Vec3(0, 0, 0)); // disregard gravity
 
-			pPhysics->VUpdateSimulation(deltaTimeStep);
+			pPhysics->VUpdateSimulation(DELTA_TIME_STEP);
 			pPhysics->VSyncScene();
 
 			Vec3 actorPosition = pActor->GetWorldTransform().GetPosition();
@@ -124,11 +125,10 @@ namespace DemoTest
 				"balsa", "Normal");
 
 			// Set an angular velocity about the x axis in radians per second.
-			float pi = 3.14159f;
-			pPhysics->VSetAngularVelocity(pActor->GetID(), Vec3(1, 0, 0), pi);
+			pPhysics->VSetAngularVelocity(pActor->GetID(), Vec3(1, 0, 0), PI);
 			pPhysics->VSetGlobalGravity(Vec3(0, 0, 0)); // disregard gravity
 
-			pPhysics->VUpdateSimulation(deltaTimeStep);
+			pPhysics->VUpdateSimulation(DELTA_TIME_STEP);
 			pPhysics->VSyncScene();
 
 			irr::core::vector3df actorRotation;
@@ -136,7 +136,7 @@ namespace DemoTest
 			irr::core::vector3df difference = actorRotation-startRotation;
 			Assert::AreEqual(0.f, difference.Y);
 			Assert::AreEqual(0.f, difference.Z);
-			Assert::IsTrue(AreEqual(pi*deltaTimeStep, difference.X, 0.00001f));
+			Assert::IsTrue(AreEqual(PI*DELTA_TIME_STEP, difference.X, 0.00001f));
 		}
 
 		TEST_METHOD(ApplyingATorque)
@@ -149,10 +149,10 @@ namespace DemoTest
 				GameEngine::Physics::IPhysicsEngine::PhysicsObjectType::DYNAMIC,
 				"balsa", "Normal");
 
-			pPhysics->VApplyTorque(Vec3(1, 0, 0), 3.f, pActor->GetID());
+			pPhysics->VApplyTorque(Vec3(1, 0, 0), PI, pActor->GetID());
 			pPhysics->VSetGlobalGravity(Vec3(0, 0, 0)); // disregard gravity
 
-			pPhysics->VUpdateSimulation(deltaTimeStep);
+			pPhysics->VUpdateSimulation(DELTA_TIME_STEP);
 			pPhysics->VSyncScene();
 
 			irr::core::vector3df actorRotation;
@@ -162,13 +162,38 @@ namespace DemoTest
 			Assert::AreEqual(0.f, difference.Z);
 			Assert::IsTrue(difference.X > 0.f);
 		}
+
+		TEST_METHOD(StopAMovingActor)
+		{
+			Vec3 actorStartPosition(0, 100, 0);
+			pActor->GetWorldTransform().SetPosition(actorStartPosition);
+			pPhysics->VAddSphere(pActor, 10.f,
+				GameEngine::Physics::IPhysicsEngine::PhysicsObjectType::DYNAMIC,
+				"balsa", "Normal");
+
+			pPhysics->VSetLinearVelocity(pActor->GetID(), Vec3(1, 0, 0), 10.f);
+			pPhysics->VSetAngularVelocity(pActor->GetID(), Vec3(-1, 0, 0), PI);
+			pPhysics->VSetGlobalGravity(Vec3(0, 0, 0)); // disregard gravity
+
+			pPhysics->VUpdateSimulation(DELTA_TIME_STEP);
+			pPhysics->VSyncScene();
+			Vec3 oldActorPosition = pActor->GetWorldTransform().GetPosition();
+			Quaternion oldActorRotation = pActor->GetWorldTransform().GetRotation();
+
+			pPhysics->VStopActor(pActor->GetID());
+			pPhysics->VUpdateSimulation(DELTA_TIME_STEP);
+			pPhysics->VSyncScene();
+
+			Assert::AreEqual(oldActorPosition, pActor->GetWorldTransform().GetPosition());
+			Assert::IsTrue(AreEqual(oldActorRotation, pActor->GetWorldTransform().GetRotation(), 0.00001f));
+		}
+
 		// TODO: Test removing a physics object.
 		// TODO: Test effects of different materials?
 		// TODO: Test collision events.
 		// TODO: Test separation events.
 		// TODO: Test trigger entry events.
 		// TODO: Test trigger exit events.
-		// TODO: Test stopping an actor.
 		// TODO: Test raycasts:
 		// - subtask: trying to select a trigger
 		// - subtask: trying to select a static object

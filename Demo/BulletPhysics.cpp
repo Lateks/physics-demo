@@ -342,8 +342,8 @@ namespace GameEngine
 
 		void BulletPhysics::VStopActor(ActorID id)
 		{
-			VSetLinearVelocity(id, Vec3(0, 0, 0), 1.f);
-			VSetAngularVelocity(id, Vec3(0, 0, 0), 1.f);
+			VSetLinearVelocity(id, Vec3(1, 0, 0), 0.f);
+			VSetAngularVelocity(id, Vec3(1, 0, 0), 0.f);
 		}
 
 		void BulletPhysics::VSetLinearVelocity(ActorID id, const Vec3& direction, float magnitude)

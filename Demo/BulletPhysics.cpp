@@ -303,13 +303,7 @@ namespace GameEngine
 			}
 		}
 
-		/* VApplyForce and VApplyTorque are presented in the Game Coding Complete
-		 * example code, but I could not figure out good uses for these. Forces
-		 * are cleared out after each simulation step, so either the impulse
-		 * applied to the object must be very strong or the force must be
-		 * applied repeatedly for several simulation steps for it to have an
-		 * effect.
-		 */
+		// TODO: forces should be scaled too
 		void BulletPhysics::VApplyForce(const Vec3& direction, float magnitude, ActorID id)
 		{
 			std::shared_ptr<BulletPhysicsObject> pObject = m_pData->GetPhysicsObject(id);

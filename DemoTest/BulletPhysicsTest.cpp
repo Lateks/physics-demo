@@ -61,6 +61,7 @@ namespace DemoTest
 			pPhysics.reset();
 			pGame->RemoveActor(pActor->GetID());
 			pActor.reset();
+			pGame->SetEventManager(nullptr);
 			pEvents.reset();
 		}
 
@@ -558,8 +559,165 @@ namespace DemoTest
 			Assert::AreEqual(pActor->GetID(), id); // object is now in the direction the camera points to
 		}
 
-		// TODO: Test removing a pick constraint and sending camera move events.
-		// TODO: Test removal of a physics world object when it is affected by a constraint
+		TEST_METHOD(PickConstraintIsRemovedProperly)
+		{
+			Vec3 actorStartPosition(100, 50, 0);
+			pActor->GetWorldTransform().SetPosition(actorStartPosition);
+			float sphereRadius = 10.f;
+			pPhysics->VAddSphere(pActor, sphereRadius,
+				IPhysicsEngine::PhysicsObjectType::DYNAMIC, "balsa", "Normal");
+
+			pPhysics->VSetGlobalGravity(Vec3(0, 0, 0));
+			Vec3 oldCameraPos(0, 50, 0);
+			Vec3 oldObjectPos(90.f, 50.f, 0.f);
+			unsigned int constraintId = pPhysics->VAddPickConstraint(pActor->GetID(), oldObjectPos, oldCameraPos);
+
+			SimulateSteps(1);
+			pPhysics->VRemoveConstraint(pActor->GetID(), constraintId);
+
+			Vec3 newCameraPos(10, 50, 50);
+			Vec3 newCameraTarget(100, 50, 100);
+			Vec3 actorPositionAfterConstraintRemoval = pActor->GetWorldTransform().GetPosition();
+			auto cameraMoveEvent = std::make_shared<GameEngine::Events::CameraMoveEvent>(
+				0u, newCameraPos, newCameraTarget);
+			pEvents->VQueueEvent(cameraMoveEvent);
+			SimulateSteps(30);
+			Vec3 actorPositionAfterSimulation = pActor->GetWorldTransform().GetPosition();
+
+			Vec3 newActorPosition = pActor->GetWorldTransform().GetPosition();
+			Vec3 pickPosition;
+			GameEngine::ActorID id = pPhysics->VGetClosestActorHit(
+				newCameraPos, newCameraTarget, pickPosition);
+
+			Assert::AreEqual(NO_ACTOR, id);
+			Assert::AreEqual(actorPositionAfterSimulation, actorPositionAfterConstraintRemoval);
+		}
+
+		TEST_METHOD(CanRemovePhysicsWorldObjectWhileItIsConstrained)
+		{
+			Vec3 actorStartPosition(100, 50, 0);
+			pActor->GetWorldTransform().SetPosition(actorStartPosition);
+			float sphereRadius = 10.f;
+			pPhysics->VAddSphere(pActor, sphereRadius,
+				IPhysicsEngine::PhysicsObjectType::DYNAMIC, "balsa", "Normal");
+
+			pPhysics->VSetGlobalGravity(Vec3(0, 0, 0));
+			Vec3 oldCameraPos(0, 50, 0);
+			Vec3 oldObjectPos(90.f, 50.f, 0.f);
+			unsigned int constraintId = pPhysics->VAddPickConstraint(pActor->GetID(), oldObjectPos, oldCameraPos);
+
+			pPhysics->VRemoveActor(pActor->GetID());
+			SimulateSteps(30);
+			Assert::AreEqual(actorStartPosition, pActor->GetWorldTransform().GetPosition());
+		}
+
+		TEST_METHOD(BouncyObjectsBounceOffOtherObjects)
+		{
+			Vec3 actorStartPosition(0, 100, 0);
+			pActor->GetWorldTransform().SetPosition(actorStartPosition);
+			pPhysics->VAddSphere(pActor, 10.f,
+				IPhysicsEngine::PhysicsObjectType::DYNAMIC, "balsa", "Bouncy");
+
+			Vec3 floorStartPosition(0, 0, 0);
+			auto pFloor = std::make_shared<GameActor>();
+			GameData::GetInstance()->AddActor(pFloor);
+			pPhysics->VAddBox(pFloor, Vec3(1000.f, 0.02f, 1000.f),
+				IPhysicsEngine::PhysicsObjectType::STATIC, "", "Normal");
+
+			MockEventReceiver collisionListener;
+			collisionListener.RegisterTo(GameEngine::Events::EventType::COLLISION_EVENT, pEvents);
+
+			Vec3 position;
+			for (int i = 0; i < 60 && collisionListener.NumValidCallsReceived() < 1; ++i)
+			{
+				SimulateSteps(1);
+				position = pActor->GetWorldTransform().GetPosition();
+			}
+			Assert::AreEqual(1, collisionListener.NumValidCallsReceived());
+
+			Vec3 actorPositionBeforeBounce = pActor->GetWorldTransform().GetPosition();
+			SimulateSteps(10);
+			Vec3 actorPositionAfterBounce = pActor->GetWorldTransform().GetPosition();
+			Assert::IsTrue(actorPositionBeforeBounce.y() < actorPositionAfterBounce.y());
+		}
+
+		TEST_METHOD(NonBouncyObjectsDoNotBounce)
+		{
+			Vec3 actorStartPosition(0, 100, 0);
+			pActor->GetWorldTransform().SetPosition(actorStartPosition);
+			pPhysics->VAddSphere(pActor, 10.f,
+				IPhysicsEngine::PhysicsObjectType::DYNAMIC, "balsa", "PlayDough");
+
+			Vec3 floorStartPosition(0, 0, 0);
+			auto pFloor = std::make_shared<GameActor>();
+			GameData::GetInstance()->AddActor(pFloor);
+			pPhysics->VAddBox(pFloor, Vec3(1000.f, 0.02f, 1000.f),
+				IPhysicsEngine::PhysicsObjectType::STATIC, "", "Normal");
+
+			MockEventReceiver collisionListener;
+			collisionListener.RegisterTo(GameEngine::Events::EventType::COLLISION_EVENT, pEvents);
+
+			Vec3 position;
+			for (int i = 0; i < 60 && collisionListener.NumValidCallsReceived() < 1; ++i)
+			{
+				SimulateSteps(1);
+				position = pActor->GetWorldTransform().GetPosition();
+			}
+			Assert::AreEqual(1, collisionListener.NumValidCallsReceived());
+
+			Vec3 actorPositionBeforeCollisionResponse = pActor->GetWorldTransform().GetPosition();
+			SimulateSteps(10);
+			Vec3 actorPositionAfterCollisionResponse = pActor->GetWorldTransform().GetPosition();
+			Assert::IsTrue(actorPositionBeforeCollisionResponse.y() > actorPositionAfterCollisionResponse.y());
+		}
+
+		TEST_METHOD(SphereEventuallyStopsRollingWhenBothSphereAndSurfaceHaveFriction)
+		{
+			Vec3 actorStartPosition(0, 10, 0);
+			pActor->GetWorldTransform().SetPosition(actorStartPosition);
+			pPhysics->VAddSphere(pActor, 12.f,
+				IPhysicsEngine::PhysicsObjectType::DYNAMIC, "Titanium", "Normal");
+
+			Vec3 floorStartPosition(0, 0, 0);
+			auto pFloor = std::make_shared<GameActor>();
+			GameData::GetInstance()->AddActor(pFloor);
+			pPhysics->VAddBox(pFloor, Vec3(2000.f, 0.02f, 2000.f),
+				IPhysicsEngine::PhysicsObjectType::STATIC, "", "Normal");
+
+			pPhysics->VApplyForce(Vec3(1.f, 0.f, 0.f), 1.0f, pActor->GetID()); // apply a slight force to get the ball rolling
+
+			SimulateSteps(150);
+			Vec3 oldActorPosition = pActor->GetWorldTransform().GetPosition();
+			Quaternion oldActorRotation = pActor->GetWorldTransform().GetRotation();
+			SimulateSteps(10);
+
+			Assert::AreEqual(oldActorPosition, pActor->GetWorldTransform().GetPosition());
+			Assert::AreEqual(oldActorRotation, pActor->GetWorldTransform().GetRotation());
+		}
+
+		TEST_METHOD(IfObjectHasNoFrictionItDoesNotStopSlidingOrRolling)
+		{
+			Vec3 actorStartPosition(0, 10, 0);
+			pActor->GetWorldTransform().SetPosition(actorStartPosition);
+			pPhysics->VAddSphere(pActor, 12.f,
+				IPhysicsEngine::PhysicsObjectType::DYNAMIC, "balsa");
+
+			Vec3 floorStartPosition(0, 0, 0);
+			auto pFloor = std::make_shared<GameActor>();
+			GameData::GetInstance()->AddActor(pFloor);
+			pPhysics->VAddBox(pFloor, Vec3(2000.f, 0.02f, 2000.f),
+				IPhysicsEngine::PhysicsObjectType::STATIC, "", "");
+
+			pPhysics->VApplyForce(Vec3(1.f, 0.f, 0.f), 0.05f, pActor->GetID()); // apply a slight force to get the ball rolling
+
+			SimulateSteps(500);
+			Vec3 oldActorPosition = pActor->GetWorldTransform().GetPosition();
+			Quaternion oldActorRotation = pActor->GetWorldTransform().GetRotation();
+			SimulateSteps(10);
+
+			Assert::AreNotEqual(oldActorPosition, pActor->GetWorldTransform().GetPosition());
+			Assert::AreNotEqual(oldActorRotation, pActor->GetWorldTransform().GetRotation());
+		}
 	private:
 		std::shared_ptr<IPhysicsEngine> pPhysics;
 		std::shared_ptr<IEventManager> pEvents;

@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <cmath>
 #include <set>
+#include <stdexcept>
 #include <iostream> // used for error output
 
 using std::shared_ptr;
@@ -816,7 +817,7 @@ namespace GameEngine
 				AddSingleBodyShape(pActor, shape, object);
 				break;
 			default: // Note: Kinematic objects are not supported.
-				std::cerr << "Unsupported physics object type given." << std::endl;
+				throw std::domain_error("Unsupported physics object type given.");
 			}
 		}
 

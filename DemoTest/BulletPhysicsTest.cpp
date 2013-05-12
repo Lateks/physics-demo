@@ -512,12 +512,20 @@ namespace DemoTest
 			Assert::IsTrue(AreEqual(sphereRadius, distance, 0.04f));
 		}
 
+		// This object type is declared in the IPhysicsEngine header but is not
+		// currently implemented.
+		TEST_METHOD(KinematicObjectsAreUnsupported)
+		{
+			Assert::ExpectException<std::domain_error>([this] () {
+				pPhysics->VAddSphere(pActor, 10.f, IPhysicsEngine::PhysicsObjectType::KINEMATIC);
+			});
+		}
+
 		// TODO: Test adding a pick constraint and sending camera move events.
 		// - subtask: refactor pick constraints
 		// TODO: Test removing a pick constraint and sending camera move events.
 		// TODO: Test removal of a physics world object when it is affected by a constraint
 		// TODO: Test effects of different materials?
-		// TODO: Test adding a body for the same actor twice?
 	private:
 		std::shared_ptr<IPhysicsEngine> pPhysics;
 		std::shared_ptr<IEventManager> pEvents;

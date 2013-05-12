@@ -4,6 +4,7 @@
 #include "Vec3.h"
 #include "Vec4.h"
 #include "IEventManager.h"
+#include <vector>
 
 namespace GameEngine
 {

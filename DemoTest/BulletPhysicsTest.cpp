@@ -2,6 +2,7 @@
 #include "ToString.h"
 #include "MockEventReceiver.h"
 #include "EqualityComparison.h"
+#include "Events.h"
 #include <BulletPhysics.h>
 #include <EventManager.h>
 #include <GameActor.h>
@@ -55,8 +56,10 @@ namespace DemoTest
 
 		TEST_METHOD_CLEANUP(CleanupBulletPhysics)
 		{
+			auto pGame = GameData::GetInstance();
+			pGame->SetPhysicsEngine(nullptr);
 			pPhysics.reset();
-			GameData::GetInstance()->RemoveActor(pActor->GetID());
+			pGame->RemoveActor(pActor->GetID());
 			pActor.reset();
 			pEvents.reset();
 		}
@@ -513,7 +516,7 @@ namespace DemoTest
 		}
 
 		// This object type is declared in the IPhysicsEngine header but is not
-		// currently implemented.
+		// currently implemented in the BulletPhysics class.
 		TEST_METHOD(KinematicObjectsAreUnsupported)
 		{
 			Assert::ExpectException<std::domain_error>([this] () {
@@ -522,7 +525,40 @@ namespace DemoTest
 		}
 
 		// TODO: Test adding a pick constraint and sending camera move events.
-		// - subtask: refactor pick constraints
+		TEST_METHOD(PickConstraintKeepsObjectAtTheSameDistanceItWasPickedAt)
+		{
+			Vec3 actorStartPosition(100, 50, 0);
+			pActor->GetWorldTransform().SetPosition(actorStartPosition);
+			float sphereRadius = 10.f;
+			pPhysics->VAddSphere(pActor, sphereRadius,
+				IPhysicsEngine::PhysicsObjectType::DYNAMIC, "balsa", "Normal");
+
+			Vec3 oldCameraPos(0, 50, 0);
+			Vec3 oldObjectPos(90.f, 50.f, 0.f);
+			pPhysics->VAddPickConstraint(pActor->GetID(), oldObjectPos, oldCameraPos);
+
+			Vec3 newCameraPos(10, 50, 50);
+			Vec3 newCameraTarget(100, 50, 100);
+			auto cameraMoveEvent = std::make_shared<GameEngine::Events::CameraMoveEvent>(
+				0u, newCameraPos, newCameraTarget);
+			pEvents->VQueueEvent(cameraMoveEvent);
+
+			SimulateSteps(30); // it takes a while for the DOF6 constrained object to move to the new pivot point
+
+			Vec3 newActorPosition = pActor->GetWorldTransform().GetPosition();
+			Vec3 oldCameraToActorVector = oldObjectPos - oldCameraPos;
+			Vec3 newCameraToTargetVector = newCameraTarget - newCameraPos;
+			Vec3 newCameraToActorVector = newActorPosition - newCameraPos;
+			Vec3 pickPosition;
+			GameEngine::ActorID id = pPhysics->VGetClosestActorHit(
+				newCameraPos, newCameraTarget, pickPosition);
+
+			Assert::AreNotEqual(newActorPosition, actorStartPosition);
+			Assert::IsTrue(AreEqual(oldCameraToActorVector.norm(),
+				newCameraToActorVector.norm() - sphereRadius, 0.5f/WORLD_SCALE));
+			Assert::AreEqual(pActor->GetID(), id); // object is now in the direction the camera points to
+		}
+
 		// TODO: Test removing a pick constraint and sending camera move events.
 		// TODO: Test removal of a physics world object when it is affected by a constraint
 		// TODO: Test effects of different materials?

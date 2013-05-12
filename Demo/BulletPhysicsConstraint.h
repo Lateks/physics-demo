@@ -21,10 +21,7 @@ namespace GameEngine
 				: m_pConstraint(constraint), m_updaterEventType(Events::EventType::NONE) { }
 			BulletPhysicsConstraint(btTypedConstraint *constraint, Events::EventHandlerPtr handler, Events::EventType type)
 				: m_pConstraint(constraint), m_pConstraintUpdater(handler), m_updaterEventType(type) { }
-			virtual ~BulletPhysicsConstraint()
-			{
-				delete m_pConstraint;
-			}
+			virtual ~BulletPhysicsConstraint() { }
 
 			Events::EventHandlerPtr GetConstraintUpdater()
 			{

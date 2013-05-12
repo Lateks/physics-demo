@@ -25,10 +25,6 @@ namespace GameEngine
 		class IEventManager;
 		class EventManager;
 		class IEventData;
-		class BaseEventData;
-		class CollisionEvent;
-		class SeparationEvent;
-		class ActorMoveEvent;
 	}
 
 	class GameActor;

@@ -560,7 +560,8 @@ namespace GameEngine
 			std::shared_ptr<BulletPhysicsConstraint> pPickConstraint = pObject->GetConstraint(constraintId);
 			assert(pPickConstraint && pPickConstraint->GetBulletConstraint());
 
-			bool isPickConstraint = pPickConstraint->GetConstraintType() == BulletPhysicsConstraint::ConstraintType::PICK_CONSTRAINT;
+			bool isPickConstraint = pPickConstraint->GetConstraintType() ==
+				BulletPhysicsConstraint::ConstraintType::PICK_CONSTRAINT;
 			assert(isPickConstraint);
 			if (!pPickConstraint || !pPickConstraint->GetBulletConstraint() || !isPickConstraint)
 				return;

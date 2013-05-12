@@ -29,6 +29,7 @@ namespace
 	const float DELTA_TIME_STEP = 1/60.f;
 	const float PI = 3.14159f;
 	const float WORLD_SCALE = 0.05f;
+	const GameEngine::ActorID NO_ACTOR = 0u;
 }
 
 namespace DemoTest
@@ -357,18 +358,166 @@ namespace DemoTest
 			Assert::AreEqual(1, receiver.NumValidCallsReceived());
 		}
 
-		// TODO: Test raycasts:
-		// - subtask: trying to select a trigger
-		// - subtask: trying to select a static object
-		// - subtask: trying to select a dynamic object behind a static object
-		// - subtask: trying to select a dynamic object behind a trigger
-		// - subtask: trying to select a dynamic object inside a trigger
-		//   (from outside the trigger)
+		TEST_METHOD(RayTestReturnsZeroIfNoObjectInRange)
+		{
+			Vec3 actorStartPosition(0, 100, 100);
+			pActor->GetWorldTransform().SetPosition(actorStartPosition);
+			pPhysics->VAddSphere(pActor, 10.f,
+				IPhysicsEngine::PhysicsObjectType::DYNAMIC, "balsa", "Normal");
+
+			Vec3 pickPosition;
+			GameEngine::ActorID id = pPhysics->VGetClosestActorHit(
+				Vec3(10, 10, -10), Vec3(12, 90, 100), pickPosition);
+			Assert::AreEqual(NO_ACTOR, id);
+			Assert::AreEqual(Vec3(), pickPosition);
+		}
+
+		TEST_METHOD(RayTestReturnsObjectIdIfDynamicObjectSelected)
+		{
+			Vec3 actorStartPosition(0, 100, 100);
+			pActor->GetWorldTransform().SetPosition(actorStartPosition);
+			float sphereRadius = 10.f;
+			pPhysics->VAddSphere(pActor, sphereRadius,
+				IPhysicsEngine::PhysicsObjectType::DYNAMIC, "balsa", "Normal");
+
+			Vec3 pickPosition;
+			GameEngine::ActorID id = pPhysics->VGetClosestActorHit(
+				Vec3(10, 10, -10), Vec3(5, 98, 95), pickPosition);
+			Assert::AreEqual(pActor->GetID(), id);
+			float distance = (actorStartPosition - pickPosition).norm();
+			Assert::IsTrue(AreEqual(sphereRadius, distance, 0.04f));
+		}
+
+		TEST_METHOD(RayTestCannotPickATrigger)
+		{
+			Vec3 actorStartPosition(0, 50, 100);
+			pActor->GetWorldTransform().SetPosition(actorStartPosition);
+			pPhysics->VAddSphere(pActor, 40.f,
+				IPhysicsEngine::PhysicsObjectType::TRIGGER);
+
+			Vec3 pickPosition;
+			GameEngine::ActorID id = pPhysics->VGetClosestActorHit(
+				Vec3(0, 0, 0), actorStartPosition, pickPosition);
+			Assert::AreEqual(NO_ACTOR, id);
+			Assert::AreEqual(Vec3(), pickPosition);
+		}
+
+		TEST_METHOD(RayTestCannotPickAStaticObject)
+		{
+			Vec3 actorStartPosition(0, 50, 100);
+			pActor->GetWorldTransform().SetPosition(actorStartPosition);
+			pPhysics->VAddSphere(pActor, 40.f,
+				IPhysicsEngine::PhysicsObjectType::STATIC, "", "Normal");
+
+			Vec3 pickPosition;
+			GameEngine::ActorID id = pPhysics->VGetClosestActorHit(
+				Vec3(0, 0, 0), actorStartPosition, pickPosition);
+			Assert::AreEqual(NO_ACTOR, id);
+			Assert::AreEqual(Vec3(), pickPosition);
+		}
+
+		TEST_METHOD(RayTestCannotPickADynamicObjectBehindAStaticObject)
+		{
+			Vec3 actorStartPosition(100, 50, 0);
+			pActor->GetWorldTransform().SetPosition(actorStartPosition);
+			pPhysics->VAddBox(pActor, Vec3(40.f, 40.f, 40.f),
+				IPhysicsEngine::PhysicsObjectType::STATIC, "", "Normal");
+
+			auto pGame = GameData::GetInstance();
+			auto pActor2 = std::make_shared<GameActor>();
+			pGame->AddActor(pActor2);
+			Vec3 actor2StartPosition(actorStartPosition + Vec3(50, 0, 0));
+			pActor2->GetWorldTransform().SetPosition(actor2StartPosition);
+			pPhysics->VAddSphere(pActor2, 10.f,
+				IPhysicsEngine::PhysicsObjectType::DYNAMIC, "balsa", "Normal");
+
+			Vec3 pickPosition;
+			GameEngine::ActorID id = pPhysics->VGetClosestActorHit(
+				Vec3(0, 50, 0), actor2StartPosition, pickPosition);
+			Assert::AreEqual(NO_ACTOR, id);
+			Assert::AreEqual(Vec3(), pickPosition);
+		}
+
+		TEST_METHOD(RayTestCanPickADynamicObjectBehindATrigger)
+		{
+			Vec3 actorStartPosition(100, 50, 0);
+			pActor->GetWorldTransform().SetPosition(actorStartPosition);
+			pPhysics->VAddBox(pActor, Vec3(40.f, 40.f, 40.f),
+				IPhysicsEngine::PhysicsObjectType::TRIGGER);
+
+			auto pGame = GameData::GetInstance();
+			auto pActor2 = std::make_shared<GameActor>();
+			pGame->AddActor(pActor2);
+			Vec3 actor2StartPosition(actorStartPosition + Vec3(50, 0, 0));
+			pActor2->GetWorldTransform().SetPosition(actor2StartPosition);
+
+			float sphereRadius = 10.f;
+			pPhysics->VAddSphere(pActor2, sphereRadius,
+				IPhysicsEngine::PhysicsObjectType::DYNAMIC, "balsa", "Normal");
+
+			Vec3 pickPosition;
+			GameEngine::ActorID id = pPhysics->VGetClosestActorHit(
+				Vec3(0, 50, 0), actor2StartPosition, pickPosition);
+			Assert::AreEqual(pActor2->GetID(), id);
+			float distance = (actor2StartPosition - pickPosition).norm();
+			Assert::IsTrue(AreEqual(sphereRadius, distance, 0.04f));
+		}
+
+		TEST_METHOD(RayTestCanPickADynamicObjectInsideATrigger)
+		{
+			Vec3 actorStartPosition(100, 50, 0);
+			pActor->GetWorldTransform().SetPosition(actorStartPosition);
+			pPhysics->VAddBox(pActor, Vec3(40.f, 40.f, 40.f),
+				IPhysicsEngine::PhysicsObjectType::TRIGGER);
+
+			auto pGame = GameData::GetInstance();
+			auto pActor2 = std::make_shared<GameActor>();
+			pGame->AddActor(pActor2);
+			pActor2->GetWorldTransform().SetPosition(actorStartPosition);
+
+			float sphereRadius = 10.f;
+			pPhysics->VAddSphere(pActor2, sphereRadius,
+				IPhysicsEngine::PhysicsObjectType::DYNAMIC, "balsa", "Normal");
+
+			Vec3 pickPosition;
+			GameEngine::ActorID id = pPhysics->VGetClosestActorHit(
+				Vec3(0, 50, 0), actorStartPosition, pickPosition);
+			Assert::AreEqual(pActor2->GetID(), id);
+			float distance = (actorStartPosition - pickPosition).norm();
+			Assert::IsTrue(AreEqual(sphereRadius, distance, 0.04f));
+		}
+
+		TEST_METHOD(RayTestReturnsTheFirstDynamicObjectHit)
+		{
+			Vec3 actorStartPosition(100, 50, 0);
+			pActor->GetWorldTransform().SetPosition(actorStartPosition);
+			float sphereRadius = 10.f;
+			pPhysics->VAddSphere(pActor, sphereRadius,
+				IPhysicsEngine::PhysicsObjectType::DYNAMIC, "balsa", "Normal");
+
+			auto pGame = GameData::GetInstance();
+			auto pActor2 = std::make_shared<GameActor>();
+			pGame->AddActor(pActor2);
+			Vec3 actor2StartPosition(actorStartPosition + Vec3(50, 0, 0));
+			pActor2->GetWorldTransform().SetPosition(actor2StartPosition);
+
+			pPhysics->VAddSphere(pActor2, sphereRadius,
+				IPhysicsEngine::PhysicsObjectType::DYNAMIC, "balsa", "Normal");
+
+			Vec3 pickPosition;
+			GameEngine::ActorID id = pPhysics->VGetClosestActorHit(
+				Vec3(0, 50, 0), actor2StartPosition, pickPosition);
+			Assert::AreEqual(pActor->GetID(), id);
+			float distance = (actorStartPosition - pickPosition).norm();
+			Assert::IsTrue(AreEqual(sphereRadius, distance, 0.04f));
+		}
+
 		// TODO: Test adding a pick constraint and sending camera move events.
 		// - subtask: refactor pick constraints
 		// TODO: Test removing a pick constraint and sending camera move events.
 		// TODO: Test removal of a physics world object when it is affected by a constraint
 		// TODO: Test effects of different materials?
+		// TODO: Test adding a body for the same actor twice?
 	private:
 		std::shared_ptr<IPhysicsEngine> pPhysics;
 		std::shared_ptr<IEventManager> pEvents;

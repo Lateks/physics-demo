@@ -426,6 +426,7 @@ namespace GameEngine
 						{
 							if (!m_pData->GetPhysicsObject(actorId)->IsTrigger() && objectDistance < closestHitDistance)
 							{
+								actorHit = 0;
 								closestHitDistance = objectDistance;
 							}
 						}

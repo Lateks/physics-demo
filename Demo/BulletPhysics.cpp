@@ -803,7 +803,10 @@ namespace GameEngine
 		{
 			assert (pActor);
 			if (!pActor)
+			{
+				delete shape;
 				return;
+			}
 
 			switch (object.m_objectType)
 			{
@@ -817,6 +820,7 @@ namespace GameEngine
 				AddSingleBodyShape(pActor, shape, object);
 				break;
 			default: // Note: Kinematic objects are not supported.
+				delete shape;
 				throw std::domain_error("Unsupported physics object type given.");
 			}
 		}

@@ -353,10 +353,11 @@ namespace GameEngine
 			if (pObject && !pObject->IsStatic() && pObject->GetNumBodies() > 0)
 			{
 				const btVector3 dir = Vec3_to_btVector3(direction).normalized();
+				float scaledMagnitude = m_pData->m_worldScaleConst * magnitude;
 				auto &bodies = pObject->GetRigidBodies();
 				std::for_each(bodies.begin(), bodies.end(),
-					[&dir, magnitude] (btRigidBody *pBody) {
-						pBody->setLinearVelocity(dir * magnitude);
+					[&dir, scaledMagnitude] (btRigidBody *pBody) {
+						pBody->setLinearVelocity(dir * scaledMagnitude);
 				});
 			}
 		}
@@ -379,7 +380,13 @@ namespace GameEngine
 		void BulletPhysics::VSetGlobalGravity(Vec3& gravity)
 		{
 			assert(m_pData && m_pData->m_pDynamicsWorld);
-			m_pData->m_pDynamicsWorld->setGravity(Vec3_to_btVector3(gravity));
+			m_pData->m_pDynamicsWorld->setGravity(Vec3_to_btVector3(gravity, m_pData->m_worldScaleConst));
+		}
+
+		Vec3 BulletPhysics::VGetGlobalGravity()
+		{
+			assert(m_pData && m_pData->m_pDynamicsWorld);
+			return btVector3_to_Vec3(m_pData->m_pDynamicsWorld->getGravity(), m_pData->m_worldScaleConst);
 		}
 
 		ActorID BulletPhysics::VGetClosestActorHit(Vec3& rayFrom, Vec3& rayTo, Vec3& pickPosition) const

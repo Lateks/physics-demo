@@ -15,6 +15,7 @@
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using GameEngine::Physics::IPhysicsEngine;
 using GameEngine::Physics::BulletPhysics;
+using GameEngine::Events::EventType;
 using GameEngine::GameActor;
 using GameEngine::WorldTransformComponent;
 using GameEngine::Vec3;
@@ -27,6 +28,7 @@ namespace
 {
 	const float DELTA_TIME_STEP = 1/60.f;
 	const float PI = 3.14159f;
+	const float WORLD_SCALE = 0.05f;
 }
 
 namespace DemoTest
@@ -38,7 +40,7 @@ namespace DemoTest
 		{
 			// TODO: make a factory for the physics engine as well,
 			// to ensure initialization before use.
-			pPhysics.reset(new BulletPhysics(0.05f));
+			pPhysics.reset(new BulletPhysics(WORLD_SCALE));
 			pPhysics->VInitEngine("..\\assets\\materials.xml");
 
 			pActor.reset(new GameActor());
@@ -63,8 +65,7 @@ namespace DemoTest
 			Vec3 actorStartPosition(0, 100, 0);
 			pActor->GetWorldTransform().SetPosition(actorStartPosition);
 			pPhysics->VAddSphere(pActor, 10.f,
-				GameEngine::Physics::IPhysicsEngine::PhysicsObjectType::DYNAMIC,
-				"balsa", "Normal");
+				IPhysicsEngine::PhysicsObjectType::DYNAMIC, "balsa", "Normal");
 
 			pPhysics->VUpdateSimulation(DELTA_TIME_STEP);
 			pPhysics->VSyncScene();
@@ -74,13 +75,18 @@ namespace DemoTest
 			Assert::AreEqual(Vec3(0, -1, 0), gravityVector);
 		}
 
+		TEST_METHOD(DefaultGravityAssumesSingleUnitToBeCloseToAMeter)
+		{
+			Vec3 gravity = pPhysics->VGetGlobalGravity();
+			Assert::AreEqual(10.f/WORLD_SCALE, gravity.norm());
+		}
+
 		TEST_METHOD(ApplyingAForce)
 		{
 			Vec3 actorStartPosition(0, 100, 0);
 			pActor->GetWorldTransform().SetPosition(actorStartPosition);
 			pPhysics->VAddSphere(pActor, 10.f,
-				GameEngine::Physics::IPhysicsEngine::PhysicsObjectType::DYNAMIC,
-				"balsa", "Normal");
+				IPhysicsEngine::PhysicsObjectType::DYNAMIC, "balsa", "Normal");
 
 			Vec3 directionOfForce(1, 0, 0);
 			pPhysics->VApplyForce(directionOfForce, 10.f, pActor->GetID());
@@ -99,8 +105,7 @@ namespace DemoTest
 			Vec3 actorStartPosition(0, 100, 0);
 			pActor->GetWorldTransform().SetPosition(actorStartPosition);
 			pPhysics->VAddSphere(pActor, 10.f,
-				GameEngine::Physics::IPhysicsEngine::PhysicsObjectType::DYNAMIC,
-				"balsa", "Normal");
+				IPhysicsEngine::PhysicsObjectType::DYNAMIC, "balsa", "Normal");
 
 			Vec3 directionOfVelocity(1, 0, 0);
 			pPhysics->VSetLinearVelocity(pActor->GetID(), directionOfVelocity, 10.f);
@@ -121,8 +126,7 @@ namespace DemoTest
 			Vec3 startRotation = GameEngine::ConvertVector(
 				GameEngine::QuaternionToEuler(pActor->GetWorldTransform().GetRotation()));
 			pPhysics->VAddSphere(pActor, 10.f,
-				GameEngine::Physics::IPhysicsEngine::PhysicsObjectType::DYNAMIC,
-				"balsa", "Normal");
+				IPhysicsEngine::PhysicsObjectType::DYNAMIC, "balsa", "Normal");
 
 			// Set an angular velocity about the x axis in radians per second.
 			pPhysics->VSetAngularVelocity(pActor->GetID(), Vec3(1, 0, 0), PI);
@@ -212,9 +216,75 @@ namespace DemoTest
 			Assert::IsTrue(AreEqual(oldActorRotation, pActor->GetWorldTransform().GetRotation(), 0.00001f));
 		}
 
-		// TODO: Test effects of different materials?
-		// TODO: Test collision events.
-		// TODO: Test separation events.
+		TEST_METHOD(CollisionEventIsSentWhenObjectsCloseEnough)
+		{
+			auto pGame = GameData::GetInstance();
+			Vec3 actorStartPosition(0, 100, 0);
+			pActor->GetWorldTransform().SetPosition(actorStartPosition);
+			pPhysics->VAddSphere(pActor, 10.f, IPhysicsEngine::PhysicsObjectType::DYNAMIC,
+				"balsa", "Normal");
+
+			// Add another object to collide with.
+			auto pActor2 = std::make_shared<GameActor>();
+			pGame->AddActor(pActor);
+			Vec3 distance(75.f, 0, 0);
+			Vec3 actor2StartPosition(actorStartPosition + distance);
+			pActor2->GetWorldTransform().SetPosition(actor2StartPosition);
+			pPhysics->VAddSphere(pActor2, 50.f, IPhysicsEngine::PhysicsObjectType::DYNAMIC);
+
+			pPhysics->VSetGlobalGravity(Vec3(0, 0, 0));
+
+			/* Move 20 units/sec toward the other object. Because the distance
+			 * between the objects outer perimeters is 20 units, the objects
+			 * should collide within a second. In practice, Bullet detects
+			 * this collision slightly earlier (probably an issue with the
+			 * contact processing threshold?).
+			 */
+			pPhysics->VSetLinearVelocity(pActor->GetID(), distance, 20.f);
+
+			MockEventReceiver receiver;
+			receiver.RegisterTo(EventType::COLLISION_EVENT, pGame->GetEventManager());
+
+			for (int i = 0; i < 60; ++i)
+			{
+				pPhysics->VUpdateSimulation(DELTA_TIME_STEP);
+				pPhysics->VSyncScene();
+				pGame->GetEventManager()->VDispatchEvents();
+			}
+			Assert::AreEqual(1, receiver.NumValidCallsReceived());
+		}
+
+		TEST_METHOD(SeparationEventSentWhenObjectsFarEnough)
+		{
+			auto pGame = GameData::GetInstance();
+			Vec3 actorStartPosition(0, 100, 0);
+			pActor->GetWorldTransform().SetPosition(actorStartPosition);
+			pPhysics->VAddSphere(pActor, 10.f,
+				IPhysicsEngine::PhysicsObjectType::DYNAMIC, "balsa", "Normal");
+
+			// Add another object to separate from.
+			auto pActor2 = std::make_shared<GameActor>();
+			pGame->AddActor(pActor);
+			Vec3 distance(50.f, 0, 0);
+			Vec3 actor2StartPosition(actorStartPosition + distance);
+			pActor2->GetWorldTransform().SetPosition(actor2StartPosition);
+			pPhysics->VAddSphere(pActor2, 40.f, IPhysicsEngine::PhysicsObjectType::DYNAMIC);
+
+			pPhysics->VSetGlobalGravity(Vec3(0, 0, 0));
+			pPhysics->VSetLinearVelocity(pActor->GetID(), Vec3(-1.f * distance), 20.f);
+
+			MockEventReceiver receiver;
+			receiver.RegisterTo(EventType::SEPARATION_EVENT, pGame->GetEventManager());
+
+			for (int i = 0; i < 30; ++i)
+			{
+				pPhysics->VUpdateSimulation(DELTA_TIME_STEP);
+				pPhysics->VSyncScene();
+				pGame->GetEventManager()->VDispatchEvents();
+			}
+			Assert::AreEqual(1, receiver.NumValidCallsReceived());
+		}
+
 		// TODO: Test trigger entry events.
 		// TODO: Test trigger exit events.
 		// TODO: Test raycasts:
@@ -229,6 +299,7 @@ namespace DemoTest
 		// TODO: Test removing a pick constraint and sending camera move events.
 		// TODO: Test removal of a physics world object when it is affected by a constraint
 		// TODO: Additional tests for gravity
+		// TODO: Test effects of different materials?
 	private:
 		std::shared_ptr<IPhysicsEngine> pPhysics;
 		std::shared_ptr<IEventManager> pEvents;

@@ -182,7 +182,7 @@ namespace Demo
 		Vec3 rotationAxis = pDisplay->VGetCameraRightVector();
 		rotationAxis[2] = -rotationAxis[2];
 
-		physics->VSetLinearVelocity(cube->GetID(), throwDirection, 10.f);
+		physics->VSetLinearVelocity(cube->GetID(), throwDirection, 175.f);
 		physics->VSetAngularVelocity(cube->GetID(), rotationAxis, 2.5f);
 	}
 

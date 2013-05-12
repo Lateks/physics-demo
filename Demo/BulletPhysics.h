@@ -39,6 +39,7 @@ namespace GameEngine
 			virtual void VSetAngularVelocity(ActorID id, const Vec3& rotationAxis, float radiansPerSecond) override;
 
 			virtual void VSetGlobalGravity(Vec3& gravity) override;
+			virtual Vec3 VGetGlobalGravity() override;
 
 			virtual ActorID VGetClosestActorHit(Vec3& rayFrom, Vec3& rayTo, Vec3& pickPosition) const override;
 			virtual ConstraintID VAddPickConstraint(ActorID actorID, Vec3& pickPosition, Vec3& cameraPosition) override;

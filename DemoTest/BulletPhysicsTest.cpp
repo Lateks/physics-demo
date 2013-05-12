@@ -131,6 +131,42 @@ namespace DemoTest
 			Assert::AreEqual(directionOfForce, movementVector);
 		}
 
+		TEST_METHOD(ForcesCannotBeAppliedToObjectsWithoutMass)
+		{
+			Vec3 actorStartPosition(0, 100, 0);
+			pActor->GetWorldTransform().SetPosition(actorStartPosition);
+			pPhysics->VAddSphere(pActor, 10.f,
+				IPhysicsEngine::PhysicsObjectType::DYNAMIC);
+
+			Vec3 directionOfForce(1, 0, 0);
+			pPhysics->VApplyForce(directionOfForce, 10.f, pActor->GetID());
+
+			pPhysics->VUpdateSimulation(DELTA_TIME_STEP);
+			pPhysics->VSyncScene();
+
+			Vec3 actorPosition = pActor->GetWorldTransform().GetPosition();
+			float movementVectorLength = (actorPosition - actorStartPosition).norm();
+			Assert::AreEqual(0.f, movementVectorLength);
+		}
+
+		TEST_METHOD(ForcesCannotBeAppliedToStaticObjects)
+		{
+			Vec3 actorStartPosition(0, 100, 0);
+			pActor->GetWorldTransform().SetPosition(actorStartPosition);
+			pPhysics->VAddSphere(pActor, 10.f,
+				IPhysicsEngine::PhysicsObjectType::STATIC, "balsa", "Normal");
+
+			Vec3 directionOfForce(1, 0, 0);
+			pPhysics->VApplyForce(directionOfForce, 10.f, pActor->GetID());
+
+			pPhysics->VUpdateSimulation(DELTA_TIME_STEP);
+			pPhysics->VSyncScene();
+
+			Vec3 actorPosition = pActor->GetWorldTransform().GetPosition();
+			float movementVectorLength = (actorPosition - actorStartPosition).norm();
+			Assert::AreEqual(0.f, movementVectorLength);
+		}
+
 		TEST_METHOD(SettingLinearVelocity)
 		{
 			Vec3 actorStartPosition(0, 100, 0);
@@ -267,18 +303,16 @@ namespace DemoTest
 
 			/* Move 20 units/sec toward the other object. Because the distance
 			 * between the objects' outer perimeters is 20 units, the objects
-			 * should collide within a second. In practice, Bullet detects
-			 * this collision slightly earlier (probably an issue with the
-			 * contact processing threshold?).
+			 * should collide within about a second.
 			 */
 			pPhysics->VSetLinearVelocity(pActor->GetID(), distance, 20.f);
 
 			MockEventReceiver receiver;
 			receiver.RegisterTo(EventType::COLLISION_EVENT, pGame->GetEventManager());
 
-			SimulateSteps(30);
+			SimulateSteps(45);
 			Assert::AreEqual(0, receiver.NumCallsReceived());
-			SimulateSteps(30);
+			SimulateSteps(15);
 			Assert::AreEqual(1, receiver.NumValidCallsReceived());
 		}
 
@@ -559,6 +593,25 @@ namespace DemoTest
 			Assert::AreEqual(pActor->GetID(), id); // object is now in the direction the camera points to
 		}
 
+		TEST_METHOD(ObjectUnderPickConstraintCannotChangeAngleDueToTorque) // Note: an angular velocity can still be explicitly set
+		{
+			Vec3 actorStartPosition(100, 50, 0);
+			pActor->GetWorldTransform().SetPosition(actorStartPosition);
+			float sphereRadius = 10.f;
+			pPhysics->VAddSphere(pActor, sphereRadius,
+				IPhysicsEngine::PhysicsObjectType::DYNAMIC, "balsa", "Normal");
+
+			Vec3 oldCameraPos(0, 50, 0);
+			Vec3 oldObjectPos(90.f, 50.f, 0.f);
+			pPhysics->VAddPickConstraint(pActor->GetID(), oldObjectPos, oldCameraPos);
+
+			pPhysics->VApplyTorque(Vec3(1.f, 0.f, 0.f), PI, pActor->GetID());
+			Quaternion oldRotation = pActor->GetWorldTransform().GetRotation();
+			SimulateSteps(20);
+
+			Assert::AreEqual(oldRotation, pActor->GetWorldTransform().GetRotation());
+		}
+
 		TEST_METHOD(PickConstraintIsRemovedProperly)
 		{
 			Vec3 actorStartPosition(100, 50, 0);
@@ -591,6 +644,35 @@ namespace DemoTest
 
 			Assert::AreEqual(NO_ACTOR, id);
 			Assert::AreEqual(actorPositionAfterSimulation, actorPositionAfterConstraintRemoval);
+		}
+
+		TEST_METHOD(TorqueWorksNormallyOnObjectAfterRemovalOfPickConstraint)
+		{
+			Vec3 actorStartPosition(100, 50, 0);
+			pActor->GetWorldTransform().SetPosition(actorStartPosition);
+			float sphereRadius = 10.f;
+			pPhysics->VAddSphere(pActor, sphereRadius,
+				IPhysicsEngine::PhysicsObjectType::DYNAMIC, "balsa", "Normal");
+			pPhysics->VSetGlobalGravity(Vec3(0, 0, 0));
+
+			Vec3 oldCameraPos(0, 50, 0);
+			Vec3 oldObjectPos(90.f, 50.f, 0.f);
+			unsigned int constraintId = pPhysics->VAddPickConstraint(pActor->GetID(), oldObjectPos, oldCameraPos);
+
+			SimulateSteps(1);
+			pPhysics->VRemoveConstraint(pActor->GetID(), constraintId);
+
+			pPhysics->VApplyTorque(Vec3(1.f, 0.f, 0.f), PI, pActor->GetID());
+			Vec3 oldRotation = GameEngine::ConvertVector(
+				GameEngine::QuaternionToEuler(pActor->GetWorldTransform().GetRotation()));
+			SimulateSteps(2);
+
+			Vec3 newRotation = GameEngine::ConvertVector(
+				GameEngine::QuaternionToEuler(pActor->GetWorldTransform().GetRotation()));
+			Vec3 difference = newRotation-oldRotation;
+			Assert::AreNotEqual(0.f, difference.x());
+			Assert::AreEqual(0.f, difference.y());
+			Assert::AreEqual(0.f, difference.z());
 		}
 
 		TEST_METHOD(CanRemovePhysicsWorldObjectWhileItIsConstrained)

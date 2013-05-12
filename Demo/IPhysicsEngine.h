@@ -56,7 +56,7 @@ namespace GameEngine
 			virtual void VApplyTorque(const Vec3& direction, float magnitude, ActorID id) = 0;
 			virtual void VStopActor(ActorID id) = 0; // set velocity to 0
 			virtual void VSetLinearVelocity(ActorID id, const Vec3& direction, float magnitude) = 0;
-			virtual void VSetAngularVelocity(ActorID id, const Vec3& rotationAxis, float magnitude) = 0;
+			virtual void VSetAngularVelocity(ActorID id, const Vec3& rotationAxis, float radiansPerSecond) = 0;
 
 			virtual void VSetGlobalGravity(Vec3& gravity) = 0;
 

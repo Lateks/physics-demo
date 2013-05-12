@@ -36,7 +36,7 @@ namespace GameEngine
 			virtual void VApplyTorque(const Vec3& direction, float magnitude, ActorID id) override;
 			virtual void VStopActor(ActorID id) override;
 			virtual void VSetLinearVelocity(ActorID id, const Vec3& direction, float magnitude) override;
-			virtual void VSetAngularVelocity(ActorID id, const Vec3& rotationAxis, float magnitude) override;
+			virtual void VSetAngularVelocity(ActorID id, const Vec3& rotationAxis, float radiansPerSecond) override;
 
 			virtual void VSetGlobalGravity(Vec3& gravity) override;
 

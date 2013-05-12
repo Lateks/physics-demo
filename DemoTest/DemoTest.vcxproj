@@ -86,12 +86,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="EqualityComparison.h" />
     <ClInclude Include="MockEventReceiver.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="ToString.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BulletPhysicsTest.cpp" />
+    <ClCompile Include="EqualityComparison.cpp" />
     <ClCompile Include="EventSystemTest.cpp" />
     <ClCompile Include="IrrlichtDisplayTest.cpp" />
     <ClCompile Include="MockEventReceiver.cpp" />

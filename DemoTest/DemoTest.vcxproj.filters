@@ -24,6 +24,9 @@
     <ClInclude Include="MockEventReceiver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="EqualityComparison.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="VectorTest.cpp">
@@ -39,6 +42,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="MockEventReceiver.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="EqualityComparison.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

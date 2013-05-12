@@ -1,5 +1,6 @@
 #include "CppUnitTest.h"
 #include "ToString.h"
+#include "EqualityComparison.h"
 #include <IrrlichtDisplay.h>
 #include <Vec3.h>
 #include <Vec4.h>
@@ -165,16 +166,5 @@ namespace DemoTest
 		}
 	private:
 		std::shared_ptr<IDisplay> pDisplay;
-		bool AreEqual(Quaternion expectedValue, Quaternion actualValue, float errorTerm)
-		{
-			return AreEqual(expectedValue.x(), actualValue.x(), errorTerm)
-				&& AreEqual(expectedValue.y(), actualValue.y(), errorTerm)
-				&& AreEqual(expectedValue.z(), actualValue.z(), errorTerm)
-				&& AreEqual(expectedValue.w(), actualValue.w(), errorTerm);
-		}
-		bool AreEqual(float expectedValue, float actualValue, float errorTerm)
-		{
-			return abs(actualValue - expectedValue) < errorTerm;
-		}
 	};
 }

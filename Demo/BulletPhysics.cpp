@@ -312,23 +312,31 @@ namespace GameEngine
 		void BulletPhysics::VApplyForce(const Vec3& direction, float magnitude, ActorID id)
 		{
 			std::shared_ptr<BulletPhysicsObject> pObject = m_pData->GetPhysicsObject(id);
+			assert(pObject);
 			// Could e.g. log an error if the body is not found.
-			if (pObject->GetNumBodies() > 0)
+			if (pObject && !pObject->IsStatic() && pObject->GetNumBodies() > 0)
 			{
-				assert(pObject->GetNumBodies() == 1); // only static actors can have many bodies
-				const btVector3 dir = Vec3_to_btVector3(direction);
-				pObject->GetRigidBodies()[0]->applyCentralImpulse(dir.normalized() * magnitude);
+				const btVector3 dir = Vec3_to_btVector3(direction).normalized();
+				auto &bodies = pObject->GetRigidBodies();
+				std::for_each(bodies.begin(), bodies.end(),
+					[&dir, magnitude] (btRigidBody *pBody) {
+						pBody->applyCentralImpulse(dir * magnitude);
+				});
 			}
 		}
 
 		void BulletPhysics::VApplyTorque(const Vec3& direction, float magnitude, ActorID id)
 		{
 			std::shared_ptr<BulletPhysicsObject> pObject = m_pData->GetPhysicsObject(id);
-			if (pObject->GetNumBodies() > 0)
+			assert(pObject);
+			if (pObject && !pObject->IsStatic() && pObject->GetNumBodies() > 0)
 			{
-				assert(pObject->GetNumBodies() == 1);
-				const btVector3 dir = Vec3_to_btVector3(direction);
-				pObject->GetRigidBodies()[0]->applyTorqueImpulse(dir.normalized() * magnitude);
+				const btVector3 dir = Vec3_to_btVector3(direction).normalized();
+				auto &bodies = pObject->GetRigidBodies();
+				std::for_each(bodies.begin(), bodies.end(),
+					[&dir, magnitude] (btRigidBody *pBody) {
+						pBody->applyTorqueImpulse(dir * magnitude);
+				});
 			}
 		}
 
@@ -341,24 +349,30 @@ namespace GameEngine
 		void BulletPhysics::VSetLinearVelocity(ActorID id, const Vec3& direction, float magnitude)
 		{
 			std::shared_ptr<BulletPhysicsObject> pObject = m_pData->GetPhysicsObject(id);
-			if (pObject->GetNumBodies() > 0)
+			assert(pObject);
+			if (pObject && !pObject->IsStatic() && pObject->GetNumBodies() > 0)
 			{
-				assert(pObject->GetNumBodies() == 1);
-
 				const btVector3 dir = Vec3_to_btVector3(direction).normalized();
-				pObject->GetRigidBodies()[0]->setLinearVelocity(dir * magnitude);
+				auto &bodies = pObject->GetRigidBodies();
+				std::for_each(bodies.begin(), bodies.end(),
+					[&dir, magnitude] (btRigidBody *pBody) {
+						pBody->setLinearVelocity(dir * magnitude);
+				});
 			}
 		}
 
-		void BulletPhysics::VSetAngularVelocity(ActorID id, const Vec3& rotationAxis, float magnitude)
+		void BulletPhysics::VSetAngularVelocity(ActorID id, const Vec3& rotationAxis, float radiansPerSecond)
 		{
 			std::shared_ptr<BulletPhysicsObject> pObject = m_pData->GetPhysicsObject(id);
-			if (pObject->GetNumBodies() > 0)
+			assert(pObject);
+			if (pObject && !pObject->IsStatic() && pObject->GetNumBodies() > 0)
 			{
-				assert(pObject->GetNumBodies() == 1);
-
 				const btVector3 axis = Vec3_to_btVector3(rotationAxis).normalized();
-				pObject->GetRigidBodies()[0]->setAngularVelocity(axis * magnitude);
+				auto &bodies = pObject->GetRigidBodies();
+				std::for_each(bodies.begin(), bodies.end(),
+					[&axis, radiansPerSecond] (btRigidBody *pBody) {
+						pBody->setAngularVelocity(axis * radiansPerSecond);
+				});
 			}
 		}
 

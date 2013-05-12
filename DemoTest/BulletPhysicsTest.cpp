@@ -625,20 +625,15 @@ namespace DemoTest
 				IPhysicsEngine::PhysicsObjectType::STATIC, "", "Normal");
 
 			MockEventReceiver collisionListener;
-			collisionListener.RegisterTo(GameEngine::Events::EventType::COLLISION_EVENT, pEvents);
+			collisionListener.RegisterTo(GameEngine::Events::EventType::SEPARATION_EVENT, pEvents);
 
 			Vec3 position;
-			for (int i = 0; i < 60 && collisionListener.NumValidCallsReceived() < 1; ++i)
+			for (int i = 0; i < 90 && collisionListener.NumValidCallsReceived() < 1; ++i)
 			{
 				SimulateSteps(1);
 				position = pActor->GetWorldTransform().GetPosition();
 			}
 			Assert::AreEqual(1, collisionListener.NumValidCallsReceived());
-
-			Vec3 actorPositionBeforeBounce = pActor->GetWorldTransform().GetPosition();
-			SimulateSteps(10);
-			Vec3 actorPositionAfterBounce = pActor->GetWorldTransform().GetPosition();
-			Assert::IsTrue(actorPositionBeforeBounce.y() < actorPositionAfterBounce.y());
 		}
 
 		TEST_METHOD(NonBouncyObjectsDoNotBounce)
@@ -655,20 +650,15 @@ namespace DemoTest
 				IPhysicsEngine::PhysicsObjectType::STATIC, "", "Normal");
 
 			MockEventReceiver collisionListener;
-			collisionListener.RegisterTo(GameEngine::Events::EventType::COLLISION_EVENT, pEvents);
+			collisionListener.RegisterTo(GameEngine::Events::EventType::SEPARATION_EVENT, pEvents);
 
 			Vec3 position;
-			for (int i = 0; i < 60 && collisionListener.NumValidCallsReceived() < 1; ++i)
+			for (int i = 0; i < 90 && collisionListener.NumValidCallsReceived() < 1; ++i)
 			{
 				SimulateSteps(1);
 				position = pActor->GetWorldTransform().GetPosition();
 			}
-			Assert::AreEqual(1, collisionListener.NumValidCallsReceived());
-
-			Vec3 actorPositionBeforeCollisionResponse = pActor->GetWorldTransform().GetPosition();
-			SimulateSteps(10);
-			Vec3 actorPositionAfterCollisionResponse = pActor->GetWorldTransform().GetPosition();
-			Assert::IsTrue(actorPositionBeforeCollisionResponse.y() > actorPositionAfterCollisionResponse.y());
+			Assert::AreEqual(0, collisionListener.NumCallsReceived());
 		}
 
 		TEST_METHOD(SphereEventuallyStopsRollingWhenBothSphereAndSurfaceHaveFriction)

@@ -766,16 +766,16 @@ namespace GameEngine
 		{
 			for (int manifoldIdx = 0; manifoldIdx < m_pCollisionDispatcher->getNumManifolds(); ++manifoldIdx)
 			{
-				const btPersistentManifold * const pContactPoint =
+				const btPersistentManifold * const pContactManifold =
 					m_pCollisionDispatcher->getManifoldByIndexInternal(manifoldIdx);
-				assert(pContactPoint);
-				if (!pContactPoint)
+				assert(pContactManifold);
+				if (!pContactManifold)
 					continue;
 
 				const btRigidBody * body1 =
-					static_cast<const btRigidBody *>(pContactPoint->getBody0());
+					static_cast<const btRigidBody *>(pContactManifold->getBody0());
 				const btRigidBody * body2 =
-					static_cast<const btRigidBody *>(pContactPoint->getBody1());
+					static_cast<const btRigidBody *>(pContactManifold->getBody1());
 
 				// Keep rigid body pointers always in the same order to make
 				// comparisons between collision pairs easier.
@@ -784,12 +784,20 @@ namespace GameEngine
 					std::swap(body1, body2);
 				}
 
-				const CollisionPair newPair = std::make_pair(body1, body2);
-				currentTickCollisions.insert(newPair);
-
-				if (m_previousTickCollisions.find(newPair) == m_previousTickCollisions.end())
+				float contactThreshold = 0.01f * m_worldScaleConst;
+				for (int i = 0; i < pContactManifold->getNumContacts(); ++i)
 				{
-					SendNewCollisionEvent(pContactPoint, body1, body2);
+					if (pContactManifold->getContactPoint(i).getDistance() < contactThreshold)
+					{
+						const CollisionPair newPair = std::make_pair(body1, body2);
+						currentTickCollisions.insert(newPair);
+
+						if (m_previousTickCollisions.find(newPair) == m_previousTickCollisions.end())
+						{
+							SendNewCollisionEvent(pContactManifold, body1, body2);
+						}
+						break;
+					}
 				}
 			}
 		}

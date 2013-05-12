@@ -879,6 +879,7 @@ namespace GameEngine
 			if (mass > 0.f)
 				shape->calculateLocalInertia(mass, localInertia);
 
+			shape->setMargin(0.01f * m_worldScaleConst);
 			btRigidBody::btRigidBodyConstructionInfo rbInfo(
 				mass, motionState, shape, localInertia);
 

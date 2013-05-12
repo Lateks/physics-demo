@@ -524,7 +524,6 @@ namespace DemoTest
 			});
 		}
 
-		// TODO: Test adding a pick constraint and sending camera move events.
 		TEST_METHOD(PickConstraintKeepsObjectAtTheSameDistanceItWasPickedAt)
 		{
 			Vec3 actorStartPosition(100, 50, 0);
@@ -561,7 +560,6 @@ namespace DemoTest
 
 		// TODO: Test removing a pick constraint and sending camera move events.
 		// TODO: Test removal of a physics world object when it is affected by a constraint
-		// TODO: Test effects of different materials?
 	private:
 		std::shared_ptr<IPhysicsEngine> pPhysics;
 		std::shared_ptr<IEventManager> pEvents;

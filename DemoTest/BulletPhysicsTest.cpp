@@ -60,7 +60,7 @@ namespace DemoTest
 			pEvents.reset();
 		}
 
-		TEST_METHOD(DefaultGravityPointsTowardNegativeYAxis)
+		TEST_METHOD(GravityAffectsObjectsWithNonZeroMass)
 		{
 			Vec3 actorStartPosition(0, 100, 0);
 			pActor->GetWorldTransform().SetPosition(actorStartPosition);
@@ -79,6 +79,32 @@ namespace DemoTest
 		{
 			Vec3 gravity = pPhysics->VGetGlobalGravity();
 			Assert::AreEqual(10.f/WORLD_SCALE, gravity.norm());
+		}
+
+		TEST_METHOD(GravityDoesNotAffectObjectsWithNoMass)
+		{
+			Vec3 actorStartPosition(0, 100, 0);
+			pActor->GetWorldTransform().SetPosition(actorStartPosition);
+			pPhysics->VAddSphere(pActor, 10.f,
+				IPhysicsEngine::PhysicsObjectType::DYNAMIC); // no specified material = no mass
+
+			pPhysics->VUpdateSimulation(DELTA_TIME_STEP);
+			pPhysics->VSyncScene();
+
+			Assert::AreEqual(actorStartPosition, pActor->GetWorldTransform().GetPosition());
+		}
+
+		TEST_METHOD(GravityDoesNotAffectStaticObjects)
+		{
+			Vec3 actorStartPosition(0, 100, 0);
+			pActor->GetWorldTransform().SetPosition(actorStartPosition);
+			pPhysics->VAddSphere(pActor, 10.f,
+				IPhysicsEngine::PhysicsObjectType::STATIC, "Titanium", "");
+
+			pPhysics->VUpdateSimulation(DELTA_TIME_STEP);
+			pPhysics->VSyncScene();
+
+			Assert::AreEqual(actorStartPosition, pActor->GetWorldTransform().GetPosition());
 		}
 
 		TEST_METHOD(ApplyingAForce)
@@ -167,7 +193,7 @@ namespace DemoTest
 			Assert::IsTrue(difference.x() > 0.f);
 		}
 
-		TEST_METHOD(StopAMovingActor)
+		TEST_METHOD(StoppingAMovingActor)
 		{
 			Vec3 actorStartPosition(0, 100, 0);
 			pActor->GetWorldTransform().SetPosition(actorStartPosition);
@@ -235,7 +261,7 @@ namespace DemoTest
 			pPhysics->VSetGlobalGravity(Vec3(0, 0, 0));
 
 			/* Move 20 units/sec toward the other object. Because the distance
-			 * between the objects outer perimeters is 20 units, the objects
+			 * between the objects' outer perimeters is 20 units, the objects
 			 * should collide within a second. In practice, Bullet detects
 			 * this collision slightly earlier (probably an issue with the
 			 * contact processing threshold?).
@@ -298,7 +324,6 @@ namespace DemoTest
 		// - subtask: refactor pick constraints
 		// TODO: Test removing a pick constraint and sending camera move events.
 		// TODO: Test removal of a physics world object when it is affected by a constraint
-		// TODO: Additional tests for gravity
 		// TODO: Test effects of different materials?
 	private:
 		std::shared_ptr<IPhysicsEngine> pPhysics;

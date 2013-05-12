@@ -188,7 +188,30 @@ namespace DemoTest
 			Assert::IsTrue(AreEqual(oldActorRotation, pActor->GetWorldTransform().GetRotation(), 0.00001f));
 		}
 
-		// TODO: Test removing a physics object.
+		TEST_METHOD(RemovingAPhysicsWorldObject)
+		{
+			Vec3 actorStartPosition(0, 100, 0);
+			pActor->GetWorldTransform().SetPosition(actorStartPosition);
+			pPhysics->VAddSphere(pActor, 10.f,
+				GameEngine::Physics::IPhysicsEngine::PhysicsObjectType::DYNAMIC,
+				"balsa", "Normal");
+
+			pPhysics->VSetLinearVelocity(pActor->GetID(), Vec3(1, 0, 0), 10.f);
+			pPhysics->VSetAngularVelocity(pActor->GetID(), Vec3(-1, 0, 0), PI);
+
+			pPhysics->VUpdateSimulation(DELTA_TIME_STEP);
+			pPhysics->VSyncScene();
+			Vec3 oldActorPosition = pActor->GetWorldTransform().GetPosition();
+			Quaternion oldActorRotation = pActor->GetWorldTransform().GetRotation();
+
+			pPhysics->VRemoveActor(pActor->GetID()); // should no longer move or be affected by gravity after removal
+			pPhysics->VUpdateSimulation(DELTA_TIME_STEP);
+			pPhysics->VSyncScene();
+
+			Assert::AreEqual(oldActorPosition, pActor->GetWorldTransform().GetPosition());
+			Assert::IsTrue(AreEqual(oldActorRotation, pActor->GetWorldTransform().GetRotation(), 0.00001f));
+		}
+
 		// TODO: Test effects of different materials?
 		// TODO: Test collision events.
 		// TODO: Test separation events.
@@ -204,6 +227,7 @@ namespace DemoTest
 		// TODO: Test adding a pick constraint and sending camera move events.
 		// - subtask: refactor pick constraints
 		// TODO: Test removing a pick constraint and sending camera move events.
+		// TODO: Test removal of a physics world object when it is affected by a constraint
 		// TODO: Additional tests for gravity
 	private:
 		std::shared_ptr<IPhysicsEngine> pPhysics;

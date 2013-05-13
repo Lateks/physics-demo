@@ -832,7 +832,7 @@ namespace GameEngine
 			ActorID id = pActor->GetID();
 			auto iter = m_actorToBulletPhysicsObjectMap.find(id);
 			assert(iter == m_actorToBulletPhysicsObjectMap.end());
-			if (iter != m_actorToBulletPhysicsObjectMap.end())
+			if (iter != m_actorToBulletPhysicsObjectMap.end()) // remove old bodies if found
 			{
 				auto &rigidBodies = iter->second->GetRigidBodies();
 				std::for_each(rigidBodies.begin(), rigidBodies.end(),

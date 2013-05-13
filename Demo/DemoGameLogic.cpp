@@ -178,8 +178,8 @@ namespace Demo
 
 		Vec3 throwDirection = throwTowards - cameraPos;
 
-		// Make the object rotate slightly "away from the camera".
-		Vec3 rotationAxis = pDisplay->VGetCameraRightVector();
+		// Make the object rotate slightly away from the camera.
+		Vec3 rotationAxis = -1.f * pDisplay->VGetCameraRightVector();
 
 		physics->VSetLinearVelocity(cube->GetID(), throwDirection, 175.f);
 		physics->VSetAngularVelocity(cube->GetID(), rotationAxis, 2.5f);

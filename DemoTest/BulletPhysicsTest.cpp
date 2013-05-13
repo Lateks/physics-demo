@@ -195,8 +195,8 @@ namespace DemoTest
 			pPhysics->VAddSphere(pActor, 10.f,
 				IPhysicsEngine::PhysicsObjectType::DYNAMIC, "balsa", "Normal");
 
-			// Set an angular velocity about the x axis in radians per second.
-			pPhysics->VSetAngularVelocity(pActor->GetID(), Vec3(1, 0, 0), PI);
+			// Set an angular velocity about the negative x axis in radians per second.
+			pPhysics->VSetAngularVelocity(pActor->GetID(), Vec3(-1, 0, 0), PI);
 			pPhysics->VSetGlobalGravity(Vec3(0, 0, 0)); // disregard gravity
 
 			pPhysics->VUpdateSimulation(DELTA_TIME_STEP);
@@ -220,7 +220,7 @@ namespace DemoTest
 				GameEngine::Physics::IPhysicsEngine::PhysicsObjectType::DYNAMIC,
 				"balsa", "Normal");
 
-			pPhysics->VApplyTorque(Vec3(1, 0, 0), PI, pActor->GetID());
+			pPhysics->VApplyTorque(Vec3(-1, 0, 0), PI, pActor->GetID());
 			pPhysics->VSetGlobalGravity(Vec3(0, 0, 0)); // disregard gravity
 
 			pPhysics->VUpdateSimulation(DELTA_TIME_STEP);
@@ -662,7 +662,7 @@ namespace DemoTest
 			SimulateSteps(1);
 			pPhysics->VRemoveConstraint(pActor->GetID(), constraintId);
 
-			pPhysics->VApplyTorque(Vec3(1.f, 0.f, 0.f), PI, pActor->GetID());
+			pPhysics->VApplyTorque(Vec3(-1.f, 0.f, 0.f), PI, pActor->GetID());
 			Vec3 oldRotation = GameEngine::ConvertVector(
 				GameEngine::QuaternionToEuler(pActor->GetWorldTransform().GetRotation()));
 			SimulateSteps(1);

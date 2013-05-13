@@ -328,6 +328,7 @@ namespace GameEngine
 			{
 				const btVector3 dir = Vec3_to_btVector3(direction).normalized();
 				auto &bodies = pObject->GetRigidBodies();
+				magnitude *= -1.f; // this makes torque work according to the "right hand rule"
 				std::for_each(bodies.begin(), bodies.end(),
 					[&dir, magnitude] (btRigidBody *pBody) {
 						pBody->applyTorqueImpulse(dir * magnitude);
@@ -365,6 +366,7 @@ namespace GameEngine
 			{
 				const btVector3 axis = Vec3_to_btVector3(rotationAxis).normalized();
 				auto &bodies = pObject->GetRigidBodies();
+				radiansPerSecond *= -1.f; // this makes rotations work according to the "right hand rule"
 				std::for_each(bodies.begin(), bodies.end(),
 					[&axis, radiansPerSecond] (btRigidBody *pBody) {
 						pBody->setAngularVelocity(axis * radiansPerSecond);

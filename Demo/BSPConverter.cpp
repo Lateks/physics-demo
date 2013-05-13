@@ -8,7 +8,7 @@ Modifications made for the Game Engine Architecture project:
   polyhedra that make up the map geometry.
 
 - Refactored Bullet-specific functionality into BulletPhysics.h/cpp
-  to make it *theoretically* compatible with any physics system...
+  to make it theoretically compatible with any physics system...
   Also: using generic data structures here (std::vector and my own Vec4)
   instead of Bullet's equivalents (btAlignedObjectArray and btVector3).
 
@@ -17,14 +17,13 @@ Modifications made for the Game Engine Architecture project:
   for simplicity) and make the conversion function a free function.
 
 - In Quake III the Y and Z axes are swapped, so I also have to swap these
-  in the calculated plane normals and convert them from a left-handed
-  coordinate system to a right-handed coordinate system (as used in Bullet).
-  For some reason, this is in no way taken into account in the Bullet example
-  project. (The original code can be found here:
-  https://github.com/alanjrogers/bullet-physics/tree/master/Demos/BspDemo.)
+  in the calculated plane normals.
 
 - Removed the scaling parameter since this is done inside the Bullet Physics
   wrapper class anyway.
+
+The original example code can be found at
+https://github.com/alanjrogers/bullet-physics/tree/master/Demos/BspDemo.
 
 ---------------------------------
 
@@ -83,7 +82,7 @@ namespace Utils
 
 							Vec4 planeEq(plane.normal[0],
 										 plane.normal[2],
-										 -plane.normal[1],
+										 plane.normal[1],
 										 -plane.dist); // The last parameter defines the
 													   // distance of the plane to the origin of the
 													   // map.

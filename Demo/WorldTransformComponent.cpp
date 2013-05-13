@@ -7,7 +7,7 @@ namespace GameEngine
 	struct WorldTransformComponentData
 	{
 		WorldTransformComponentData()
-			: m_scale(1, 1, 1, CSHandedness::NONE), m_rotation(0, 0, 0, 1), m_position(0, 0, 0) { }
+			: m_scale(1, 1, 1), m_rotation(0, 0, 0, 1), m_position(0, 0, 0) { }
 		Vec3 m_scale;
 		Quaternion m_rotation;
 		Vec3 m_position;

@@ -665,12 +665,12 @@ namespace DemoTest
 			pPhysics->VApplyTorque(Vec3(1.f, 0.f, 0.f), PI, pActor->GetID());
 			Vec3 oldRotation = GameEngine::ConvertVector(
 				GameEngine::QuaternionToEuler(pActor->GetWorldTransform().GetRotation()));
-			SimulateSteps(2);
+			SimulateSteps(1);
 
 			Vec3 newRotation = GameEngine::ConvertVector(
 				GameEngine::QuaternionToEuler(pActor->GetWorldTransform().GetRotation()));
 			Vec3 difference = newRotation-oldRotation;
-			Assert::AreNotEqual(0.f, difference.x());
+			Assert::IsTrue(difference.x() > 0);
 			Assert::AreEqual(0.f, difference.y());
 			Assert::AreEqual(0.f, difference.z());
 		}

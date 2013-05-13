@@ -180,7 +180,6 @@ namespace Demo
 
 		// Make the object rotate slightly "away from the camera".
 		Vec3 rotationAxis = pDisplay->VGetCameraRightVector();
-		rotationAxis[2] = -rotationAxis[2];
 
 		physics->VSetLinearVelocity(cube->GetID(), throwDirection, 175.f);
 		physics->VSetAngularVelocity(cube->GetID(), rotationAxis, 2.5f);
@@ -218,7 +217,7 @@ namespace Demo
 
 		// Create an actor for the world map to be able to refer to the associated
 		// rigid bodies.
-		Vec3 mapPosition(-1350, -130, 1400);
+		Vec3 mapPosition(-1350, -130, -1400);
 		auto world = std::make_shared<GameActor>(mapPosition);
 		pGame->AddActor(world);
 		pDisplay->VLoadMap("..\\assets\\map-20kdm2.pk3", "20kdm2.bsp", mapPosition);
@@ -229,17 +228,17 @@ namespace Demo
 
 		pPhysics->VLoadBspMap(*pBspLoader, world, "Tarmac");
 
-		pDisplay->VSetCameraPosition(Vec3(80,40,60));
-		pDisplay->VSetCameraTarget(Vec3(-80,40,60));
+		pDisplay->VSetCameraPosition(Vec3(80,40,-60));
+		pDisplay->VSetCameraTarget(Vec3(-80,40,-60));
 
 		// Setup lighting.
-		pDisplay->VAddLightSceneNode(Vec3(-100, 120, 60),
+		pDisplay->VAddLightSceneNode(Vec3(-100, 120, -60),
 			RGBAColor(1.f, 1.f, 1.f, 1.f), 500.f);
-		pDisplay->VAddLightSceneNode(Vec3(200, 120, 60),
+		pDisplay->VAddLightSceneNode(Vec3(200, 120, -60),
 			RGBAColor(1.f, 1.f, 1.f, 1.f), 500.f);
-		pDisplay->VAddLightSceneNode(Vec3(-100, 200, 450),
+		pDisplay->VAddLightSceneNode(Vec3(-100, 200, -450),
 			RGBAColor(1.f, 1.f, 1.f, 1.f), 500.f);
-		pDisplay->VAddLightSceneNode(Vec3(150, 200, 450),
+		pDisplay->VAddLightSceneNode(Vec3(150, 200, -450),
 			RGBAColor(1.f, 1.f, 1.f, 1.f), 500.f);
 		pDisplay->VSetGlobalAmbientLight(RGBAColor(0.1f, 0.1f, 0.15f, 1.f));
 
@@ -248,18 +247,18 @@ namespace Demo
 		WOODBOX_TEXTURE = pDisplay->VLoadTexture("..\\assets\\woodbox2.jpg");
 
 		// Setup actors and their graphical and physical representations.
-		auto ball = std::make_shared<GameActor>(Vec3(0, 50, 60));
+		auto ball = std::make_shared<GameActor>(Vec3(0, 50, -60));
 		pGame->AddActor(ball);
 		pDisplay->VAddSphereSceneNode(10.f, ball, MUD_TEXTURE, true);
 		pPhysics->VAddSphere(ball, 10.f, Physics::IPhysicsEngine::PhysicsObjectType::DYNAMIC, "Titanium", "Bouncy");
 
-		auto cube = std::make_shared<GameActor>(Vec3(0, 80, 60));
+		auto cube = std::make_shared<GameActor>(Vec3(0, 80, -60));
 		pGame->AddActor(cube);
 		pDisplay->VAddCubeSceneNode(25.f, cube, WOODBOX_TEXTURE, true);
 		pPhysics->VAddBox(cube, Vec3(25.f, 25.f, 25.f), Physics::IPhysicsEngine::PhysicsObjectType::DYNAMIC, "manganese", "Normal");
 
 		// Add a trigger node, rendered as a wireframe cube.
-		auto trigger = std::make_shared<GameActor>(Vec3(-100, 125, 450));
+		auto trigger = std::make_shared<GameActor>(Vec3(-100, 125, -450));
 		pGame->AddActor(trigger);
 		pDisplay->VAddCubeSceneNode(125.f, trigger, 0);
 		pPhysics->VAddBox(trigger, Vec3(125.f, 125.f, 125.f), Physics::IPhysicsEngine::PhysicsObjectType::TRIGGER);

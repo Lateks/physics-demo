@@ -118,8 +118,8 @@ namespace DemoTest
 			pDisplay->VSetCameraPosition(cameraPos);
 			pDisplay->VSetCameraTarget(cameraTarget);
 
-			Vec3 negativeZAxis(0, 0, -1);
-			Assert::AreEqual(negativeZAxis, pDisplay->VGetCameraRightVector());
+			Vec3 positiveZAxis(0, 0, 1);
+			Assert::AreEqual(positiveZAxis, pDisplay->VGetCameraRightVector());
 		}
 
 		TEST_METHOD(CanGetCameraRightVectorWhenLookingTowardPositiveX)
@@ -129,8 +129,8 @@ namespace DemoTest
 			pDisplay->VSetCameraPosition(cameraPos);
 			pDisplay->VSetCameraTarget(cameraTarget);
 
-			Vec3 positiveZAxis(0, 0, 1);
-			Assert::AreEqual(positiveZAxis, pDisplay->VGetCameraRightVector());
+			Vec3 negativeZAxis(0, 0, -1);
+			Assert::AreEqual(negativeZAxis, pDisplay->VGetCameraRightVector());
 		}
 
 		TEST_METHOD(CanGetCameraRightVectorWhenLookingTowardNegativeZ)
@@ -140,8 +140,8 @@ namespace DemoTest
 			pDisplay->VSetCameraPosition(cameraPos);
 			pDisplay->VSetCameraTarget(cameraTarget);
 
-			Vec3 positiveXAxis(1, 0, 0);
-			Assert::AreEqual(positiveXAxis, pDisplay->VGetCameraRightVector());
+			Vec3 negativeXAxis(-1, 0, 0);
+			Assert::AreEqual(negativeXAxis, pDisplay->VGetCameraRightVector());
 		}
 
 		TEST_METHOD(CanGetCameraRightVectorWhenLookingTowardPositiveZ)
@@ -151,8 +151,8 @@ namespace DemoTest
 			pDisplay->VSetCameraPosition(cameraPos);
 			pDisplay->VSetCameraTarget(cameraTarget);
 
-			Vec3 negativeXAxis(-1, 0, 0);
-			Assert::AreEqual(negativeXAxis, pDisplay->VGetCameraRightVector());
+			Vec3 positiveXAxis(1, 0, 0);
+			Assert::AreEqual(positiveXAxis, pDisplay->VGetCameraRightVector());
 		}
 
 		TEST_METHOD(LoadingANonExistentTexture)

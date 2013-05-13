@@ -18,17 +18,12 @@ namespace GameEngine
 {
 	vector3df ConvertVector(const Vec3& vector)
 	{
-		vector3df converted(vector.x(), vector.y(), vector.z());
-		if (vector.GetHandedness() == CSHandedness::RIGHT)
-		{
-			converted.Z = -converted.Z;
-		}
-		return converted;
+		return vector3df(vector.x(), vector.y(), vector.z());
 	}
 
 	Vec3 ConvertVector(const vector3df& vector)
 	{
-		return Vec3(vector.X, vector.Y, -vector.Z);
+		return Vec3(vector.X, vector.Y, vector.Z);
 	}
 
 	quaternion ConvertQuaternion(const Quaternion& quat)
@@ -55,7 +50,8 @@ namespace GameEngine
 
 	Quaternion EulerToQuaternion(const vector3df& euler)
 	{
-		return ConvertQuaternion(quaternion(euler * irr::core::DEGTORAD));
+		vector3df rhEuler(euler.X, euler.Y, euler.Z);
+		return ConvertQuaternion(quaternion(rhEuler * irr::core::DEGTORAD));
 	}
 
 	SColorf ConvertRGBAColorToSColorf(const RGBAColor& color)

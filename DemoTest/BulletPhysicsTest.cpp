@@ -780,7 +780,7 @@ namespace DemoTest
 			pPhysics->VAddBox(pFloor, Vec3(2000.f, 0.02f, 2000.f),
 				IPhysicsEngine::PhysicsObjectType::STATIC, "", "");
 
-			pPhysics->VApplyForce(Vec3(1.f, 0.f, 0.f), 0.05f, pActor->GetID()); // apply a slight force to get the ball rolling
+			pPhysics->VApplyForce(Vec3(1.f, 0.f, 0.f), 1.f, pActor->GetID()); // apply a slight force to get the ball rolling
 
 			SimulateSteps(500);
 			Vec3 oldActorPosition = pActor->GetWorldTransform().GetPosition();

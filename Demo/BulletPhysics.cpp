@@ -85,8 +85,9 @@ namespace GameEngine
 				const btRigidBody *pBody1, const btRigidBody *pBody2);
 			void SendSeparationEvent(const btRigidBody *pBody1, const btRigidBody *pBody2);
 			void RemoveCollisionObject(btCollisionObject *obj);
-			btMotionState *GetMotionStateFrom(const WorldTransformComponent& transform);
 			void CreateRigidBody(ActorPtr pActor, btCollisionShape *shape, CollisionObject& object);
+
+			btMotionState *GetMotionStateFrom(const WorldTransformComponent& transform);
 
 			// Bullet callbacks.
 			static void BulletInternalTickCallback(btDynamicsWorld * const pWorld, const btScalar timeStep);
@@ -94,10 +95,15 @@ namespace GameEngine
 			void HandleNewCollisions(CollisionPairs& currentTickCollisions);
 			void HandleRemovedCollisions(CollisionPairs& currentTickCollisions);
 
+			// Applies a function over the rigid bodies of a non-static object.
+			// (No-op if the actor is a static object.)
+			void ApplyOnNonStaticBodies(ActorID id, std::function<void(btRigidBody *pBody)>& func);
+
 			void SetupSystems();
 			void CleanUpRigidBodies();
 		};
 
+		// These are temporary objects used for building a rigid body.
 		struct CollisionObject
 		{
 			CollisionObject(IPhysicsEngine::PhysicsObjectType type,
@@ -117,9 +123,6 @@ namespace GameEngine
 			const std::string m_density;
 		};
 
-		/* The following functions can be used as volume calculation strategies
-		 * for CollisionObject.
-		 */
 		inline float SphereVolume(float radius)
 		{
 			return (4.f/3.f) * 3.14159f * pow(radius, 3);
@@ -150,6 +153,17 @@ namespace GameEngine
 			return m_pData->VInitializeSystems(materialFileName);
 		}
 
+		/* Updates an actor's world transform with the new position and rotation.
+
+		   Note that synchronization is always only done from BulletPhysics to
+		   the actor's global world transform, not the other way around. That meand
+		   that with this implementation, no one else can move these actors.
+		   Note, however, that the only actors moving in this implementation are
+		   dynamic, and therefore are supposed to be fully controlled by the
+		   physics system (unless user controlled constraints are in place).
+		   Other user or AI movable objects would need to be implemented as kinematic
+		   objects.
+		 */
 		void UpdateWorldTransform(ActorPtr pActor, const Vec3& pos, const Quaternion& rot)
 		{
 			shared_ptr<GameData> pGame = GameData::GetInstance();
@@ -171,8 +185,8 @@ namespace GameEngine
 				auto pEventManager = pGame->GetEventManager();
 				if (pEventManager)
 				{
-					std::shared_ptr<Events::IEventData> event = std::make_shared<Events::ActorMoveEvent>(
-						pGame->CurrentTimeMs(), pActor->GetID());
+					std::shared_ptr<Events::IEventData> event =
+						std::make_shared<Events::ActorMoveEvent>(pGame->CurrentTimeMs(), pActor->GetID());
 					pEventManager->VQueueEvent(event);
 				}
 			}
@@ -189,18 +203,14 @@ namespace GameEngine
 				ActorID id = it->first;
 				std::shared_ptr<BulletPhysicsObject> pObject = it->second;
 				assert(pObject);
-				if (pObject->GetNumBodies() > 1 || pObject->GetNumBodies() == 0)
-					continue; // do not update static actors
-
-				const btRigidBody *body = pObject->GetRigidBodies()[0];
-				const Quaternion rot = btQuaternion_to_Quaternion(body->getOrientation());
-				const Vec3 pos = btVector3_to_Vec3(body->getCenterOfMassPosition(), m_pData->m_worldScaleConst);
-
 				auto pActor = pGame->GetActor(id);
-				if (pActor)
-				{
-					UpdateWorldTransform(pActor, pos, rot);
-				}
+				if (!pActor || pObject->IsStatic() || pObject->GetNumBodies() == 0)
+					continue;
+
+				btRigidBody *pBody = pObject->GetRigidBodies()[0];
+				const Quaternion rot = btQuaternion_to_Quaternion(pBody->getOrientation());
+				const Vec3 pos = btVector3_to_Vec3(pBody->getCenterOfMassPosition(), m_pData->m_worldScaleConst);
+				UpdateWorldTransform(pActor, pos, rot);
 			}
 		}
 
@@ -310,37 +320,39 @@ namespace GameEngine
 			}
 		}
 
-		// TODO: forces should be scaled too
-		void BulletPhysics::VApplyForce(const Vec3& direction, float magnitude, ActorID id)
+		void BulletPhysicsData::ApplyOnNonStaticBodies(ActorID id,
+			std::function<void(btRigidBody *pBody)>& func)
 		{
-			std::shared_ptr<BulletPhysicsObject> pObject = m_pData->GetPhysicsObject(id);
+			std::shared_ptr<BulletPhysicsObject> pObject = GetPhysicsObject(id);
 			assert(pObject);
 			// Could e.g. log an error if the body is not found.
 			if (pObject && !pObject->IsStatic() && pObject->GetNumBodies() > 0)
 			{
-				const btVector3 dir = Vec3_to_btVector3(direction).normalized();
 				auto &bodies = pObject->GetRigidBodies();
-				std::for_each(bodies.begin(), bodies.end(),
-					[&dir, magnitude] (btRigidBody *pBody) {
-						pBody->applyCentralImpulse(dir * magnitude);
-				});
+				std::for_each(bodies.begin(), bodies.end(), func);
 			}
+		}
+
+		void BulletPhysics::VApplyForce(const Vec3& direction, float magnitude, ActorID id)
+		{
+			const btVector3 forceVector = Vec3_to_btVector3(direction).normalized()
+				* magnitude * m_pData->m_worldScaleConst;
+			m_pData->ApplyOnNonStaticBodies(id, std::function<void(btRigidBody *pBody)>(
+				[&forceVector] (btRigidBody *pBody)
+			{
+				pBody->applyCentralImpulse(forceVector);
+			}));
 		}
 
 		void BulletPhysics::VApplyTorque(const Vec3& direction, float magnitude, ActorID id)
 		{
-			std::shared_ptr<BulletPhysicsObject> pObject = m_pData->GetPhysicsObject(id);
-			assert(pObject);
-			if (pObject && !pObject->IsStatic() && pObject->GetNumBodies() > 0)
+			const btVector3 torqueVector = Vec3_to_btVector3(direction).normalized()
+				* magnitude * -1.f * m_pData->m_worldScaleConst;
+			m_pData->ApplyOnNonStaticBodies(id, std::function<void(btRigidBody *pBody)>(
+				[&torqueVector] (btRigidBody *pBody)
 			{
-				const btVector3 dir = Vec3_to_btVector3(direction).normalized();
-				auto &bodies = pObject->GetRigidBodies();
-				magnitude *= -1.f; // this makes torque work according to the "right hand rule"
-				std::for_each(bodies.begin(), bodies.end(),
-					[&dir, magnitude] (btRigidBody *pBody) {
-						pBody->applyTorqueImpulse(dir * magnitude);
-				});
-			}
+				pBody->applyTorqueImpulse(torqueVector);
+			}));
 		}
 
 		void BulletPhysics::VStopActor(ActorID id)
@@ -351,34 +363,26 @@ namespace GameEngine
 
 		void BulletPhysics::VSetLinearVelocity(ActorID id, const Vec3& direction, float magnitude)
 		{
-			std::shared_ptr<BulletPhysicsObject> pObject = m_pData->GetPhysicsObject(id);
-			assert(pObject);
-			if (pObject && !pObject->IsStatic() && pObject->GetNumBodies() > 0)
+			const btVector3 velocity = Vec3_to_btVector3(direction).normalized()
+				* magnitude * m_pData->m_worldScaleConst;
+			m_pData->ApplyOnNonStaticBodies(id, std::function<void(btRigidBody *pBody)>(
+				[&velocity] (btRigidBody *pBody)
 			{
-				const btVector3 dir = Vec3_to_btVector3(direction).normalized();
-				float scaledMagnitude = m_pData->m_worldScaleConst * magnitude;
-				auto &bodies = pObject->GetRigidBodies();
-				std::for_each(bodies.begin(), bodies.end(),
-					[&dir, scaledMagnitude] (btRigidBody *pBody) {
-						pBody->setLinearVelocity(dir * scaledMagnitude);
-				});
-			}
+				pBody->setLinearVelocity(velocity);
+			}));
 		}
 
 		void BulletPhysics::VSetAngularVelocity(ActorID id, const Vec3& rotationAxis, float radiansPerSecond)
 		{
-			std::shared_ptr<BulletPhysicsObject> pObject = m_pData->GetPhysicsObject(id);
-			assert(pObject);
-			if (pObject && !pObject->IsStatic() && pObject->GetNumBodies() > 0)
+			// Multiply radians by -1 to make rotations work according to the "right hand rule"
+			// (same as for torque).
+			const btVector3 velocity =
+				Vec3_to_btVector3(rotationAxis).normalized() * radiansPerSecond * -1.f;
+			m_pData->ApplyOnNonStaticBodies(id, std::function<void(btRigidBody *pBody)>(
+				[&velocity] (btRigidBody *pBody)
 			{
-				const btVector3 axis = Vec3_to_btVector3(rotationAxis).normalized();
-				auto &bodies = pObject->GetRigidBodies();
-				radiansPerSecond *= -1.f; // this makes rotations work according to the "right hand rule"
-				std::for_each(bodies.begin(), bodies.end(),
-					[&axis, radiansPerSecond] (btRigidBody *pBody) {
-						pBody->setAngularVelocity(axis * radiansPerSecond);
-				});
-			}
+				pBody->setAngularVelocity(velocity);
+			}));
 		}
 
 		void BulletPhysics::VSetGlobalGravity(Vec3& gravity)
@@ -780,9 +784,15 @@ namespace GameEngine
 
 				for (int i = 0; i < pContactManifold->getNumContacts(); ++i)
 				{
-					// Bullet registers the collision slightly before it actually happens
-					// (regardless of collision margins etc.), so check the actual contact
-					// point distance to see whether the objects are touching.
+					/* Bullet registers the collision slightly before it actually happens
+					  (regardless of collision margins etc.), so check the actual contact
+					  point distance to see whether the objects are touching.
+
+					  Note that this reports collisions between rigid bodies. If an actor
+					  (say, the world map) has multiple rigid bodies, a collision or separation
+					  event may be reported several times in a row for the same pair of actors
+					  (but not rigid bodies).
+					 */
 					if (pContactManifold->getContactPoint(i).getDistance() < m_contactThreshold)
 					{
 						const CollisionPair newPair = std::make_pair(body1, body2);

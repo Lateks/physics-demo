@@ -123,6 +123,10 @@ namespace GameEngine
 			const std::string m_density;
 		};
 
+		/********************************************
+		 * Functions for calculating object volumes *
+		 ********************************************/
+
 		inline float SphereVolume(float radius)
 		{
 			return (4.f/3.f) * 3.14159f * pow(radius, 3);
@@ -143,6 +147,10 @@ namespace GameEngine
 			const btVector3 dimensions = aabbMax - aabbMin;
 			return BoxVolume(dimensions);
 		}
+
+		/************************************************
+		 * Implementation of the BulletPhysics class.   *
+		 ************************************************/
 
 		BulletPhysics::BulletPhysics(float worldScale) : m_pData(new BulletPhysicsData(worldScale)) { }
 
@@ -320,19 +328,6 @@ namespace GameEngine
 			}
 		}
 
-		void BulletPhysicsData::ApplyOnNonStaticBodies(ActorID id,
-			std::function<void(btRigidBody *pBody)>& func)
-		{
-			std::shared_ptr<BulletPhysicsObject> pObject = GetPhysicsObject(id);
-			assert(pObject);
-			// Could e.g. log an error if the body is not found.
-			if (pObject && !pObject->IsStatic() && pObject->GetNumBodies() > 0)
-			{
-				auto &bodies = pObject->GetRigidBodies();
-				std::for_each(bodies.begin(), bodies.end(), func);
-			}
-		}
-
 		void BulletPhysics::VApplyForce(const Vec3& direction, float magnitude, ActorID id)
 		{
 			const btVector3 forceVector = Vec3_to_btVector3(direction).normalized()
@@ -388,15 +383,18 @@ namespace GameEngine
 		void BulletPhysics::VSetGlobalGravity(Vec3& gravity)
 		{
 			assert(m_pData && m_pData->m_pDynamicsWorld);
-			m_pData->m_pDynamicsWorld->setGravity(Vec3_to_btVector3(gravity, m_pData->m_worldScaleConst));
+			m_pData->m_pDynamicsWorld->setGravity(
+				Vec3_to_btVector3(gravity, m_pData->m_worldScaleConst));
 		}
 
 		Vec3 BulletPhysics::VGetGlobalGravity()
 		{
 			assert(m_pData && m_pData->m_pDynamicsWorld);
-			return btVector3_to_Vec3(m_pData->m_pDynamicsWorld->getGravity(), m_pData->m_worldScaleConst);
+			return btVector3_to_Vec3(
+				m_pData->m_pDynamicsWorld->getGravity(), m_pData->m_worldScaleConst);
 		}
 
+		// Use a raycast to get the first non-static body that was hit (for picking objects).
 		ActorID BulletPhysics::VGetClosestActorHit(Vec3& rayFrom, Vec3& rayTo, Vec3& pickPosition) const
 		{
 			btVector3 btRayFrom = Vec3_to_btVector3(rayFrom, m_pData->m_worldScaleConst);
@@ -410,11 +408,10 @@ namespace GameEngine
 			btVector3 btPickPosition;
 			if (rayCallback.hasHit())
 			{
-				/* Pick the first body that was hit and was not a static or a kinematic object
-				 * (those are unpickable). The collection of collision objects in the raycallback
-				 * does not appear to be ordered by distance, so we need to keep track of the closest
-				 * hit so far. Triggers are ignored and picking is not possible through walls or
-				 * other static non-trigger objects.
+				/* The collection of collision objects in the raycallback does not appear
+				 * to be ordered by distance, so we need to keep track of the closest
+				 * hit so far. Triggers are ignored and picking is not possible through
+				 * walls or other static non-trigger objects.
 				 *
 				 * btCollisionWorld::ClosestRayResultCallback cannot be used here because we
 				 * want to be able to pick objects that are inside trigger bodies, in which
@@ -429,8 +426,8 @@ namespace GameEngine
 					{
 						auto actorId = m_pData->m_rigidBodyToActorMap[pBody];
 						auto hitPosition = rayCallback.m_hitPointWorld[i];
-						float objectDistance = (hitPosition-btRayFrom).length();
-						if (pBody->isStaticOrKinematicObject())
+						float objectDistance = (hitPosition - btRayFrom).length();
+						if (pBody->isStaticObject())
 						{
 							if (!m_pData->GetPhysicsObject(actorId)->IsTrigger() && objectDistance < closestHitDistance)
 							{
@@ -454,36 +451,44 @@ namespace GameEngine
 			return actorHit;
 		}
 
-		inline btGeneric6DofConstraint *CreatePickConstraint(btRigidBody* pBody, btTransform *pTransform)
+		// I could not find documentation for the parameters of DOF6 constraints,
+		// so the code in this function is basically from the Bullet examples,
+		// refactored for parameterisation and commented.
+		btGeneric6DofConstraint *CreateUniformDOF6Constraint(
+			btRigidBody* pBody, btTransform *pTransform,
+			float constraintForceMix, float constraintForceErrorMargin)
 		{
 			btGeneric6DofConstraint* dof6 = new btGeneric6DofConstraint(*pBody, *pTransform, false);
-			dof6->setLinearLowerLimit(btVector3(0,0,0));
-			dof6->setLinearUpperLimit(btVector3(0,0,0));
-			dof6->setAngularLowerLimit(btVector3(0,0,0));
-			dof6->setAngularUpperLimit(btVector3(0,0,0));
+			btVector3 zeroVector(0,0,0);
+			dof6->setLinearLowerLimit(zeroVector);
+			dof6->setLinearUpperLimit(zeroVector);
+			dof6->setAngularLowerLimit(zeroVector);
+			dof6->setAngularUpperLimit(zeroVector);
 
-			dof6->setParam(BT_CONSTRAINT_STOP_CFM,0.8f,0);
-			dof6->setParam(BT_CONSTRAINT_STOP_CFM,0.8f,1);
-			dof6->setParam(BT_CONSTRAINT_STOP_CFM,0.8f,2);
-			dof6->setParam(BT_CONSTRAINT_STOP_CFM,0.8f,3);
-			dof6->setParam(BT_CONSTRAINT_STOP_CFM,0.8f,4);
-			dof6->setParam(BT_CONSTRAINT_STOP_CFM,0.8f,5);
+			/* Apparently this is the "constraint force mixing factor when
+			 * joint is at limit" (?). From testing, it appears that the value
+			 * should be between 0 and 1 or unexpected bad things (TM) will happen.
+			 * At 1.0 the constraint gets very wonky (or springy?) but I can barely
+			 * notice any difference between 0.1 and 0.8.
+			 */
+			dof6->setParam(BT_CONSTRAINT_STOP_CFM, constraintForceMix, 0);
+			dof6->setParam(BT_CONSTRAINT_STOP_CFM, constraintForceMix, 1);
+			dof6->setParam(BT_CONSTRAINT_STOP_CFM, constraintForceMix, 2);
+			dof6->setParam(BT_CONSTRAINT_STOP_CFM, constraintForceMix, 3);
+			dof6->setParam(BT_CONSTRAINT_STOP_CFM, constraintForceMix, 4);
+			dof6->setParam(BT_CONSTRAINT_STOP_CFM, constraintForceMix, 5);
 
-			dof6->setParam(BT_CONSTRAINT_STOP_ERP,0.1f,0);
-			dof6->setParam(BT_CONSTRAINT_STOP_ERP,0.1f,1);
-			dof6->setParam(BT_CONSTRAINT_STOP_ERP,0.1f,2);
-			dof6->setParam(BT_CONSTRAINT_STOP_ERP,0.1f,3);
-			dof6->setParam(BT_CONSTRAINT_STOP_ERP,0.1f,4);
-			dof6->setParam(BT_CONSTRAINT_STOP_ERP,0.1f,5);
+			// Set the error margins for the six degrees of freedom (?)
+			dof6->setParam(BT_CONSTRAINT_STOP_ERP, constraintForceErrorMargin, 0);
+			dof6->setParam(BT_CONSTRAINT_STOP_ERP, constraintForceErrorMargin, 1);
+			dof6->setParam(BT_CONSTRAINT_STOP_ERP, constraintForceErrorMargin, 2);
+			dof6->setParam(BT_CONSTRAINT_STOP_ERP, constraintForceErrorMargin, 3);
+			dof6->setParam(BT_CONSTRAINT_STOP_ERP, constraintForceErrorMargin, 4);
+			dof6->setParam(BT_CONSTRAINT_STOP_ERP, constraintForceErrorMargin, 5);
 
 			return dof6;
 		}
 
-		/* Most of the constraint code is from Bullet tutorials (DemoApplication.cpp).
-		 * This is really a convenience method to allow adding constraints for
-		 * picking up items. In general, a physics SDK wrapper should possibly
-		 * define more generic methods for setting up constraints (?).
-		 */
 		unsigned int BulletPhysics::VAddPickConstraint(ActorID actorId, Vec3& pickPosition, Vec3& cameraPosition)
 		{
 			std::shared_ptr<BulletPhysicsObject> pObject = m_pData->GetPhysicsObject(actorId);
@@ -498,20 +503,25 @@ namespace GameEngine
 			btRigidBody *pBody = pObject->GetRigidBodies()[0];
 			pBody->setActivationState(DISABLE_DEACTIVATION);
 
+			// Calculate pivot point for the picking constraint.
 			btVector3 localPivot = pBody->getCenterOfMassTransform().inverse() * btPickPosition;
 
 			btTransform transform;
 			transform.setIdentity();
 			transform.setOrigin(localPivot);
 
-			// Create the constraint and store it.
-			btGeneric6DofConstraint* btPickConstraint = CreatePickConstraint(pBody, &transform);
+			// Create the constraint and store it. The constraint parameters are
+			// from Bullet example code.
+			btGeneric6DofConstraint* btPickConstraint =
+				CreateUniformDOF6Constraint(pBody, &transform, 0.8f, 0.1f);
 
 			m_pData->m_pDynamicsWorld->addConstraint(btPickConstraint,true);
+
 			ConstraintID pickConstraintId = pObject->AddConstraint(btPickConstraint,
 				BulletPhysicsConstraint::ConstraintType::PICK_CONSTRAINT);
 
-			// Create the event handler callback.
+			// Create the event handler callback. The pick constraint is constrained
+			// to the camera, so it reacts to camera movement.
 			Events::EventType handledType = Events::EventType::CAMERA_MOVED;
 			Events::EventHandlerPtr pHandler(new std::function<void(Events::EventPtr)>(
 				[this, pickConstraintId, actorId, handledType] (Events::EventPtr pEvent)
@@ -570,14 +580,15 @@ namespace GameEngine
 			bool isPickConstraint = pPickConstraint->GetConstraintType() ==
 				BulletPhysicsConstraint::ConstraintType::PICK_CONSTRAINT;
 			assert(isPickConstraint);
+
 			if (!pPickConstraint || !pPickConstraint->GetBulletConstraint() || !isPickConstraint)
 				return;
 
 			std::shared_ptr<BulletPickConstraint> pConstraint =
 				std::dynamic_pointer_cast<BulletPickConstraint>(pPickConstraint);
 
-			// Update the pick constraint and keep it at the same picking distance as
-			// when it was picked up.
+			// Update the pivot point of the pick constraint and keep it at
+			// the same picking distance as when it was picked up (if possible).
 			btTypedConstraint *btConstraint = pPickConstraint->GetBulletConstraint();
 			if (btConstraint->getConstraintType() == D6_CONSTRAINT_TYPE)
 			{
@@ -631,6 +642,10 @@ namespace GameEngine
 			}
 			pObject->RemoveConstraint(constraintId);
 		}
+
+		/*******************************************************
+		 * Implementation of the BulletPhysicsData struct.     *
+		 *******************************************************/
 
 		std::shared_ptr<BulletPhysicsObject> BulletPhysicsData::GetPhysicsObject(ActorID id) const
 		{
@@ -827,6 +842,19 @@ namespace GameEngine
 			});
 		}
 
+		void BulletPhysicsData::ApplyOnNonStaticBodies(ActorID id,
+			std::function<void(btRigidBody *pBody)>& func)
+		{
+			std::shared_ptr<BulletPhysicsObject> pObject = GetPhysicsObject(id);
+			assert(pObject);
+			// Could e.g. log an error if the body is not found.
+			if (pObject && !pObject->IsStatic() && pObject->GetNumBodies() > 0)
+			{
+				auto &bodies = pObject->GetRigidBodies();
+				std::for_each(bodies.begin(), bodies.end(), func);
+			}
+		}
+
 		void BulletPhysicsData::AddShape(ActorPtr pActor, btCollisionShape *shape, CollisionObject& object)
 		{
 			assert (pActor);
@@ -892,9 +920,10 @@ namespace GameEngine
 
 		void BulletPhysicsData::CreateRigidBody(ActorPtr pActor, btCollisionShape *shape, CollisionObject& object)
 		{
-			static MaterialData defaultMaterial = MaterialData(0.f, 0.f);
+			static MaterialData defaultMaterial(0.f, 0.f);
 			const MaterialData& matData = object.m_material.empty() ?
 				defaultMaterial : m_physicsMaterialData->LookupMaterial(object.m_material);
+
 			float density = object.m_density.empty() ?
 				0.f : m_physicsMaterialData->LookupDensity(object.m_density);
 			float mass = density > 0.f ? object.m_calculateVolume() * density : 0.f;

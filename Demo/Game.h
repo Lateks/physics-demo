@@ -9,6 +9,7 @@ namespace GameEngine
 		virtual ~Game();
 		bool Run();
 	private:
-		bool Setup();
+		bool Initialize();
+		void Shutdown();
 	};
 }

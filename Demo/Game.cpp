@@ -20,7 +20,7 @@ namespace GameEngine
 	}
 
 	// Sets up the GameData singleton.
-	bool Game::Setup()
+	bool Game::Initialize()
 	{
 		auto pGameData = GameData::GetInstance();
 
@@ -78,13 +78,23 @@ namespace GameEngine
 		return true;
 	}
 
+	void Game::Shutdown()
+	{
+		auto pGameData = GameData::GetInstance();
+		pGameData->SetPhysicsEngine(nullptr);
+		pGameData->SetEventManager(nullptr);
+		pGameData->SetInputHandler(nullptr);
+		pGameData->SetTimer(nullptr);
+		pGameData->SetDisplayComponent(nullptr);
+	}
+
 	Game::Game() { }
 
 	Game::~Game() { }
 
 	bool Game::Run()
 	{
-		if (!Setup())
+		if (!Initialize())
 			return false;
 
 		auto pGameData = GameData::GetInstance();
@@ -118,6 +128,7 @@ namespace GameEngine
 			timeBegin = timeEnd;
 		}
 
+		Shutdown();
 		return true;
 	}
 }

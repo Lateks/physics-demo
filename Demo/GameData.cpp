@@ -77,6 +77,7 @@ namespace GameEngine
 
 	void GameData::SetInputHandler(std::shared_ptr<IGameLogic> pInputHandler)
 	{
+		m_pData->m_pInputHandler.reset();
 		m_pData->m_pInputHandler = pInputHandler;
 	}
 
@@ -87,6 +88,7 @@ namespace GameEngine
 
 	void GameData::SetPhysicsEngine(std::shared_ptr<Physics::IPhysicsEngine> pPhysics)
 	{
+		m_pData->m_pPhysicsEngine.reset();
 		m_pData->m_pPhysicsEngine = pPhysics;
 	}
 
@@ -97,6 +99,7 @@ namespace GameEngine
 
 	void GameData::SetInputStateHandler(std::shared_ptr<Display::IInputState> pInputState)
 	{
+		m_pData->m_pInputState.reset();
 		m_pData->m_pInputState = std::shared_ptr<Display::IInputState>(pInputState);
 	}
 
@@ -107,6 +110,7 @@ namespace GameEngine
 
 	void GameData::SetDisplayComponent(std::shared_ptr<Display::IDisplay> pDisplay)
 	{
+		m_pData->m_pDisplay.reset();
 		m_pData->m_pDisplay = pDisplay;
 	}
 
@@ -117,6 +121,7 @@ namespace GameEngine
 
 	void GameData::SetTimer(std::shared_ptr<ITimer> pTimer)
 	{
+		m_pData->m_pTimer.reset();
 		m_pData->m_pTimer = pTimer;
 	}
 
@@ -127,6 +132,7 @@ namespace GameEngine
 
 	void GameData::SetEventManager(std::shared_ptr<Events::IEventManager> pManager)
 	{
+		m_pData->m_pEvents.reset();
 		m_pData->m_pEvents = pManager;
 	}
 

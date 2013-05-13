@@ -1,6 +1,5 @@
 #include "BulletPhysics.h"
 #include "BulletPhysicsObject.h"
-#include "BulletPhysicsConstraint.h"
 #include "GameActor.h"
 #include "WorldTransformComponent.h"
 #include "GameData.h"
@@ -25,6 +24,11 @@
 using std::shared_ptr;
 using std::weak_ptr;
 using std::unique_ptr;
+
+namespace
+{
+	GameEngine::Physics::ConstraintID CONSTRAINT_ID = 0;
+}
 
 namespace GameEngine
 {
@@ -65,6 +69,7 @@ namespace GameEngine
 			 */
 			std::map<ActorID, std::shared_ptr<BulletPhysicsObject>> m_actorToBulletPhysicsObjectMap;
 			std::map<const btRigidBody*, ActorID> m_rigidBodyToActorMap;
+			std::map<ConstraintID, btTypedConstraint*> m_constraintMap;
 
 			// Stores the Bullet collision flags associated with each object type.
 			std::map<IPhysicsEngine::PhysicsObjectType, int> m_collisionFlags;
@@ -451,9 +456,42 @@ namespace GameEngine
 			return actorHit;
 		}
 
+		Vec3 BulletPhysics::VGetLinearVelocity(ActorID id)
+		{
+			std::shared_ptr<BulletPhysicsObject> pObject = m_pData->GetPhysicsObject(id);
+			if (!pObject || pObject->IsStatic() || pObject->IsKinematic() || pObject->GetNumBodies() != 1)
+				return Vec3(0, 0, 0);
+			return btVector3_to_Vec3(pObject->GetRigidBodies()[0]->getLinearVelocity(), m_pData->m_worldScaleConst);
+		}
+
+		Vec3 BulletPhysics::VGetAngularVelocity(ActorID id)
+		{
+			std::shared_ptr<BulletPhysicsObject> pObject = m_pData->GetPhysicsObject(id);
+			if (!pObject || pObject->IsStatic() || pObject->IsKinematic() || pObject->GetNumBodies() != 1)
+				return Vec3(0, 0, 0);
+			return btVector3_to_Vec3(pObject->GetRigidBodies()[0]->getAngularVelocity(), m_pData->m_worldScaleConst);
+		}
+
+		void BulletPhysics::VSetAngularFactor(ActorID id, const Vec3& factor)
+		{
+			std::shared_ptr<BulletPhysicsObject> pObject = m_pData->GetPhysicsObject(id);
+			if (!pObject || pObject->IsStatic() || pObject->IsKinematic() || pObject->GetNumBodies() != 1)
+				return;
+			pObject->GetRigidBodies()[0]->setAngularFactor(Vec3_to_btVector3(factor, m_pData->m_worldScaleConst));
+		}
+
+		Vec3 BulletPhysics::VGetAngularFactor(ActorID id)
+		{
+			std::shared_ptr<BulletPhysicsObject> pObject = m_pData->GetPhysicsObject(id);
+			if (!pObject || pObject->IsStatic() || pObject->IsKinematic() || pObject->GetNumBodies() != 1)
+				return Vec3(0, 0, 0);
+			return btVector3_to_Vec3(pObject->GetRigidBodies()[0]->getAngularFactor(), m_pData->m_worldScaleConst);
+		}
+
 		// I could not find documentation for the parameters of DOF6 constraints,
-		// so the code in this function is basically from the Bullet examples,
-		// refactored for parameterisation and commented.
+		// (e.g. BT_CONSTRAINT_STOP_CFM - these are not mentioned in the Bullet
+		// user manual as far as I can see) so the code in this function is
+		// basically from the Bullet examples, refactored for parameterisation and commented.
 		btGeneric6DofConstraint *CreateUniformDOF6Constraint(
 			btRigidBody* pBody, btTransform *pTransform,
 			float constraintForceMix, float constraintForceErrorMargin)
@@ -489,158 +527,69 @@ namespace GameEngine
 			return dof6;
 		}
 
-		unsigned int BulletPhysics::VAddPickConstraint(ActorID actorId, Vec3& pickPosition, Vec3& cameraPosition)
+		ConstraintID BulletPhysics::VAddDOF6Constraint(ActorID actorID, const Vec3& pivotPosition)
 		{
-			std::shared_ptr<BulletPhysicsObject> pObject = m_pData->GetPhysicsObject(actorId);
-			if (!pObject || pObject->IsStatic() || pObject->IsKinematic())
+			std::shared_ptr<BulletPhysicsObject> pObject = m_pData->GetPhysicsObject(actorID);
+			if (!pObject || pObject->IsStatic() || pObject->IsKinematic()) // cannot create constraint for static or kinematic objects
 				return 0;
 
-			// Calculate parameters for the constraint.
-			btVector3 btPickPosition = Vec3_to_btVector3(pickPosition, m_pData->m_worldScaleConst);
-			btVector3 btCameraPosition = Vec3_to_btVector3(cameraPosition, m_pData->m_worldScaleConst);
-			float pickDistance = (btPickPosition - btCameraPosition).length();
-
+			assert(pObject->GetNumBodies() == 1);
 			btRigidBody *pBody = pObject->GetRigidBodies()[0];
 			pBody->setActivationState(DISABLE_DEACTIVATION);
 
-			// Calculate pivot point for the picking constraint.
-			btVector3 localPivot = pBody->getCenterOfMassTransform().inverse() * btPickPosition;
+			btVector3 btPivotPosition = Vec3_to_btVector3(pivotPosition, m_pData->m_worldScaleConst);
+			btVector3 objectSpacePivot = pBody->getCenterOfMassTransform().inverse() * btPivotPosition;
 
 			btTransform transform;
 			transform.setIdentity();
-			transform.setOrigin(localPivot);
+			transform.setOrigin(objectSpacePivot);
 
-			// Create the constraint and store it. The constraint parameters are
-			// from Bullet example code.
 			btGeneric6DofConstraint* btPickConstraint =
 				CreateUniformDOF6Constraint(pBody, &transform, 0.8f, 0.1f);
 
-			m_pData->m_pDynamicsWorld->addConstraint(btPickConstraint,true);
+			m_pData->m_pDynamicsWorld->addConstraint(btPickConstraint, true);
 
-			ConstraintID pickConstraintId = pObject->AddConstraint(btPickConstraint,
-				BulletPhysicsConstraint::ConstraintType::PICK_CONSTRAINT);
+			ConstraintID constraintId = ++CONSTRAINT_ID;
+			m_pData->m_constraintMap[constraintId] = btPickConstraint;
 
-			// Create the event handler callback. The pick constraint is constrained
-			// to the camera, so it reacts to camera movement.
-			Events::EventType handledType = Events::EventType::CAMERA_MOVED;
-			Events::EventHandlerPtr pHandler(new std::function<void(Events::EventPtr)>(
-				[this, pickConstraintId, actorId, handledType] (Events::EventPtr pEvent)
-			{
-				assert(pEvent->VGetEventType() == handledType);
-				if (pEvent->VGetEventType() != handledType)
-					return;
-
-				std::shared_ptr<Events::CameraMoveEvent> pMoveEvent =
-					std::dynamic_pointer_cast<Events::CameraMoveEvent>(pEvent);
-
-				this->VUpdatePickConstraint(actorId, pickConstraintId,
-					pMoveEvent->GetCameraPosition(), pMoveEvent->GetCameraTarget());
-			})
-			);
-
-			std::shared_ptr<BulletPhysicsConstraint> pPickConstraint =
-				pObject->GetConstraint(pickConstraintId);
-			assert(pPickConstraint && pPickConstraint->GetBulletConstraint() &&
-				pPickConstraint->GetConstraintType() == BulletPhysicsConstraint::ConstraintType::PICK_CONSTRAINT);
-
-			// Store the callback function and picking distance for later reference.
-			std::shared_ptr<BulletPickConstraint> pConstraint =
-				std::dynamic_pointer_cast<BulletPickConstraint>(pPickConstraint);
-			pConstraint->SetConstraintUpdater(pHandler, handledType);
-			pConstraint->SetPickDistance(pickDistance);
-
-			// Disable rotations to avoid jitter when rigid body is
-			// pushed against e.g. a wall. Store the current angular
-			// factor to restore it later. Set angular velocity to zero
-			// to stop ongoing rotations at the moment of picking.
-			pConstraint->SetOriginalAngularFactor(pBody->getAngularFactor());
-			pBody->setAngularFactor(0);
-			pBody->setAngularVelocity(btVector3(0, 0, 0));
-
-			auto pGame = GameData::GetInstance();
-			assert(pGame && pGame->GetEventManager());
-			std::shared_ptr<Events::IEventManager> pEventMgr = pGame->GetEventManager();
-			if (pEventMgr)
-			{
-				pEventMgr->VRegisterHandler(handledType, pHandler);
-			}
-
-			return pickConstraintId;
+			return constraintId;
 		}
 
-		void BulletPhysics::VUpdatePickConstraint(ActorID actorId, ConstraintID constraintId, Vec3& rayFrom, Vec3& rayTo)
+		void BulletPhysics::VUpdateDOF6PivotPoint(ConstraintID constraintId, const Vec3& pivotPosition)
 		{
-			std::shared_ptr<BulletPhysicsObject> pObject = m_pData->GetPhysicsObject(actorId);
-			if (!pObject || pObject->GetNumBodies() != 1 || pObject->GetNumConstraints() == 0)
-				return;
-
-			std::shared_ptr<BulletPhysicsConstraint> pPickConstraint = pObject->GetConstraint(constraintId);
-			assert(pPickConstraint && pPickConstraint->GetBulletConstraint());
-
-			bool isPickConstraint = pPickConstraint->GetConstraintType() ==
-				BulletPhysicsConstraint::ConstraintType::PICK_CONSTRAINT;
-			assert(isPickConstraint);
-
-			if (!pPickConstraint || !pPickConstraint->GetBulletConstraint() || !isPickConstraint)
-				return;
-
-			std::shared_ptr<BulletPickConstraint> pConstraint =
-				std::dynamic_pointer_cast<BulletPickConstraint>(pPickConstraint);
-
-			// Update the pivot point of the pick constraint and keep it at
-			// the same picking distance as when it was picked up (if possible).
-			btTypedConstraint *btConstraint = pPickConstraint->GetBulletConstraint();
-			if (btConstraint->getConstraintType() == D6_CONSTRAINT_TYPE)
+			auto iter = m_pData->m_constraintMap.find(constraintId);
+			if (iter != m_pData->m_constraintMap.end() && iter->second->getConstraintType() == D6_CONSTRAINT_TYPE)
 			{
-				btGeneric6DofConstraint* pDof6PickConstraint = static_cast<btGeneric6DofConstraint*>(btConstraint);
+				btGeneric6DofConstraint* pDof6PickConstraint =
+					static_cast<btGeneric6DofConstraint*>(iter->second);
 				if (pDof6PickConstraint)
 				{
-					btVector3 btRayFrom = Vec3_to_btVector3(rayFrom, m_pData->m_worldScaleConst);
-					btVector3 btRayTo = Vec3_to_btVector3(rayTo, m_pData->m_worldScaleConst);
-
-					btVector3 newPivot;
-					btVector3 dir = btRayTo - btRayFrom;
-					dir.normalize();
-					dir *= pConstraint->GetPickDistance();
-
-					newPivot = btRayFrom + dir;
+					btVector3 newPivot = Vec3_to_btVector3(pivotPosition, m_pData->m_worldScaleConst);
 					pDof6PickConstraint->getFrameOffsetA().setOrigin(newPivot);
 				}
 			}
 		}
 
-		void BulletPhysics::VRemoveConstraint(ActorID actorId, unsigned int constraintId)
+		void ReactivateBody(btRigidBody &pBody)
 		{
-			std::shared_ptr<BulletPhysicsObject> pObject = m_pData->GetPhysicsObject(actorId);
-			if (!pObject || pObject->GetNumBodies() != 1 || pObject->GetNumConstraints() == 0)
-				return;
-			std::shared_ptr<BulletPhysicsConstraint> pConstraint = pObject->GetConstraint(constraintId);
-			assert(pConstraint && pConstraint->GetBulletConstraint());
-			if (!pConstraint || !pConstraint->GetBulletConstraint())
-				return;
+			pBody.forceActivationState(ACTIVE_TAG);
+			pBody.setDeactivationTime(0.f);
+		}
 
-			btRigidBody *pBody = pObject->GetRigidBodies()[0];
-			m_pData->m_pDynamicsWorld->removeConstraint(pConstraint->GetBulletConstraint());
-
-			// Restore angular factor to re-enable rotations.
-			if (pConstraint->GetConstraintType() == BulletPhysicsConstraint::ConstraintType::PICK_CONSTRAINT)
+		void BulletPhysics::VRemoveConstraint(ConstraintID constraintId)
+		{
+			auto iter = m_pData->m_constraintMap.find(constraintId);
+			if (iter != m_pData->m_constraintMap.end())
 			{
-				std::shared_ptr<BulletPickConstraint> pPickConstraint =
-					std::dynamic_pointer_cast<BulletPickConstraint>(pConstraint);
-				pBody->setAngularFactor(pPickConstraint->GetOriginalAngularFactor());
-			}
+				btTypedConstraint *pConstraint = iter->second;
 
-			pBody->forceActivationState(ACTIVE_TAG);
-			pBody->setDeactivationTime(0.f);
+				ReactivateBody(pConstraint->getRigidBodyA());
+				ReactivateBody(pConstraint->getRigidBodyB());
 
-			auto pGame = GameData::GetInstance();
-			assert(pGame && pGame->GetEventManager());
-			std::shared_ptr<Events::IEventManager> pEventMgr = pGame->GetEventManager();
-			if (pEventMgr)
-			{
-				pEventMgr->VDeregisterHandler(pConstraint->GetHandlerEventType(), pConstraint->GetConstraintUpdater());
+				m_pData->m_pDynamicsWorld->removeConstraint(pConstraint);
+				m_pData->m_constraintMap.erase(iter);
+				delete pConstraint;
 			}
-			pObject->RemoveConstraint(constraintId);
 		}
 
 		/*******************************************************

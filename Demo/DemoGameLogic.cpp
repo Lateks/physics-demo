@@ -52,6 +52,9 @@ namespace Demo
 
 		ActorID m_pickedActor;
 		unsigned int m_pickConstraintId;
+		float m_pickDistance;
+		Vec3 m_storedAngularFactor;
+
 		float m_updateTimer;
 
 		inline bool CameraMoved();
@@ -63,6 +66,9 @@ namespace Demo
 		inline bool RightMouseReleased();
 		void UpdateHighlight(float deltaSec);
 		ActorID PickTarget(Vec3& pickPoint);
+		void AddPickConstraint(ActorID actorId, const Vec3& pickPoint, const Vec3& cameraPos);
+		void UpdatePickConstraint();
+		void RemovePickConstraint();
 	};
 
 	// Highlights the given actor's scene node with a blue hued light.
@@ -83,6 +89,56 @@ namespace Demo
 		{
 			pDisplay->VSetSceneNodeShininess(actorId, 0.f);
 			pDisplay->VSetSceneNodeLightColors(actorId, RGBAColor::White, RGBAColor::White, RGBAColor::White);
+		}
+	}
+
+	void DemoGameLogicData::AddPickConstraint(ActorID actorId, const Vec3& pickPoint, const Vec3& cameraPos)
+	{
+		auto pPhysics = GameData::GetInstance()->GetPhysicsEngine();
+		if (pPhysics)
+		{
+			m_pickConstraintId = pPhysics->VAddDOF6Constraint(actorId, pickPoint);
+			m_pickDistance = (pickPoint - cameraPos).norm();
+
+			// Disable rotations to avoid jitter when rigid body is
+			// pushed against e.g. a wall. Store the current angular
+			// factor to restore it later. Set angular velocity to zero
+			// to stop ongoing rotations at the moment of picking.
+			m_storedAngularFactor = pPhysics->VGetAngularFactor(actorId);
+			pPhysics->VSetAngularFactor(actorId, Vec3(0.f, 0.f, 0.f));
+			pPhysics->VSetAngularVelocity(actorId, Vec3(1, 0, 0), 0.f);
+
+			// Update highlights if required.
+			if (m_pickedActor != actorId)
+			{
+				AddHighlight(actorId);
+				RemoveHighlight(m_pickedActor);
+				m_pickedActor = actorId;
+			}
+		}
+	}
+
+	void DemoGameLogicData::UpdatePickConstraint()
+	{
+		auto pPhysics = GameData::GetInstance()->GetPhysicsEngine();
+		// Update the pivot to the current camera target but try to keep
+		// the object at the original picking distance.
+		if (pPhysics && m_pickConstraintId != 0)
+		{
+			Vec3 cameraDirection = (m_currentCameraState.cameraTarget - m_currentCameraState.cameraPos).normalized();
+			Vec3 newPivot = m_currentCameraState.cameraPos + cameraDirection * m_pickDistance;
+			pPhysics->VUpdateDOF6PivotPoint(m_pickConstraintId, newPivot);
+		}
+	}
+
+	void DemoGameLogicData::RemovePickConstraint()
+	{
+		auto pPhysics = GameData::GetInstance()->GetPhysicsEngine();
+		if (pPhysics && m_pickConstraintId != 0)
+		{
+			pPhysics->VRemoveConstraint(m_pickConstraintId);
+			pPhysics->VSetAngularFactor(m_pickedActor, m_storedAngularFactor);
+			m_pickConstraintId = 0;
 		}
 	}
 
@@ -341,31 +397,18 @@ namespace Demo
 
 			if (pickedActorId != 0)
 			{
-				m_pData->m_pickConstraintId = pPhysics->VAddPickConstraint(pickedActorId, pickPoint,
+				m_pData->AddPickConstraint(pickedActorId, pickPoint,
 					m_pData->m_currentCameraState.cameraPos);
-				if (m_pData->m_pickedActor != pickedActorId)
-				{
-					AddHighlight(pickedActorId);
-					RemoveHighlight(m_pData->m_pickedActor);
-					m_pData->m_pickedActor = pickedActorId;
-				}
 			}
 		}
 		else if (m_pData->LeftMouseReleased() && m_pData->m_pickConstraintId != 0)
 		{
-			pPhysics->VRemoveConstraint(m_pData->m_pickedActor, m_pData->m_pickConstraintId);
-			m_pData->m_pickConstraintId = 0;
+			m_pData->RemovePickConstraint();
 		}
 
 		if (m_pData->CameraMoved())
 		{
-			auto pEventMgr = pGame->GetEventManager();
-			if (pEventMgr)
-			{
-				std::shared_ptr<Events::IEventData> event(new Events::CameraMoveEvent(pGame->CurrentTimeMs(),
-					m_pData->m_currentCameraState.cameraPos, m_pData->m_currentCameraState.cameraTarget));
-				pEventMgr->VQueueEvent(event);
-			}
+			m_pData->UpdatePickConstraint();
 		}
 
 		m_pData->m_previousMouseState = m_pData->m_currentMouseState;

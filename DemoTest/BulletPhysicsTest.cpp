@@ -559,7 +559,7 @@ namespace DemoTest
 			});
 		}
 
-		TEST_METHOD(PickConstraintKeepsObjectAtTheSameDistanceItWasPickedAt)
+		TEST_METHOD(UpdatingAConstraintPivotCausesObjectToMoveTowardNewPivot)
 		{
 			Vec3 actorStartPosition(100, 50, 0);
 			pActor->GetWorldTransform().SetPosition(actorStartPosition);
@@ -567,43 +567,33 @@ namespace DemoTest
 			pPhysics->VAddSphere(pActor, sphereRadius,
 				IPhysicsEngine::PhysicsObjectType::DYNAMIC, "balsa", "Normal");
 
-			Vec3 oldCameraPos(0, 50, 0);
-			Vec3 oldObjectPos(90.f, 50.f, 0.f);
-			pPhysics->VAddPickConstraint(pActor->GetID(), oldObjectPos, oldCameraPos);
+			Vec3 pivotPos(90.f, 50.f, 0.f);
+			pPhysics->VAddDOF6Constraint(pActor->GetID(), pivotPos);
+			SimulateSteps(5);
 
-			Vec3 newCameraPos(10, 50, 50);
-			Vec3 newCameraTarget(100, 50, 100);
-			auto cameraMoveEvent = std::make_shared<GameEngine::Events::CameraMoveEvent>(
-				0u, newCameraPos, newCameraTarget);
-			pEvents->VQueueEvent(cameraMoveEvent);
+			Vec3 newPivot(100, 50, 100);
+			pPhysics->VUpdateDOF6PivotPoint(pActor->GetID(), newPivot);
 
-			SimulateSteps(30); // it takes a while for the DOF6 constrained object to move to the new pivot point
+			SimulateSteps(60); // it takes a while for the DOF6 constrained object to move close enough to the new pivot point
 
 			Vec3 newActorPosition = pActor->GetWorldTransform().GetPosition();
-			Vec3 oldCameraToActorVector = oldObjectPos - oldCameraPos;
-			Vec3 newCameraToTargetVector = newCameraTarget - newCameraPos;
-			Vec3 newCameraToActorVector = newActorPosition - newCameraPos;
-			Vec3 pickPosition;
-			GameEngine::ActorID id = pPhysics->VGetClosestActorHit(
-				newCameraPos, newCameraTarget, pickPosition);
+			float distance = (newPivot - newActorPosition).norm();
 
 			Assert::AreNotEqual(newActorPosition, actorStartPosition);
-			Assert::IsTrue(AreEqual(oldCameraToActorVector.norm(),
-				newCameraToActorVector.norm() - sphereRadius, 0.5f/WORLD_SCALE));
-			Assert::AreEqual(pActor->GetID(), id); // object is now in the direction the camera points to
+			Assert::IsTrue(distance < 15.f);
 		}
 
-		TEST_METHOD(ObjectUnderPickConstraintCannotChangeAngleDueToTorque) // Note: an angular velocity can still be explicitly set
+		TEST_METHOD(IfAngularFactorSetToZeroObjectIsNotAffectedByTorque)
 		{
+			// Note: an angular velocity can still be set. The effect in that
+			// case is that the rotation continues endlessly.
 			Vec3 actorStartPosition(100, 50, 0);
 			pActor->GetWorldTransform().SetPosition(actorStartPosition);
 			float sphereRadius = 10.f;
 			pPhysics->VAddSphere(pActor, sphereRadius,
 				IPhysicsEngine::PhysicsObjectType::DYNAMIC, "balsa", "Normal");
 
-			Vec3 oldCameraPos(0, 50, 0);
-			Vec3 oldObjectPos(90.f, 50.f, 0.f);
-			pPhysics->VAddPickConstraint(pActor->GetID(), oldObjectPos, oldCameraPos);
+			pPhysics->VSetAngularFactor(pActor->GetID(), Vec3(0, 0, 0));
 
 			pPhysics->VApplyTorque(Vec3(1.f, 0.f, 0.f), PI, pActor->GetID());
 			Quaternion oldRotation = pActor->GetWorldTransform().GetRotation();
@@ -612,7 +602,7 @@ namespace DemoTest
 			Assert::AreEqual(oldRotation, pActor->GetWorldTransform().GetRotation());
 		}
 
-		TEST_METHOD(PickConstraintIsRemovedProperly)
+		TEST_METHOD(TorqueWorksNormallyAfterAngularFactorRestored)
 		{
 			Vec3 actorStartPosition(100, 50, 0);
 			pActor->GetWorldTransform().SetPosition(actorStartPosition);
@@ -620,59 +610,47 @@ namespace DemoTest
 			pPhysics->VAddSphere(pActor, sphereRadius,
 				IPhysicsEngine::PhysicsObjectType::DYNAMIC, "balsa", "Normal");
 
-			pPhysics->VSetGlobalGravity(Vec3(0, 0, 0));
-			Vec3 oldCameraPos(0, 50, 0);
-			Vec3 oldObjectPos(90.f, 50.f, 0.f);
-			unsigned int constraintId = pPhysics->VAddPickConstraint(pActor->GetID(), oldObjectPos, oldCameraPos);
-
+			Vec3 oldAngularFactor = pPhysics->VGetAngularFactor(pActor->GetID());
+			pPhysics->VSetAngularFactor(pActor->GetID(), Vec3(0, 0, 0));
 			SimulateSteps(1);
-			pPhysics->VRemoveConstraint(pActor->GetID(), constraintId);
 
-			Vec3 newCameraPos(10, 50, 50);
-			Vec3 newCameraTarget(100, 50, 100);
-			Vec3 actorPositionAfterConstraintRemoval = pActor->GetWorldTransform().GetPosition();
-			auto cameraMoveEvent = std::make_shared<GameEngine::Events::CameraMoveEvent>(
-				0u, newCameraPos, newCameraTarget);
-			pEvents->VQueueEvent(cameraMoveEvent);
-			SimulateSteps(30);
-			Vec3 actorPositionAfterSimulation = pActor->GetWorldTransform().GetPosition();
-
-			Vec3 newActorPosition = pActor->GetWorldTransform().GetPosition();
-			Vec3 pickPosition;
-			GameEngine::ActorID id = pPhysics->VGetClosestActorHit(
-				newCameraPos, newCameraTarget, pickPosition);
-
-			Assert::AreEqual(NO_ACTOR, id);
-			Assert::AreEqual(actorPositionAfterSimulation, actorPositionAfterConstraintRemoval);
-		}
-
-		TEST_METHOD(TorqueWorksNormallyOnObjectAfterRemovalOfPickConstraint)
-		{
-			Vec3 actorStartPosition(100, 50, 0);
-			pActor->GetWorldTransform().SetPosition(actorStartPosition);
-			float sphereRadius = 10.f;
-			pPhysics->VAddSphere(pActor, sphereRadius,
-				IPhysicsEngine::PhysicsObjectType::DYNAMIC, "balsa", "Normal");
-			pPhysics->VSetGlobalGravity(Vec3(0, 0, 0));
-
-			Vec3 oldCameraPos(0, 50, 0);
-			Vec3 oldObjectPos(90.f, 50.f, 0.f);
-			unsigned int constraintId = pPhysics->VAddPickConstraint(pActor->GetID(), oldObjectPos, oldCameraPos);
-
-			SimulateSteps(1);
-			pPhysics->VRemoveConstraint(pActor->GetID(), constraintId);
-
+			pPhysics->VSetAngularFactor(pActor->GetID(), oldAngularFactor);
 			pPhysics->VApplyTorque(Vec3(-1.f, 0.f, 0.f), PI, pActor->GetID());
 			Vec3 oldRotation = GameEngine::ConvertVector(
 				GameEngine::QuaternionToEuler(pActor->GetWorldTransform().GetRotation()));
 			SimulateSteps(1);
 
-			Vec3 newRotation = GameEngine::ConvertVector(
+			Vec3 actorRotation = GameEngine::ConvertVector(
 				GameEngine::QuaternionToEuler(pActor->GetWorldTransform().GetRotation()));
-			Vec3 difference = newRotation-oldRotation;
-			Assert::IsTrue(difference.x() > 0);
+			Vec3 difference = Vec3(actorRotation - oldRotation);
+			Assert::AreNotEqual(oldRotation, actorRotation);
 			Assert::AreEqual(0.f, difference.y());
 			Assert::AreEqual(0.f, difference.z());
+			Assert::IsTrue(difference.x() > 0.f);
+		}
+
+		TEST_METHOD(CannotUpdateConstraintAfterRemoval)
+		{
+			Vec3 actorStartPosition(100, 50, 0);
+			pActor->GetWorldTransform().SetPosition(actorStartPosition);
+			float sphereRadius = 10.f;
+			pPhysics->VAddSphere(pActor, sphereRadius,
+				IPhysicsEngine::PhysicsObjectType::DYNAMIC, "balsa", "Normal");
+
+			pPhysics->VSetGlobalGravity(Vec3(0, 0, 0));
+			Vec3 pivotPos(90.f, 50.f, 0.f);
+			unsigned int constraintId = pPhysics->VAddDOF6Constraint(pActor->GetID(), pivotPos);
+
+			SimulateSteps(1);
+			pPhysics->VRemoveConstraint(constraintId);
+
+			Vec3 newPivotPos(100, 50, 100);
+			Vec3 actorPositionAfterConstraintRemoval = pActor->GetWorldTransform().GetPosition();
+			pPhysics->VUpdateDOF6PivotPoint(constraintId, newPivotPos);
+			SimulateSteps(30);
+			Vec3 actorPositionAfterSimulation = pActor->GetWorldTransform().GetPosition();
+
+			Assert::AreEqual(actorPositionAfterSimulation, actorPositionAfterConstraintRemoval);
 		}
 
 		TEST_METHOD(CanRemovePhysicsWorldObjectWhileItIsConstrained)
@@ -684,9 +662,8 @@ namespace DemoTest
 				IPhysicsEngine::PhysicsObjectType::DYNAMIC, "balsa", "Normal");
 
 			pPhysics->VSetGlobalGravity(Vec3(0, 0, 0));
-			Vec3 oldCameraPos(0, 50, 0);
-			Vec3 oldObjectPos(90.f, 50.f, 0.f);
-			unsigned int constraintId = pPhysics->VAddPickConstraint(pActor->GetID(), oldObjectPos, oldCameraPos);
+			Vec3 pivotPos(90.f, 50.f, 0.f);
+			unsigned int constraintId = pPhysics->VAddDOF6Constraint(pActor->GetID(), pivotPos);
 
 			pPhysics->VRemoveActor(pActor->GetID());
 			SimulateSteps(30);

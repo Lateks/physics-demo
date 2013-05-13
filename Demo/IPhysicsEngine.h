@@ -56,7 +56,11 @@ namespace GameEngine
 			virtual void VApplyTorque(const Vec3& direction, float magnitude, ActorID id) = 0;
 			virtual void VStopActor(ActorID id) = 0; // set velocity to 0
 			virtual void VSetLinearVelocity(ActorID id, const Vec3& direction, float magnitude) = 0;
+			virtual Vec3 VGetLinearVelocity(ActorID id) = 0;
 			virtual void VSetAngularVelocity(ActorID id, const Vec3& rotationAxis, float radiansPerSecond) = 0;
+			virtual Vec3 VGetAngularVelocity(ActorID id) = 0;
+			virtual void VSetAngularFactor(ActorID id, const Vec3& factor) = 0; // can be used to e.g. disable rotations
+			virtual Vec3 VGetAngularFactor(ActorID id) = 0;
 
 			virtual void VSetGlobalGravity(Vec3& gravity) = 0;
 			virtual Vec3 VGetGlobalGravity() = 0;
@@ -68,9 +72,13 @@ namespace GameEngine
 			 * the actor. Only dynamic bodies are picked by this method.
 			 */
 			virtual ActorID VGetClosestActorHit(Vec3& rayFrom, Vec3& rayTo, Vec3& pickPosition) const = 0;
-			virtual unsigned int VAddPickConstraint(ActorID actorID, Vec3& pickPosition, Vec3& cameraPosition) = 0;
-			virtual void VUpdatePickConstraint(ActorID actorId, ConstraintID constraintId, Vec3& rayFrom, Vec3& rayTo) = 0;
-			virtual void VRemoveConstraint(ActorID actorID, unsigned int constraintId) = 0;
+
+			// Adds a DOF6 constraint, constraining the degrees of freedom of the object.
+			// This is useful for e.g. constraining an object to camera or mouse movement.
+			virtual ConstraintID VAddDOF6Constraint(ActorID actorID, const Vec3& pivotPosition) = 0;
+			virtual void VUpdateDOF6PivotPoint(ConstraintID constraintId, const Vec3& pivotPosition) = 0;
+			virtual void VRemoveConstraint(ConstraintID constraintId) = 0;
+			//virtual void VRemoveConstraints(ActorID actorID) = 0;
 		};
 	}
 }

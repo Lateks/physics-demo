@@ -36,15 +36,20 @@ namespace GameEngine
 			virtual void VApplyTorque(const Vec3& direction, float magnitude, ActorID id) override;
 			virtual void VStopActor(ActorID id) override;
 			virtual void VSetLinearVelocity(ActorID id, const Vec3& direction, float magnitude) override;
+			virtual Vec3 VGetLinearVelocity(ActorID id) override;
 			virtual void VSetAngularVelocity(ActorID id, const Vec3& rotationAxis, float radiansPerSecond) override;
+			virtual Vec3 VGetAngularVelocity(ActorID id) override;
+			virtual void VSetAngularFactor(ActorID id, const Vec3& factor);
+			virtual Vec3 VGetAngularFactor(ActorID id) override;
 
 			virtual void VSetGlobalGravity(Vec3& gravity) override;
 			virtual Vec3 VGetGlobalGravity() override;
 
 			virtual ActorID VGetClosestActorHit(Vec3& rayFrom, Vec3& rayTo, Vec3& pickPosition) const override;
-			virtual ConstraintID VAddPickConstraint(ActorID actorID, Vec3& pickPosition, Vec3& cameraPosition) override;
-			virtual void VUpdatePickConstraint(ActorID actorId, ConstraintID constraintId, Vec3& rayFrom, Vec3& rayTo) override;
-			virtual void VRemoveConstraint(ActorID actorID, unsigned int constraintId) override;
+
+			virtual ConstraintID VAddDOF6Constraint(ActorID actorID, const Vec3& pivotPosition) override;
+			virtual void VUpdateDOF6PivotPoint(ConstraintID constraintId, const Vec3& pivotPosition) override;
+			virtual void VRemoveConstraint(ConstraintID constraintId) override;
 		private:
 			// The VS11 C++ compiler does not yet support deleting
 			// constructors, so make these private to make the class

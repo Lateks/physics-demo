@@ -1,11 +1,14 @@
 #pragma once
 
-#include "enginefwd.h"
 #include <Eigen\Dense>
 #include <iosfwd>
 
 namespace GameEngine
 {
+	// This used to have more additional functionality but is now
+	// rather pointless and would work almost as well as a
+	// typedef. However, this is easier to forward declare than
+	// the typedef alternative.
 	class Vec3 : public Eigen::Vector3f
 	{
 	public:

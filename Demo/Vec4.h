@@ -5,9 +5,11 @@ namespace GameEngine
 {
 	struct Vec4Data;
 
-	// Unlike Vec3, Vec4 currently has no handedness since it is only used
-	// for representing data that does not depend on handedness (quaternions
-	// and colors).
+	// This is just a dumb container class that allows for
+	// passing 4-dimensional data (e.g. RGBA colors,
+	// quaternions, plane equations) and allows for some
+	// comparisons. Does not check parameter values.
+	// RGBA element values should be in the range 0-1.0.
 	class Vec4
 	{
 	public:

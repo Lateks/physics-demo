@@ -27,6 +27,8 @@ namespace
 	unsigned int MUD_TEXTURE;
 	unsigned int BEACHBALL_TEXTURE;
 
+	int NUM_CUBES = 0;
+
 	const float HL_UPDATE_INTERVAL = 1.f/60;
 }
 
@@ -62,7 +64,8 @@ namespace Demo
 		void UpdateHighlight(float deltaSec);
 		ActorID PickTarget(Vec3& pickPoint);
 	};
-	
+
+	// Highlights the given actor's scene node with a blue hued light.
 	void AddHighlight(ActorID actorId)
 	{
 		auto pDisplay = GameData::GetInstance()->GetDisplayComponent();
@@ -91,7 +94,7 @@ namespace Demo
 		if (pRaycaster)
 		{
 			Vec3 rayFrom = m_currentCameraState.cameraPos;
-			Vec3 targetVector = (m_currentCameraState.cameraTarget-rayFrom).normalized() * 500.f;
+			Vec3 targetVector = (m_currentCameraState.cameraTarget - rayFrom).normalized() * 500.f;
 			Vec3 rayTo = rayFrom + targetVector;
 			pickedActorId = pGameData->GetPhysicsEngine()->VGetClosestActorHit(
 				rayFrom, rayTo, pickPoint);
@@ -127,6 +130,17 @@ namespace Demo
 		}
 	}
 
+	void AppendActorNameForDisplay(std::wostream& stream, ActorID id)
+	{
+		auto pActor = GameData::GetInstance()->GetActor(id);
+		if (!pActor)
+			stream << L"unidentified actor";
+		else if (pActor->GetName().empty())
+			stream << L"actor #" << pActor->GetID();
+		else
+			stream << pActor->GetName();
+	}
+
 	void PrintTriggerEvent(std::shared_ptr<Display::MessagingWindow> pMessages,
 		Events::EventPtr event)
 	{
@@ -135,13 +149,15 @@ namespace Demo
 		std::wstringstream message;
 		if (event->VGetEventType() == Events::EventType::ENTER_TRIGGER)
 		{
-				message << L"ENTER";
+			message << L"ENTER";
 		}
 		else if (event->VGetEventType() == Events::EventType::EXIT_TRIGGER)
 		{
 			message << L"EXIT";
 		}
-		message << " TRIGGER (actor " << pEvent->GetActorId() << ")";
+		message << " TRIGGER (";
+		AppendActorNameForDisplay(message, pEvent->GetActorId());
+		message << ")";
 		pMessages->VAddMessage(message.str());
 	}
 
@@ -155,20 +171,26 @@ namespace Demo
 
 		auto pCollisionEvent = std::dynamic_pointer_cast<Events::CollisionEvent>(pEvent);
 		if (pEvent->VGetEventType() == Events::EventType::COLLISION_EVENT)
-			std::cerr << "Collided: ";
+			std::wcerr << L"Collided: ";
 		else
-			std::cerr << "Separated: ";
+			std::wcerr << L"Separated: ";
 		auto collisionPair = pCollisionEvent->GetCollisionPair();
-		std::cerr << "actors " << collisionPair.first << " and " << collisionPair.second << std::endl;
+		AppendActorNameForDisplay(std::wcerr, collisionPair.first);
+		std::wcerr << L" and ";
+		AppendActorNameForDisplay(std::wcerr, collisionPair.second);
+		std::wcerr << std::endl;
 	}
 
 	void ThrowCube(Vec3& throwTowards)
 	{
+		++NUM_CUBES;
 		auto pGame = GameData::GetInstance();
 		auto pDisplay = pGame->GetDisplayComponent();
 		Vec3 cameraPos = pDisplay->VGetCameraPosition();
 
-		auto cube = std::make_shared<GameActor>(cameraPos);
+		std::wstringstream actorName;
+		actorName << L"small box #" << NUM_CUBES;
+		auto cube = std::make_shared<GameActor>(cameraPos, actorName.str());
 		cube->GetWorldTransform().SetRotation(pDisplay->VGetCameraRotation());
 		pGame->AddActor(cube);
 
@@ -218,7 +240,7 @@ namespace Demo
 		// Create an actor for the world map to be able to refer to the associated
 		// rigid bodies.
 		Vec3 mapPosition(-1350, -130, -1400);
-		auto world = std::make_shared<GameActor>(mapPosition);
+		auto world = std::make_shared<GameActor>(mapPosition, L"worldmap");
 		pGame->AddActor(world);
 		pDisplay->VLoadMap("..\\assets\\map-20kdm2.pk3", "20kdm2.bsp", mapPosition);
 		std::unique_ptr<BspLoader> pBspLoader = CreateBspLoader("..\\assets\\20kdm2.bsp");
@@ -247,29 +269,31 @@ namespace Demo
 		WOODBOX_TEXTURE = pDisplay->VLoadTexture("..\\assets\\woodbox2.jpg");
 
 		// Setup actors and their graphical and physical representations.
-		auto ball = std::make_shared<GameActor>(Vec3(0, 50, -60));
+		auto ball = std::make_shared<GameActor>(Vec3(0, 50, -60), L"stone ball");
 		pGame->AddActor(ball);
 		pDisplay->VAddSphereSceneNode(10.f, ball, MUD_TEXTURE, true);
 		pPhysics->VAddSphere(ball, 10.f, Physics::IPhysicsEngine::PhysicsObjectType::DYNAMIC, "Titanium", "Bouncy");
 
-		auto cube = std::make_shared<GameActor>(Vec3(0, 80, -60));
+		auto cube = std::make_shared<GameActor>(Vec3(0, 80, -60), L"large box");
 		pGame->AddActor(cube);
 		pDisplay->VAddCubeSceneNode(25.f, cube, WOODBOX_TEXTURE, true);
 		pPhysics->VAddBox(cube, Vec3(25.f, 25.f, 25.f), Physics::IPhysicsEngine::PhysicsObjectType::DYNAMIC, "manganese", "Normal");
 
 		// Add a trigger node, rendered as a wireframe cube.
-		auto trigger = std::make_shared<GameActor>(Vec3(-100, 125, -450));
+		auto trigger = std::make_shared<GameActor>(Vec3(-100, 125, -450), L"trigger cube");
 		pGame->AddActor(trigger);
 		pDisplay->VAddCubeSceneNode(125.f, trigger, 0);
 		pPhysics->VAddBox(trigger, Vec3(125.f, 125.f, 125.f), Physics::IPhysicsEngine::PhysicsObjectType::TRIGGER);
 
-		// Create an event handler to print out messages when a trigger event is detected.
+		// Create event handler to print out messages to the in-game message window
+		// when a trigger event is detected.
 		Events::EventHandlerPtr eventPrinter(new std::function<void(Events::EventPtr)>
 			([pMessages] (Events::EventPtr event)
 		{
 			PrintTriggerEvent(pMessages, event);
 		}));
 
+		// Create event handler to print collision events to the console as debug information.
 		Events::EventHandlerPtr debugPrinter(new std::function<void(Events::EventPtr)>
 			([] (Events::EventPtr event)
 		{
@@ -307,12 +331,12 @@ namespace Demo
 			Vec3 pickPoint;
 			ActorID pickedActorId = m_pData->PickTarget(pickPoint);
 
-			std::cerr << "Selected actor id: ";
+			std::wcerr << L"Selected actor: ";
 			if (!pickedActorId)
-				std::cerr << "none";
+				std::wcerr << L"none";
 			else
-				std::cerr << pickedActorId;
-			std::cerr << std::endl;
+				AppendActorNameForDisplay(std::wcerr, pickedActorId);
+			std::wcerr << std::endl;
 
 			if (pickedActorId != 0)
 			{

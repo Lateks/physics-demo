@@ -2,6 +2,7 @@
 
 #include "enginefwd.h"
 #include <memory>
+#include <string>
 
 namespace GameEngine
 {
@@ -10,10 +11,11 @@ namespace GameEngine
 	class GameActor
 	{
 	public:
-		GameActor();
-		GameActor(Vec3& startPosition);
+		GameActor(std::wstring name = L"");
+		GameActor(Vec3& startPosition, std::wstring name = L"");
 		virtual ~GameActor();
 		ActorID GetID();
+		std::wstring GetName();
 		void SetWorldTransform(const WorldTransformComponent& trans);
 		WorldTransformComponent& GetWorldTransform();
 	private:

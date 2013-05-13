@@ -196,7 +196,8 @@ namespace Demo
 
 		pDisplay->VAddCubeSceneNode(15.f, cube, WOODBOX_TEXTURE, true);
 		auto physics = pGame->GetPhysicsEngine();
-		physics->VAddBox(cube, Vec3(15.f, 15.f, 15.f), Physics::IPhysicsEngine::PhysicsObjectType::DYNAMIC, "Titanium", "Bouncy");
+		physics->VAddBox(cube, Vec3(15.f, 15.f, 15.f),
+			Physics::IPhysicsEngine::PhysicsObjectType::DYNAMIC, "Titanium", "Bouncy");
 
 		Vec3 throwDirection = throwTowards - cameraPos;
 

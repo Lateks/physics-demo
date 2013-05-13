@@ -39,11 +39,14 @@ namespace GameEngine
 		{
 			// CONSTRUCTORS / DESTRUCTORS:
 			BulletPhysicsData(float worldScale)
-				: m_worldScaleConst(worldScale) { }
+				: m_worldScaleConst(worldScale), m_contactThreshold(0.01f * m_worldScaleConst),
+				m_collisionMargin(0.01f * m_worldScaleConst) { }
 			virtual ~BulletPhysicsData();
 
 			// MEMBERS:
 			float m_worldScaleConst;
+			float m_contactThreshold;
+			float m_collisionMargin;
 
 			// Bullet-related:
 			unique_ptr<btDynamicsWorld> m_pDynamicsWorld;                   // - manages the other required components (declared below)
@@ -55,13 +58,15 @@ namespace GameEngine
 			unique_ptr<XMLPhysicsData> m_physicsMaterialData;
 
 			/* Store the rigid bodies related to game actors.
-			 * Several rigid bodies can be related to a single actor, but only
-			 * a single actor may be related to any rigid body. At the moment
-			 * only "static" actors (basically map elements) can own several
-			 * rigid bodies.
+			 * Several rigid bodies can be related to a single actor, but each
+			 * rigid body may only have one actor related to it. At the moment
+			 * only "static" actors (basically map elements in the demo) can
+			 * own several rigid bodies.
 			 */
 			std::map<ActorID, std::shared_ptr<BulletPhysicsObject>> m_actorToBulletPhysicsObjectMap;
 			std::map<const btRigidBody*, ActorID> m_rigidBodyToActorMap;
+
+			// Stores the Bullet collision flags associated with each object type.
 			std::map<IPhysicsEngine::PhysicsObjectType, int> m_collisionFlags;
 
 			std::shared_ptr<BulletPhysicsObject> GetPhysicsObject(ActorID id) const;
@@ -76,19 +81,21 @@ namespace GameEngine
 			void AddSingleBodyShape(ActorPtr pActor, btCollisionShape *shape, CollisionObject& object);
 			void AddMultiBodyShape(ActorPtr pActor, btCollisionShape *shape, CollisionObject& object);
 
-			void SendNewCollisionEvent(const btPersistentManifold * manifold,
-				const btRigidBody * pBody1, const btRigidBody * pBody2);
-			void SendSeparationEvent(const btRigidBody * pBody1, const btRigidBody * pBody2);
+			void SendNewCollisionEvent(const btPersistentManifold *manifold,
+				const btRigidBody *pBody1, const btRigidBody *pBody2);
+			void SendSeparationEvent(const btRigidBody *pBody1, const btRigidBody *pBody2);
 			void RemoveCollisionObject(btCollisionObject *obj);
-			void SetupSystems();
-			void CleanUpRigidBodies();
-			void HandleNewCollisions(CollisionPairs& currentTickCollisions);
 			btMotionState *GetMotionStateFrom(const WorldTransformComponent& transform);
 			void CreateRigidBody(ActorPtr pActor, btCollisionShape *shape, CollisionObject& object);
 
-			// Bullet callback handling.
+			// Bullet callbacks.
 			static void BulletInternalTickCallback(btDynamicsWorld * const pWorld, const btScalar timeStep);
 			void HandleCallback();
+			void HandleNewCollisions(CollisionPairs& currentTickCollisions);
+			void HandleRemovedCollisions(CollisionPairs& currentTickCollisions);
+
+			void SetupSystems();
+			void CleanUpRigidBodies();
 		};
 
 		struct CollisionObject
@@ -626,7 +633,7 @@ namespace GameEngine
 			auto it = m_actorToBulletPhysicsObjectMap.find(id);
 			if (it != m_actorToBulletPhysicsObjectMap.end())
 				return it->second;
-			return std::shared_ptr<BulletPhysicsObject>();
+			return std::shared_ptr<BulletPhysicsObject>(nullptr);
 		}
 
 		ActorID BulletPhysicsData::GetActorID(const btRigidBody *pBody) const
@@ -744,28 +751,13 @@ namespace GameEngine
 		{
 			CollisionPairs currentTickCollisions;
 			HandleNewCollisions(currentTickCollisions);
-
-			// Get collisions that existed on the last tick but not on this tick.
-			CollisionPairs removedCollisions;
-			std::set_difference(m_previousTickCollisions.begin(),
-								m_previousTickCollisions.end(),
-								currentTickCollisions.begin(), currentTickCollisions.end(),
-								std::inserter(removedCollisions, removedCollisions.end()));
-
-			std::for_each(removedCollisions.begin(), removedCollisions.end(),
-				[this] (const CollisionPair& pair)
-			{
-				const btRigidBody * const body1 = pair.first;
-				const btRigidBody * const body2 = pair.second;
-
-				this->SendSeparationEvent(body1, body2);
-			});
-
+			HandleRemovedCollisions(currentTickCollisions);
 			m_previousTickCollisions = currentTickCollisions;
 		}
 
 		void BulletPhysicsData::HandleNewCollisions(CollisionPairs& currentTickCollisions)
 		{
+			// Find the collisions that are new (did not exist on previous tick).
 			for (int manifoldIdx = 0; manifoldIdx < m_pCollisionDispatcher->getNumManifolds(); ++manifoldIdx)
 			{
 				const btPersistentManifold * const pContactManifold =
@@ -786,10 +778,12 @@ namespace GameEngine
 					std::swap(body1, body2);
 				}
 
-				float contactThreshold = 0.01f * m_worldScaleConst;
 				for (int i = 0; i < pContactManifold->getNumContacts(); ++i)
 				{
-					if (pContactManifold->getContactPoint(i).getDistance() < contactThreshold)
+					// Bullet registers the collision slightly before it actually happens
+					// (regardless of collision margins etc.), so check the actual contact
+					// point distance to see whether the objects are touching.
+					if (pContactManifold->getContactPoint(i).getDistance() < m_contactThreshold)
 					{
 						const CollisionPair newPair = std::make_pair(body1, body2);
 						currentTickCollisions.insert(newPair);
@@ -798,10 +792,29 @@ namespace GameEngine
 						{
 							SendNewCollisionEvent(pContactManifold, body1, body2);
 						}
-						break;
+						break; // found contact, no need to search this manifold further
 					}
 				}
 			}
+		}
+
+		void BulletPhysicsData::HandleRemovedCollisions(CollisionPairs& currentTickCollisions)
+		{
+			// Find the collisions that existed on the last tick but not on this tick.
+			CollisionPairs removedCollisions;
+			std::set_difference(m_previousTickCollisions.begin(),
+								m_previousTickCollisions.end(),
+								currentTickCollisions.begin(), currentTickCollisions.end(),
+								std::inserter(removedCollisions, removedCollisions.end()));
+
+			std::for_each(removedCollisions.begin(), removedCollisions.end(),
+				[this] (const CollisionPair& pair)
+			{
+				const btRigidBody * const body1 = pair.first;
+				const btRigidBody * const body2 = pair.second;
+
+				this->SendSeparationEvent(body1, body2);
+			});
 		}
 
 		void BulletPhysicsData::AddShape(ActorPtr pActor, btCollisionShape *shape, CollisionObject& object)
@@ -881,7 +894,7 @@ namespace GameEngine
 			if (mass > 0.f)
 				shape->calculateLocalInertia(mass, localInertia);
 
-			shape->setMargin(0.01f * m_worldScaleConst);
+			shape->setMargin(m_collisionMargin);
 			btRigidBody::btRigidBodyConstructionInfo rbInfo(
 				mass, motionState, shape, localInertia);
 

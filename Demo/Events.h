@@ -139,29 +139,5 @@ namespace GameEngine
 			const static EventType eventType = EventType::ACTOR_MOVED;
 			ActorID m_actorId;
 		};
-
-		class CameraMoveEvent : public BaseEventData
-		{
-		public:
-			CameraMoveEvent(const unsigned int timeStamp, Vec3 cameraPos, Vec3 cameraTarget)
-				: BaseEventData(timeStamp), m_cameraPos(cameraPos), m_cameraTarget(cameraTarget) { }
-			virtual ~CameraMoveEvent() { }
-			virtual EventType VGetEventType() const override
-			{
-				return eventType;
-			}
-			Vec3 GetCameraPosition()
-			{
-				return m_cameraPos;
-			}
-			Vec3 GetCameraTarget()
-			{
-				return m_cameraTarget;
-			}
-		private:
-			const static EventType eventType = EventType::CAMERA_MOVED;
-			Vec3 m_cameraPos;
-			Vec3 m_cameraTarget;
-		};
 	}
 }

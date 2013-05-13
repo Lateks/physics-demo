@@ -14,8 +14,7 @@ namespace GameEngine
 			SEPARATION_EVENT,
 			ACTOR_MOVED,
 			ENTER_TRIGGER,
-			EXIT_TRIGGER,
-			CAMERA_MOVED
+			EXIT_TRIGGER
 		};
 
 		class IEventData
@@ -43,7 +42,7 @@ namespace GameEngine
 			virtual void VDequeueFirst(EventType type) = 0;
 
 			/* Event handlers (callbacks) are always pointers to std::function
-			 * objects because std:function objects themselves cannot be compared.
+			 * objects because std::function objects themselves cannot be compared.
 			 * Comparison needs to be possible to make deregistering handlers
 			 * work - as well as to make it possible to check that a particular
 			 * handler is not registered twice for the same event type.

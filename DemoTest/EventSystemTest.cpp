@@ -54,7 +54,7 @@ namespace DemoTest
 		{
 			auto eventMgr = std::make_shared<EventManager>();
 			MockEventReceiver moveHandler;
-			moveHandler.RegisterTo(EventType::CAMERA_MOVED, eventMgr);
+			moveHandler.RegisterTo(EventType::EXIT_TRIGGER, eventMgr);
 
 			eventMgr->VQueueEvent(std::make_shared<ActorMoveEvent>(0, 1));
 			eventMgr->VDispatchEvents();

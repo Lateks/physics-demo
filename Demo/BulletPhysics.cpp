@@ -25,11 +25,6 @@ using std::shared_ptr;
 using std::weak_ptr;
 using std::unique_ptr;
 
-namespace
-{
-	GameEngine::Physics::ConstraintID CONSTRAINT_ID = 0;
-}
-
 namespace GameEngine
 {
 	namespace Physics
@@ -44,13 +39,14 @@ namespace GameEngine
 			// CONSTRUCTORS / DESTRUCTORS:
 			BulletPhysicsData(float worldScale)
 				: m_worldScaleConst(worldScale), m_contactThreshold(0.01f * m_worldScaleConst),
-				m_collisionMargin(0.01f * m_worldScaleConst) { }
+				m_collisionMargin(0.01f * m_worldScaleConst), m_constraintIdCounter(0) { }
 			virtual ~BulletPhysicsData();
 
 			// MEMBERS:
 			float m_worldScaleConst;
 			float m_contactThreshold;
 			float m_collisionMargin;
+			ConstraintID m_constraintIdCounter;
 
 			// Bullet-related:
 			unique_ptr<btDynamicsWorld> m_pDynamicsWorld;                   // - manages the other required components (declared below)
@@ -549,8 +545,9 @@ namespace GameEngine
 
 			m_pData->m_pDynamicsWorld->addConstraint(btPickConstraint, true);
 
-			ConstraintID constraintId = ++CONSTRAINT_ID;
-			m_pData->m_constraintMap[constraintId] = btPickConstraint;
+			ConstraintID constraintId = ++m_pData->m_constraintIdCounter;
+			m_pData->m_constraintMap.insert(std::make_pair(constraintId, btPickConstraint));
+			auto map = m_pData->m_constraintMap;
 
 			return constraintId;
 		}

@@ -568,11 +568,12 @@ namespace DemoTest
 				IPhysicsEngine::PhysicsObjectType::DYNAMIC, "balsa", "Normal");
 
 			Vec3 pivotPos(90.f, 50.f, 0.f);
-			pPhysics->VAddDOF6Constraint(pActor->GetID(), pivotPos);
+			GameEngine::Physics::ConstraintID constraintId =
+				pPhysics->VAddDOF6Constraint(pActor->GetID(), pivotPos);
 			SimulateSteps(5);
 
 			Vec3 newPivot(100, 50, 100);
-			pPhysics->VUpdateDOF6PivotPoint(pActor->GetID(), newPivot);
+			pPhysics->VUpdateDOF6PivotPoint(constraintId, newPivot);
 
 			SimulateSteps(60); // it takes a while for the DOF6 constrained object to move close enough to the new pivot point
 
@@ -580,7 +581,7 @@ namespace DemoTest
 			float distance = (newPivot - newActorPosition).norm();
 
 			Assert::AreNotEqual(newActorPosition, actorStartPosition);
-			Assert::IsTrue(distance < 15.f);
+			Assert::IsTrue(AreEqual(10.f, distance, 0.1f));
 		}
 
 		TEST_METHOD(IfAngularFactorSetToZeroObjectIsNotAffectedByTorque)

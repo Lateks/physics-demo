@@ -113,22 +113,22 @@ namespace GameEngine
 		{
 			static MaterialData defaultValue = MaterialData(0.f, 0.f);
 			auto it = m_materialTable.find(materialName);
-			assert(it != m_materialTable.end());
 			if (it != m_materialTable.end())
 			{
 				return it->second;
 			}
+			std::cerr << "Material data for '" << materialName << "' not found, using defaults." << std::endl;
 			return defaultValue;
 		}
 
 		float XMLPhysicsData::LookupDensity(const std::string& materialName)
 		{
 			auto it = m_densities.find(materialName);
-			assert(it != m_densities.end());
 			if (it != m_densities.end())
 			{
 				return it->second;
 			}
+			std::cerr << "Density for '" << materialName << "' not found, using defaults." << std::endl;
 			return 0.f;
 		}
 	}

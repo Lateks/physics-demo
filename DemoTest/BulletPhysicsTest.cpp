@@ -689,6 +689,27 @@ namespace DemoTest
 			Assert::AreEqual(actorStartPosition, pActor->GetWorldTransform().GetPosition());
 		}
 
+		TEST_METHOD(CannotConstrainAStaticObject)
+		{
+			Vec3 actorStartPosition(100, 50, 0);
+			pActor->GetWorldTransform().SetPosition(actorStartPosition);
+			float sphereRadius = 10.f;
+			pPhysics->VAddSphere(pActor, sphereRadius,
+				IPhysicsEngine::PhysicsObjectType::STATIC);
+
+			pPhysics->VSetGlobalGravity(Vec3(0, 0, 0));
+			Vec3 pivotPos(90.f, 50.f, 0.f);
+			unsigned int constraintId = pPhysics->VAddDOF6Constraint(pActor->GetID(), pivotPos);
+			SimulateSteps(1);
+
+			Vec3 newPivotPos(100, 50, 100);
+			pPhysics->VUpdateDOF6PivotPoint(constraintId, newPivotPos);
+			SimulateSteps(30);
+			Vec3 actorPositionAfterSimulation = pActor->GetWorldTransform().GetPosition();
+
+			Assert::AreEqual(actorPositionAfterSimulation, actorStartPosition);
+		}
+
 		TEST_METHOD(BouncyObjectsBounceOffOtherObjects)
 		{
 			Vec3 actorStartPosition(0, 100, 0);

@@ -77,7 +77,7 @@ namespace GameEngine
 			virtual void VSetGlobalGravity(Vec3& gravity) override;
 			virtual Vec3 VGetGlobalGravity() override;
 
-			virtual ActorID VGetClosestActorHit(Vec3& rayFrom, Vec3& rayTo, Vec3& pickPosition) const override;
+			virtual ActorID VGetClosestActorHit(Vec3& rayFrom, Vec3& rayTo, Vec3& hitPosition) const override;
 
 			virtual ConstraintID VAddDOF6Constraint(ActorID actorID, const Vec3& pivotPosition) override;
 			virtual void VUpdateDOF6PivotPoint(ConstraintID constraintId, const Vec3& pivotPosition) override;

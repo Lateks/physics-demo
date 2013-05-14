@@ -449,7 +449,7 @@ namespace GameEngine
 		}
 
 		// Use a raycast to get the first non-static body that was hit (for picking objects).
-		ActorID BulletPhysics::VGetClosestActorHit(Vec3& rayFrom, Vec3& rayTo, Vec3& pickPosition) const
+		ActorID BulletPhysics::VGetClosestActorHit(Vec3& rayFrom, Vec3& rayTo, Vec3& hitPosition) const
 		{
 			btVector3 btRayFrom = Vec3_to_btVector3(rayFrom, m_pData->m_worldScaleFactor);
 			btVector3 btRayTo = Vec3_to_btVector3(rayTo, m_pData->m_worldScaleFactor);
@@ -500,7 +500,7 @@ namespace GameEngine
 			}
 			if (actorHit)
 			{
-				pickPosition = btVector3_to_Vec3(btPickPosition, m_pData->m_worldScaleFactor);
+				hitPosition = btVector3_to_Vec3(btPickPosition, m_pData->m_worldScaleFactor);
 			}
 			return actorHit;
 		}

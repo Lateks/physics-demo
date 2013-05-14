@@ -71,7 +71,7 @@ namespace GameEngine
 			 * the point where the ray intersects the rigid body associated with
 			 * the actor. Only dynamic bodies are picked by this method.
 			 */
-			virtual ActorID VGetClosestActorHit(Vec3& rayFrom, Vec3& rayTo, Vec3& pickPosition) const = 0;
+			virtual ActorID VGetClosestActorHit(Vec3& rayFrom, Vec3& rayTo, Vec3& hitPosition) const = 0;
 
 			// Adds a DOF6 constraint, constraining the degrees of freedom of the object.
 			// This is useful for e.g. constraining an object to camera or mouse movement.

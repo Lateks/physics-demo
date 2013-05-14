@@ -123,7 +123,7 @@ namespace GameEngine
 		IrrlichtDisplayFactory::IrrlichtDisplayFactory(unsigned int width, unsigned int height, DriverType driverType, CameraType cameraType)
 			: m_width(width), m_height(height), m_driverType(driverType), m_cameraType(cameraType) { }
 
-		std::shared_ptr<IDisplay> IrrlichtDisplayFactory::VCreateDeviceAndOpenWindow()
+		std::shared_ptr<IDisplay> IrrlichtDisplayFactory::VCreateDeviceAndOpenWindow() const
 		{
 			auto pDisplay = std::shared_ptr<IDisplay>(new IrrlichtDisplay());
 			if (pDisplay)

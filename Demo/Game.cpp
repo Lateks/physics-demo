@@ -19,17 +19,50 @@ namespace GameEngine
 		std::cerr << message << std::endl;
 	}
 
+	enum class EngineState
+	{
+		UNINITIALIZED,
+		INITIALIZATION_FAILED,
+		INITIALIZED
+	};
+
+	struct GameImpl
+	{
+		GameImpl() : m_state(EngineState::UNINITIALIZED) { }
+		EngineState m_state;
+
+		inline void Fail() { m_state = EngineState::INITIALIZATION_FAILED; }
+		inline void Success() { m_state = EngineState::INITIALIZED; }
+		bool CheckInitOkAndPrintErrors()
+		{
+			if (m_state == EngineState::UNINITIALIZED)
+			{
+				PrintError("Game: Cannot run, engine is uninitialized. Initialize before calling Run.");
+				return false;
+			}
+			else if (m_state == EngineState::INITIALIZATION_FAILED)
+			{
+				PrintError("Game: Cannot run, initialization of some engine components failed.");
+				return false;
+			}
+			return true;
+		}
+		void Shutdown();
+	};
+
 	// Sets up the GameData singleton.
-	bool Game::Initialize()
+	bool Game::Initialize(const IGameLogicFactory& gameLogicFactory,
+		const Display::IDisplayFactory& displayFactory,
+		const Physics::IPhysicsEngineFactory& physicsFactory)
 	{
 		auto pGameData = GameData::GetInstance();
 
 		// Setup the display component (rendering and input handling).
-		auto pDisplay = Demo::CreateRenderer(1024, 800,
-			Display::DriverType::OPEN_GL, Display::CameraType::FPS_WASD);
+		auto pDisplay = displayFactory.VCreateDeviceAndOpenWindow();
 		if (!pDisplay)
 		{
-			PrintError("Failed to create rendering device.");
+			PrintError("Failed to initialize rendering device.");
+			m_pImpl->Fail();
 			return false;
 		}
 
@@ -40,35 +73,39 @@ namespace GameEngine
 		auto pEventManager = Demo::CreateEventManager();
 		if (!pEventManager)
 		{
-			PrintError("Failed to create an event manager.");
+			PrintError("Failed to initialize an event manager.");
+			m_pImpl->Fail();
 			return false;
 		}
 		pGameData->SetEventManager(pEventManager);
 
 		// Setup physics. World is scaled by the constant given as parameter
 		// (compared to the size of the rendered world).
-		auto pPhysics = Demo::CreatePhysicsEngine("..\\assets\\materials.xml", 0.05f);
+		auto pPhysics = physicsFactory.CreatePhysicsEngine();
 		if (!pPhysics)
 		{
 			PrintError("Failed to initialize physics engine.");
+			m_pImpl->Fail();
 			return false;
 		}
 		pGameData->SetPhysicsEngine(pPhysics);
 
 		// Setup the main game logic handler (handles inputs etc.).
 		// The factory also sets up the initial scene.
-		auto pGameLogic = Demo::CreateDemoGameLogic();
+		auto pGameLogic = gameLogicFactory.CreateGameLogic();
 		if (!pGameLogic)
 		{
 			PrintError("Failed to initialize game logic instance.");
+			m_pImpl->Fail();
 			return false;
 		}
 		pGameData->SetInputHandler(pGameLogic);
 
+		m_pImpl->Success();
 		return true;
 	}
 
-	void Game::Shutdown()
+	void GameImpl::Shutdown()
 	{
 		auto pGameData = GameData::GetInstance();
 		pGameData->SetPhysicsEngine(nullptr);
@@ -77,17 +114,14 @@ namespace GameEngine
 		pGameData->SetDisplayComponent(nullptr);
 	}
 
-	Game::Game() { }
+	Game::Game() : m_pImpl(new GameImpl()) { }
 
 	Game::~Game() { }
 
-	bool Game::Run()
+	bool Game::Run() const
 	{
-		if (!Initialize())
-		{
-			PrintError("Initialization of some engine components failed.");
+		if (!m_pImpl->CheckInitOkAndPrintErrors())
 			return false;
-		}
 
 		auto pGameData = GameData::GetInstance();
 		auto pDisplay = pGameData->GetDisplayComponent();
@@ -117,7 +151,7 @@ namespace GameEngine
 			timeBegin = timeEnd;
 		}
 
-		Shutdown();
+		m_pImpl->Shutdown();
 		return true;
 	}
 }

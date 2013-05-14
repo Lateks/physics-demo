@@ -10,6 +10,7 @@ namespace GameEngine
 		class IDisplay;
 		class MessagingWindow;
 		class IInputState;
+		class IDisplayFactory;
 	}
 
 	namespace Physics
@@ -18,6 +19,7 @@ namespace GameEngine
 		struct MaterialData;
 		struct XMLPhysicsData;
 		typedef unsigned int ConstraintID;
+		class IPhysicsEngineFactory;
 	}
 
 	namespace Events
@@ -40,6 +42,7 @@ namespace GameEngine
 	class Game;
 	class GameData;
 	class IGameLogic;
+	class IGameLogicFactory;
 
 	class ITimer;
 }

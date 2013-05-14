@@ -85,7 +85,7 @@ namespace GameEngine
 		{
 		public:
 			virtual ~IPhysicsEngineFactory() { }
-			virtual std::shared_ptr<IPhysicsEngine> CreatePhysicsEngine() = 0;
+			virtual std::shared_ptr<IPhysicsEngine> CreatePhysicsEngine() const = 0;
 		};
 	}
 }

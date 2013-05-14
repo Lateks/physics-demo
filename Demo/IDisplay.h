@@ -87,7 +87,7 @@ namespace GameEngine
 		{
 		public:
 			virtual ~IDisplayFactory() { }
-			virtual std::shared_ptr<IDisplay> VCreateDeviceAndOpenWindow() = 0;
+			virtual std::shared_ptr<IDisplay> VCreateDeviceAndOpenWindow() const = 0;
 		};
 	}
 }

@@ -137,7 +137,7 @@ namespace GameEngine
 			: m_materialFilePath(materialFilePath), m_worldScale(worldScale),
 			m_contactThreshold(contactThreshold), m_collisionMargin(collisionMargin) { }
 
-		std::shared_ptr<IPhysicsEngine> BulletPhysicsFactory::CreatePhysicsEngine()
+		std::shared_ptr<IPhysicsEngine> BulletPhysicsFactory::CreatePhysicsEngine() const
 		{
 			auto pPhysics = std::shared_ptr<IPhysicsEngine>(
 				new BulletPhysics(m_worldScale, m_contactThreshold, m_collisionMargin));

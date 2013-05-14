@@ -30,7 +30,7 @@ namespace GameEngine
 			BulletPhysicsFactory(const std::string& materialFilePath,
 				float worldScale = 1.0f, float contactThreshold = 0.1f, float collisionMargin = 0.1f);
 			virtual ~BulletPhysicsFactory() { }
-			virtual std::shared_ptr<IPhysicsEngine> CreatePhysicsEngine() override;
+			virtual std::shared_ptr<IPhysicsEngine> CreatePhysicsEngine() const override;
 		private:
 			const std::string m_materialFilePath;
 			float m_worldScale;

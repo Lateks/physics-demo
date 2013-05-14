@@ -18,7 +18,7 @@ namespace GameEngine
 	{
 	public:
 		virtual ~IGameLogicFactory() { }
-		virtual std::shared_ptr<IGameLogic> CreateGameLogic() = 0;
+		virtual std::shared_ptr<IGameLogic> CreateGameLogic() const = 0;
 	};
 }
 

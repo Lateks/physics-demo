@@ -22,7 +22,7 @@ namespace Demo
 	public:
 		virtual ~DemoGameLogicFactory() { }
 
-		virtual std::shared_ptr<GameEngine::IGameLogic> CreateGameLogic()
+		virtual std::shared_ptr<GameEngine::IGameLogic> CreateGameLogic() const
 		{
 			auto pLogic = std::make_shared<DemoGameLogic>();
 			if (pLogic && !pLogic->VSetupInitialScene())

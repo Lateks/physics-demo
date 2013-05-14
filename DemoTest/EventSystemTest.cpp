@@ -15,6 +15,26 @@ namespace DemoTest
 	TEST_CLASS(EventSystemTest)
 	{
 	public:
+		TEST_METHOD(EventSystemDoesNotCrashWhenGivenANullHandlerPointer)
+		{
+			auto eventMgr = std::make_shared<EventManager>();
+			eventMgr->VRegisterHandler(EventType::ACTOR_MOVED, nullptr);
+
+			eventMgr->VQueueEvent(std::make_shared<ActorMoveEvent>(0, 1));
+
+			eventMgr->VDispatchEvents(); // no asserts, this just should not crash
+		}
+
+		TEST_METHOD(EventSystemDoesNotCrashWhenGivenANullEventPointer)
+		{
+			auto eventMgr = std::make_shared<EventManager>();
+			MockEventReceiver moveHandler;
+			moveHandler.RegisterTo(EventType::ACTOR_MOVED, eventMgr);
+
+			eventMgr->VQueueEvent(nullptr);
+
+			eventMgr->VDispatchEvents(); // no asserts, this just should not crash
+		}
 
 		TEST_METHOD(SingleHandlerReceivesEventsRegisteredTo)
 		{

@@ -47,14 +47,20 @@ namespace GameEngine
 
 		void EventManager::VDispatchEvent(EventPtr event)
 		{
-			EventHandlerList *handlerList = &m_pData->m_eventHandlers[event->VGetEventType()];
-			std::for_each(handlerList->begin(), handlerList->end(),
-				[&event] (EventHandlerPtr handler) { (*handler)(event); });
+			if (event)
+			{
+				EventHandlerList *handlerList = &m_pData->m_eventHandlers[event->VGetEventType()];
+				std::for_each(handlerList->begin(), handlerList->end(),
+					[&event] (EventHandlerPtr handler) { (*handler)(event); });
+			}
 		}
 
 		void EventManager::VQueueEvent(EventPtr event)
 		{
-			m_pData->m_eventQueues[m_pData->m_activeQueue].push_back(event);
+			if (event)
+			{
+				m_pData->m_eventQueues[m_pData->m_activeQueue].push_back(event);
+			}
 		}
 
 		void EventManager::VDequeueFirst(EventType type)
@@ -70,23 +76,29 @@ namespace GameEngine
 
 		void EventManager::VRegisterHandler(EventType type, EventHandlerPtr handler)
 		{
-			auto &handlers = m_pData->m_eventHandlers[type];
-			auto it = std::find_if(handlers.begin(), handlers.end(),
-				[&handler] (EventHandlerPtr storedHandler) { return handler == storedHandler; });
-			if (it == handlers.end()) // only add the handler if it's not already in the list
+			if (handler)
 			{
-				handlers.push_back(handler);
+				auto &handlers = m_pData->m_eventHandlers[type];
+				auto it = std::find_if(handlers.begin(), handlers.end(),
+					[&handler] (EventHandlerPtr storedHandler) { return handler == storedHandler; });
+				if (it == handlers.end()) // only add the handler if it's not already in the list
+				{
+					handlers.push_back(handler);
+				}
 			}
 		}
 
 		void EventManager::VDeregisterHandler(EventType type, EventHandlerPtr handler)
 		{
-			EventHandlerList& handlers = m_pData->m_eventHandlers[type];
-			auto it = std::find_if(handlers.begin(), handlers.end(),
-				[&handler] (EventHandlerPtr storedHandler) { return handler == storedHandler; });
-			if (it != handlers.end())
+			if (handler)
 			{
-				handlers.erase(it);
+				EventHandlerList& handlers = m_pData->m_eventHandlers[type];
+				auto it = std::find_if(handlers.begin(), handlers.end(),
+					[&handler] (EventHandlerPtr storedHandler) { return handler == storedHandler; });
+				if (it != handlers.end())
+				{
+					handlers.erase(it);
+				}
 			}
 		}
 	}

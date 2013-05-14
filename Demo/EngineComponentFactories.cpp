@@ -29,6 +29,7 @@ namespace Demo
 
 	std::shared_ptr<GameEngine::IGameLogic> CreateDemoGameLogic()
 	{
-		return std::make_shared<Demo::DemoGameLogic>();
+		DemoGameLogicFactory factory;
+		return factory.CreateGameLogic();
 	}
 }

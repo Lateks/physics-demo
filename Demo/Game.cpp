@@ -36,15 +36,6 @@ namespace GameEngine
 		pGameData->SetDisplayComponent(pDisplay);
 		pGameData->SetInputStateHandler(pDisplay->VGetInputState());
 
-		// Setup the main game logic handler (handles inputs etc.).
-		auto pGameLogic = Demo::CreateDemoGameLogic();
-		if (!pGameLogic)
-		{
-			PrintError("Failed to create demo input handler.");
-			return false;
-		}
-		pGameData->SetInputHandler(pGameLogic);
-
 		// Setup event manager.
 		auto pEventManager = Demo::CreateEventManager();
 		if (!pEventManager)
@@ -63,6 +54,17 @@ namespace GameEngine
 			return false;
 		}
 		pGameData->SetPhysicsEngine(pPhysics);
+
+		// Setup the main game logic handler (handles inputs etc.).
+		// The factory also sets up the initial scene.
+		auto pGameLogic = Demo::CreateDemoGameLogic();
+		if (!pGameLogic)
+		{
+			PrintError("Failed to initialize game logic instance.");
+			return false;
+		}
+		pGameData->SetInputHandler(pGameLogic);
+
 		return true;
 	}
 
@@ -92,12 +94,6 @@ namespace GameEngine
 		auto pPhysics = pGameData->GetPhysicsEngine();
 		auto pEvents = pGameData->GetEventManager();
 		auto pGameLogic = pGameData->GetInputHandler();
-
-		if (!pGameLogic->VSetupInitialScene())
-		{
-			PrintError("Failed to setup the initial scene.");
-			return false;
-		}
 
 		unsigned int timeBegin = pGameData->CurrentTimeMs();
 		unsigned int timeEnd;

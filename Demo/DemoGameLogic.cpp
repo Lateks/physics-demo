@@ -273,12 +273,6 @@ namespace Demo
 
 	DemoGameLogic::~DemoGameLogic() { }
 
-	/* Note: the coordinates given here are all given in a right-handed
-	 * coordinate system. The IrrlichtDisplay component converts them to
-	 * the left-handed system used by Irrlicht by negating the z component.
-	 * (Also note that the concept of handedness does not affect quaternions
-	 * used for handling rotations.)
-	 */
 	bool DemoGameLogic::VSetupInitialScene()
 	{
 		auto pGame = GameData::GetInstance();

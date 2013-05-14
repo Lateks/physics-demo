@@ -16,4 +16,20 @@ namespace Demo
 	private:
 		std::unique_ptr<DemoGameLogicData> m_pData;
 	};
+
+	class DemoGameLogicFactory : public GameEngine::IGameLogicFactory
+	{
+	public:
+		virtual ~DemoGameLogicFactory() { }
+
+		virtual std::shared_ptr<GameEngine::IGameLogic> CreateGameLogic()
+		{
+			auto pLogic = std::make_shared<DemoGameLogic>();
+			if (pLogic && !pLogic->VSetupInitialScene())
+			{
+				pLogic.reset();
+			}
+			return pLogic;
+		}
+	};
 }

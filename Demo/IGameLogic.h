@@ -13,6 +13,13 @@ namespace GameEngine
 		virtual void VUpdate(float deltaSec) = 0;
 		virtual bool VSetupInitialScene() = 0;
 	};
+
+	class IGameLogicFactory
+	{
+	public:
+		virtual ~IGameLogicFactory() { }
+		virtual std::shared_ptr<IGameLogic> CreateGameLogic() = 0;
+	};
 }
 
 #endif

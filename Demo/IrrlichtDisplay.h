@@ -2,7 +2,6 @@
 
 #include "enginefwd.h"
 #include "IDisplay.h"
-#include "ITimer.h"
 #include <memory>
 
 namespace GameEngine

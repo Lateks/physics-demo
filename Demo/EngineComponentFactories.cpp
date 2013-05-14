@@ -12,8 +12,8 @@ namespace Demo
 	std::shared_ptr<Display::IDisplay> CreateRenderer(int width, int height,
 		Display::DriverType driverType, Display::CameraType cameraType)
 	{
-		Display::IrrlichtDisplayFactory factory;
-		return factory.VSetupAndOpenWindow(width, height, driverType, cameraType);
+		Display::IrrlichtDisplayFactory factory(width, height, driverType, cameraType);
+		return factory.VCreateDeviceAndOpenWindow();
 	}
 
 	std::shared_ptr<Events::IEventManager> CreateEventManager()

@@ -32,6 +32,9 @@ namespace GameEngine
 
 			virtual std::shared_ptr<IInputState> VGetInputState() const = 0;
 
+			virtual bool VSetupAndOpenWindow(unsigned int width, unsigned int height,
+				DriverType driverType, CameraType cameraType) = 0;
+
 			virtual void VYieldDevice() = 0;
 			virtual bool VRunning() = 0;
 			virtual bool VWindowActive() = 0;
@@ -82,8 +85,7 @@ namespace GameEngine
 
 		class IDisplayFactory
 		{
-			virtual std::shared_ptr<IDisplay> VSetupAndOpenWindow(unsigned int width,
-				unsigned int height, DriverType driverType, CameraType cameraType) = 0;
+			virtual std::shared_ptr<IDisplay> VCreateDeviceAndOpenWindow() = 0;
 		};
 	}
 }

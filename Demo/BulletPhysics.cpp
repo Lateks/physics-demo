@@ -104,7 +104,8 @@ namespace GameEngine
 			void CleanUpRigidBodies();
 		};
 
-		// These are temporary objects used for building a rigid body.
+		// These are temporary objects used passing parameters related to
+		// building a rigid body.
 		struct CollisionObject
 		{
 			CollisionObject(IPhysicsEngine::PhysicsObjectType type,

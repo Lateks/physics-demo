@@ -19,13 +19,19 @@ namespace DemoTest
 	public:
 		TEST_METHOD_INITIALIZE(InitializeIrrlichtDisplay)
 		{
-			IrrlichtDisplayFactory factory;
-			pDisplay = factory.VSetupAndOpenWindow(0, 0, DriverType::NO_WINDOW, CameraType::FPS_WASD);
+			IrrlichtDisplayFactory factory(0, 0, DriverType::NO_WINDOW, CameraType::FPS_WASD);
+			pDisplay = factory.VCreateDeviceAndOpenWindow();
 		}
 
 		TEST_METHOD_CLEANUP(CleanUpIrrlichtDisplay)
 		{
 			pDisplay.reset();
+		}
+
+		TEST_METHOD(CannotOpenWindowTwice)
+		{
+			// Window already opened by factory.
+			Assert::IsFalse(pDisplay->VSetupAndOpenWindow(0, 0, DriverType::NO_WINDOW, CameraType::FPS_WASD));
 		}
 
 		TEST_METHOD(IrrlichtCursorIsVisibleByDefault)

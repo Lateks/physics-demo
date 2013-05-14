@@ -12,8 +12,13 @@ namespace GameEngine
 		class IrrlichtDisplayFactory : public IDisplayFactory
 		{
 		public:
-			virtual std::shared_ptr<IDisplay> VSetupAndOpenWindow(unsigned int width,
-				unsigned int height, DriverType driverType, CameraType cameraType) override;
+			IrrlichtDisplayFactory(unsigned int width, unsigned int height, DriverType driverType, CameraType cameraType);
+			virtual std::shared_ptr<IDisplay> VCreateDeviceAndOpenWindow() override;
+		private:
+			unsigned int m_width;
+			unsigned int m_height;
+			DriverType m_driverType;
+			CameraType m_cameraType;
 		};
 
 		struct IrrlichtDisplayData;
@@ -30,6 +35,9 @@ namespace GameEngine
 			virtual unsigned int VGetDeviceTimeMs() const;
 
 			virtual std::shared_ptr<IInputState> VGetInputState() const override;
+
+			virtual bool VSetupAndOpenWindow(unsigned int width, unsigned int height,
+				DriverType driverType, CameraType cameraType);
 
 			virtual void VYieldDevice() override;
 			virtual bool VRunning() override;
@@ -79,8 +87,6 @@ namespace GameEngine
 			IrrlichtDisplay();
 			IrrlichtDisplay(IrrlichtDisplay& other); // cannot be copied
 			IrrlichtDisplay& operator=(IrrlichtDisplay& other);
-			bool IrrlichtDisplay::VSetupAndOpenWindow(unsigned int width, unsigned int height,
-				DriverType driverType, CameraType cameraType);
 			std::unique_ptr<IrrlichtDisplayData> m_pData;
 		};
 	}

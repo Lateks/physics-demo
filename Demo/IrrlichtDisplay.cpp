@@ -68,10 +68,18 @@ namespace GameEngine
 
 		struct IrrlichtDisplayData
 		{
+			IrrlichtDisplayData() : m_pDevice(nullptr), m_pDriver(nullptr),
+				m_pSmgr(nullptr), m_pCamera(nullptr), m_pGui(nullptr) { }
+
+			void AddSceneNode(ActorPtr pActor, irr::scene::ISceneNode *pNode, unsigned int texture, bool lightingOn);
+			void UpdateActorPosition(Events::EventPtr pEvent);
+			void SetNodeTransform(irr::scene::ISceneNode *pNode, const WorldTransformComponent& worldTransform);
+			void SetCursorVisible(bool value);
+			unsigned int GetTime();
+			irr::scene::ISceneNode *GetSceneNode(ActorID actorId);
+
 			std::map<unsigned int, irr::video::ITexture*> textures;
 			std::map<ActorID, irr::scene::ISceneNode*> sceneNodes;
-
-			irr::scene::ISceneNode *GetSceneNode(ActorID actorId);
 
 			irr::IrrlichtDevice *m_pDevice;
 			irr::video::IVideoDriver *m_pDriver;
@@ -83,12 +91,6 @@ namespace GameEngine
 			Events::EventHandlerPtr m_pMoveEventHandler;
 			shared_ptr<IrrlichtInputState> m_pInputState;
 			shared_ptr<MessagingWindow> m_pMessageWindow;
-
-			void AddSceneNode(ActorPtr pActor, irr::scene::ISceneNode *pNode, unsigned int texture, bool lightingOn);
-			void UpdateActorPosition(Events::EventPtr pEvent);
-			void SetNodeTransform(irr::scene::ISceneNode *pNode, const WorldTransformComponent& worldTransform);
-			void SetCursorVisible(bool value);
-			unsigned int GetTime();
 		};
 
 		class IrrlichtMessagingWindow : public MessagingWindow
@@ -114,6 +116,26 @@ namespace GameEngine
 			irr::video::SColor m_color;
 			void SetFontHeight();
 		};
+
+		/*
+		 * Implementation of the IrrlichtDisplayFactory class.
+		 */
+
+		IrrlichtDisplayFactory::IrrlichtDisplayFactory(unsigned int width, unsigned int height, DriverType driverType, CameraType cameraType)
+			: m_width(width), m_height(height), m_driverType(driverType), m_cameraType(cameraType) { }
+
+		std::shared_ptr<IDisplay> IrrlichtDisplayFactory::VCreateDeviceAndOpenWindow()
+		{
+			auto pDisplay = std::shared_ptr<IDisplay>(new IrrlichtDisplay());
+			if (pDisplay)
+			{
+				if (!pDisplay->VSetupAndOpenWindow(m_width, m_height, m_driverType, m_cameraType))
+				{
+					pDisplay.reset();
+				}
+			}
+			return pDisplay;
+		}
 
 		/*
 		 * Implementation of the IrrlichtDisplay class.
@@ -188,20 +210,15 @@ namespace GameEngine
 			return wasdKeyMap;
 		}
 
-		std::shared_ptr<IDisplay> IrrlichtDisplayFactory::VSetupAndOpenWindow(unsigned int width,
-			unsigned int height, DriverType driverType, CameraType cameraType)
-		{
-			auto pDisplay = std::shared_ptr<IrrlichtDisplay>(new IrrlichtDisplay());
-			if (pDisplay && !pDisplay->VSetupAndOpenWindow(width, height, driverType, cameraType))
-			{
-				pDisplay.reset();
-			}
-			return pDisplay;
-		}
-
 		bool IrrlichtDisplay::VSetupAndOpenWindow(unsigned int width, unsigned int height,
 			DriverType driverType, CameraType cameraType)
 		{
+			if (m_pData->m_pDevice)
+			{
+				std::cerr << "IrrlichtDisplay: Window already exists." << std::endl;
+				return false;
+			}
+
 			m_pData->m_pDevice = irr::createDevice(GetDriverType(driverType),
 				irr::core::dimension2d<u32>(width, height),
 				16, false, false, false, m_pData->m_pInputState.get());

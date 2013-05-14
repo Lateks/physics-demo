@@ -46,11 +46,6 @@ namespace GameEngine
 		return m_pData->m_actorName;
 	}
 
-	void GameActor::SetWorldTransform(const WorldTransformComponent& trans)
-	{
-		m_pData->m_pTransform = trans;
-	}
-
 	WorldTransformComponent& GameActor::GetWorldTransform()
 	{
 		return m_pData->m_pTransform;

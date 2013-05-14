@@ -16,14 +16,8 @@
     <Filter Include="Header Files\Display">
       <UniqueIdentifier>{618e1134-b950-4b3f-8feb-756d412ea38e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\GameObject">
-      <UniqueIdentifier>{10123544-31e3-4325-bc2c-408cb4b0afd3}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Display">
       <UniqueIdentifier>{cef50971-2dd9-4850-835a-d93e6d5b7c95}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\GameObject">
-      <UniqueIdentifier>{c6a44ba4-3502-43bd-80b9-10911ac6c590}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\Physics">
       <UniqueIdentifier>{80b74643-0965-4469-80ca-f4a2c32aaf8c}</UniqueIdentifier>
@@ -67,6 +61,12 @@
     <Filter Include="Source Files\Demo">
       <UniqueIdentifier>{ab7d7f97-be4e-47e6-b8ca-d48a87c0e5a0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\GameActors">
+      <UniqueIdentifier>{10123544-31e3-4325-bc2c-408cb4b0afd3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\GameActors">
+      <UniqueIdentifier>{c6a44ba4-3502-43bd-80b9-10911ac6c590}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -76,7 +76,7 @@
       <Filter>Header Files\Display</Filter>
     </ClInclude>
     <ClInclude Include="GameActor.h">
-      <Filter>Header Files\GameObject</Filter>
+      <Filter>Header Files\GameActors</Filter>
     </ClInclude>
     <ClInclude Include="IPhysicsEngine.h">
       <Filter>Header Files\Physics</Filter>
@@ -91,7 +91,7 @@
       <Filter>Header Files\Physics</Filter>
     </ClInclude>
     <ClInclude Include="WorldTransformComponent.h">
-      <Filter>Header Files\GameObject</Filter>
+      <Filter>Header Files\GameActors</Filter>
     </ClInclude>
     <ClInclude Include="Vec4.h">
       <Filter>Header Files\LinearAlgebra</Filter>
@@ -153,7 +153,7 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GameActor.cpp">
-      <Filter>Source Files\GameObject</Filter>
+      <Filter>Source Files\GameActors</Filter>
     </ClCompile>
     <ClCompile Include="Vec3.cpp">
       <Filter>Source Files\LinearAlgebra</Filter>
@@ -192,7 +192,7 @@
       <Filter>Source Files\Physics\BulletPhysics</Filter>
     </ClCompile>
     <ClCompile Include="WorldTransformComponent.cpp">
-      <Filter>Source Files\GameObject</Filter>
+      <Filter>Source Files\GameActors</Filter>
     </ClCompile>
     <ClCompile Include="IrrlichtConversions.cpp">
       <Filter>Source Files\Display</Filter>

@@ -106,9 +106,9 @@ namespace GameEngine
 	void GameImpl::Shutdown()
 	{
 		auto pGameData = GameData::GetInstance();
+		pGameData->SetInputHandler(nullptr);
 		pGameData->SetPhysicsEngine(nullptr);
 		pGameData->SetEventManager(nullptr);
-		pGameData->SetInputHandler(nullptr);
 		pGameData->SetDisplayComponent(nullptr);
 	}
 

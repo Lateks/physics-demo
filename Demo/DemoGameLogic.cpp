@@ -30,6 +30,7 @@ namespace
 	int NUM_CUBES = 0;
 
 	const float HL_UPDATE_INTERVAL = 1.f/60;
+	const float PI = 3.14159f;
 }
 
 namespace Demo
@@ -275,7 +276,7 @@ namespace Demo
 		Vec3 rotationAxis = -1.f * pDisplay->VGetCameraRightVector();
 
 		physics->VSetLinearVelocity(cube->GetID(), throwDirection, 175.f);
-		physics->VSetAngularVelocity(cube->GetID(), rotationAxis, 2.5f);
+		physics->VSetAngularVelocity(cube->GetID(), rotationAxis, PI);
 	}
 
 	DemoGameLogic::DemoGameLogic() : m_pData(new DemoGameLogicData())

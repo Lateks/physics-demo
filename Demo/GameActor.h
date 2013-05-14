@@ -16,7 +16,6 @@ namespace GameEngine
 		virtual ~GameActor();
 		ActorID GetID();
 		std::wstring GetName();
-		void SetWorldTransform(const WorldTransformComponent& trans);
 		WorldTransformComponent& GetWorldTransform();
 	private:
 		std::unique_ptr<GameActorData> m_pData;

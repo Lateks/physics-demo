@@ -94,7 +94,6 @@
     <ClInclude Include="BulletPhysics.h" />
     <ClInclude Include="BulletPhysicsObject.h" />
     <ClInclude Include="DemoGameLogic.h" />
-    <ClInclude Include="EngineComponentFactories.h" />
     <ClInclude Include="enginefwd.h" />
     <ClInclude Include="EventManager.h" />
     <ClInclude Include="Events.h" />
@@ -121,7 +120,6 @@
     <ClCompile Include="BulletConversions.cpp" />
     <ClCompile Include="BulletPhysics.cpp" />
     <ClCompile Include="DemoGameLogic.cpp" />
-    <ClCompile Include="EngineComponentFactories.cpp" />
     <ClCompile Include="EventManager.cpp" />
     <ClCompile Include="GameActor.cpp" />
     <ClCompile Include="IrrlichtConversions.cpp" />

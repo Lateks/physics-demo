@@ -62,7 +62,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(VCInstallDir)UnitTest\lib;$(SolutionDir)\Demo\Debug;$(SolutionDir)\lib\bullet-2.81\lib\;$(SolutionDir)\lib\irrlicht-1.8\lib\Win32-visualstudio\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>BulletPhysics.obj;IrrlichtDisplay.obj;GameData.obj;XMLPhysicsData.obj;Vec4.obj;EngineComponentFactories.obj;Vec3.obj;GameActor.obj;WorldTransformComponent.obj;EventManager.obj;BSPConverter.obj;BSPLoader.obj;BSPLoaderFactory.obj;BulletConversions.obj;IrrlichtConversions.obj;Game.obj;DemoGameLogic.obj;Demo.obj;BulletCollision_vs2010_debug.lib;BulletDynamics_vs2010_debug.lib;LinearMath_vs2010_debug.lib;Irrlicht.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>BulletPhysics.obj;IrrlichtDisplay.obj;GameData.obj;XMLPhysicsData.obj;Vec4.obj;Vec3.obj;GameActor.obj;WorldTransformComponent.obj;EventManager.obj;BSPConverter.obj;BSPLoader.obj;BSPLoaderFactory.obj;BulletConversions.obj;IrrlichtConversions.obj;Game.obj;DemoGameLogic.obj;Demo.obj;BulletCollision_vs2010_debug.lib;BulletDynamics_vs2010_debug.lib;LinearMath_vs2010_debug.lib;Irrlicht.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

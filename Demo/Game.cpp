@@ -5,9 +5,8 @@
 #include "ITimer.h"
 #include "IGameLogic.h"
 #include "IInputState.h"
-#include "IEventManager.h"
 #include "IPhysicsEngine.h"
-#include "EngineComponentFactories.h"
+#include "EventManager.h"
 
 #include <iostream>
 #include <memory>
@@ -70,7 +69,7 @@ namespace GameEngine
 		pGameData->SetInputStateHandler(pDisplay->VGetInputState());
 
 		// Setup event manager.
-		auto pEventManager = Demo::CreateEventManager();
+		auto pEventManager = std::make_shared<Events::EventManager>();
 		if (!pEventManager)
 		{
 			PrintError("Failed to initialize an event manager.");
@@ -79,8 +78,7 @@ namespace GameEngine
 		}
 		pGameData->SetEventManager(pEventManager);
 
-		// Setup physics. World is scaled by the constant given as parameter
-		// (compared to the size of the rendered world).
+		// Setup the physics engine.
 		auto pPhysics = physicsFactory.CreatePhysicsEngine();
 		if (!pPhysics)
 		{

@@ -138,9 +138,6 @@
     <ClInclude Include="IGameLogic.h">
       <Filter>Header Files\BaseGameLogic</Filter>
     </ClInclude>
-    <ClInclude Include="EngineComponentFactories.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="IrrlichtConversions.h">
       <Filter>Header Files\Display</Filter>
     </ClInclude>
@@ -190,9 +187,6 @@
     </ClCompile>
     <ClCompile Include="DemoGameLogic.cpp">
       <Filter>Source Files\BaseGameLogic</Filter>
-    </ClCompile>
-    <ClCompile Include="EngineComponentFactories.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="WorldTransformComponent.cpp">
       <Filter>Source Files\GameObject</Filter>

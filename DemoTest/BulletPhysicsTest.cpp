@@ -63,6 +63,11 @@ namespace DemoTest
 			pEvents.reset();
 		}
 
+		TEST_METHOD(SystemCannotBeReinitialized)
+		{
+			Assert::IsFalse(pPhysics->VInitEngine("..\\assets\\materials.xml"));
+		}
+
 		TEST_METHOD(GravityAffectsObjectsWithNonZeroMass)
 		{
 			Vec3 actorStartPosition(0, 100, 0);

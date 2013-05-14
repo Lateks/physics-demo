@@ -39,13 +39,14 @@ namespace GameEngine
 			// CONSTRUCTORS / DESTRUCTORS:
 			BulletPhysicsData(float worldScale, float contactThreshold, float collisionMargin)
 				: m_worldScaleFactor(worldScale), m_contactThreshold(contactThreshold * m_worldScaleFactor),
-				m_collisionMargin(collisionMargin * m_worldScaleFactor), m_constraintIdCounter(0) { }
+				m_collisionMargin(collisionMargin * m_worldScaleFactor), m_initialized(false), m_constraintIdCounter(0) { }
 			virtual ~BulletPhysicsData();
 
 			// MEMBERS:
 			float m_worldScaleFactor;
 			float m_contactThreshold;
 			float m_collisionMargin;
+			bool m_initialized;
 			ConstraintID m_constraintIdCounter;
 
 			// Bullet-related:
@@ -663,6 +664,12 @@ namespace GameEngine
 
 		bool BulletPhysicsData::VInitializeSystems(const std::string& materialFileName)
 		{
+			if (m_initialized)
+			{
+				std::cerr << "BulletPhysics: Systems already initialized." << std::endl;
+				return false;
+			}
+
 			m_physicsMaterialData.reset(new XMLPhysicsData());
 			if (!m_physicsMaterialData->LoadDataFromXML(materialFileName))
 			{
@@ -686,6 +693,7 @@ namespace GameEngine
 			m_collisionFlags[IPhysicsEngine::PhysicsObjectType::TRIGGER] =
 				btRigidBody::CF_STATIC_OBJECT | btRigidBody::CF_NO_CONTACT_RESPONSE;
 
+			m_initialized = true;
 			return true;
 		}
 

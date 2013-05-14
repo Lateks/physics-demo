@@ -33,7 +33,7 @@ namespace GameEngine
 			virtual std::shared_ptr<IInputState> VGetInputState() const = 0;
 
 			virtual bool VSetupAndOpenWindow(unsigned int width, unsigned int height,
-				DriverType driverType, CameraType cameraType) = 0;
+				DriverType driverType, CameraType cameraType, int messageBufferSize = 10) = 0;
 
 			virtual void VYieldDevice() = 0;
 			virtual bool VRunning() = 0;

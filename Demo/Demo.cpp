@@ -14,7 +14,7 @@ int main()
 {
 	GameEngine::Game game;
 	game.Initialize(DemoGameLogicFactory(),
-		IrrlichtDisplayFactory(1024, 800, GameEngine::Display::DriverType::OPEN_GL, GameEngine::Display::CameraType::FPS_WASD),
+		IrrlichtDisplayFactory(1024, 800, GameEngine::Display::DriverType::OPEN_GL, GameEngine::Display::CameraType::FPS_WASD, 15),
 		BulletPhysicsFactory("..\\assets\\materials.xml", 0.05f));
 
 	if (!game.Run())

@@ -11,7 +11,8 @@ namespace GameEngine
 		class IrrlichtDisplayFactory : public IDisplayFactory
 		{
 		public:
-			IrrlichtDisplayFactory(unsigned int width, unsigned int height, DriverType driverType, CameraType cameraType);
+			IrrlichtDisplayFactory(unsigned int width, unsigned int height, DriverType driverType, CameraType cameraType,
+				int messageBufferSize = 10);
 			virtual ~IrrlichtDisplayFactory() { }
 			virtual std::shared_ptr<IDisplay> VCreateDeviceAndOpenWindow() const override;
 		private:
@@ -19,6 +20,7 @@ namespace GameEngine
 			unsigned int m_height;
 			DriverType m_driverType;
 			CameraType m_cameraType;
+			int m_messageBufferSize;
 		};
 
 		struct IrrlichtDisplayData;
@@ -37,7 +39,7 @@ namespace GameEngine
 			virtual std::shared_ptr<IInputState> VGetInputState() const override;
 
 			virtual bool VSetupAndOpenWindow(unsigned int width, unsigned int height,
-				DriverType driverType, CameraType cameraType);
+				DriverType driverType, CameraType cameraType, int messageBufferSize);
 
 			virtual void VYieldDevice() override;
 			virtual bool VRunning() override;

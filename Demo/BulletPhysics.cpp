@@ -178,12 +178,19 @@ namespace GameEngine
 		 ************************************************/
 
 		BulletPhysics::BulletPhysics(float worldScale, float contactThreshold, float collisionMargin)
-			: m_pData(new BulletPhysicsData(worldScale, contactThreshold, collisionMargin)) { }
+			: m_pData(new BulletPhysicsData(worldScale, contactThreshold, collisionMargin))
+		{
+			std::cerr << "BulletPhysics: world scale is " << m_pData->m_worldScaleFactor
+				<< ", contact threshold is set to " << m_pData->m_contactThreshold
+				<< ", collision margin is " << m_pData->m_collisionMargin << "."
+				<< std::endl;
+		}
 
 		BulletPhysics::~BulletPhysics() { }
 
 		bool BulletPhysics::VInitEngine(const std::string& materialFileName)
 		{
+			std::cerr << "BulletPhysics: using material file '" << materialFileName << "'." << std::endl;
 			return m_pData->VInitializeSystems(materialFileName);
 		}
 

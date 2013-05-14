@@ -120,15 +120,17 @@ namespace GameEngine
 		 * Implementation of the IrrlichtDisplayFactory class.
 		 */
 
-		IrrlichtDisplayFactory::IrrlichtDisplayFactory(unsigned int width, unsigned int height, DriverType driverType, CameraType cameraType)
-			: m_width(width), m_height(height), m_driverType(driverType), m_cameraType(cameraType) { }
+		IrrlichtDisplayFactory::IrrlichtDisplayFactory(unsigned int width, unsigned int height,
+			DriverType driverType, CameraType cameraType, int messageBufferSize)
+			: m_width(width), m_height(height), m_driverType(driverType), m_cameraType(cameraType),
+			m_messageBufferSize(messageBufferSize) { }
 
 		std::shared_ptr<IDisplay> IrrlichtDisplayFactory::VCreateDeviceAndOpenWindow() const
 		{
 			auto pDisplay = std::shared_ptr<IDisplay>(new IrrlichtDisplay());
 			if (pDisplay)
 			{
-				if (!pDisplay->VSetupAndOpenWindow(m_width, m_height, m_driverType, m_cameraType))
+				if (!pDisplay->VSetupAndOpenWindow(m_width, m_height, m_driverType, m_cameraType, m_messageBufferSize))
 				{
 					pDisplay.reset();
 				}
@@ -210,7 +212,7 @@ namespace GameEngine
 		}
 
 		bool IrrlichtDisplay::VSetupAndOpenWindow(unsigned int width, unsigned int height,
-			DriverType driverType, CameraType cameraType)
+			DriverType driverType, CameraType cameraType, int messageBufferSize)
 		{
 			if (m_pData->m_pDevice)
 			{
@@ -230,8 +232,11 @@ namespace GameEngine
 			m_pData->m_pSmgr = m_pData->m_pDevice->getSceneManager();
 			m_pData->m_pGui = m_pData->m_pDevice->getGUIEnvironment();
 
-			m_pData->m_pMessageWindow.reset(new IrrlichtMessagingWindow(10, m_pData->m_pGui));
-			m_pData->m_pMessageWindow->VSetPosition(10, 10);
+			if (messageBufferSize > 0)
+			{
+				m_pData->m_pMessageWindow.reset(new IrrlichtMessagingWindow(messageBufferSize, m_pData->m_pGui));
+				m_pData->m_pMessageWindow->VSetPosition(10, 10);
+			}
 
 			switch (cameraType)
 			{

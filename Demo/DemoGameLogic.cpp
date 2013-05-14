@@ -197,27 +197,33 @@ namespace Demo
 			stream << pActor->GetName();
 	}
 
-	void PrintTriggerEvent(std::shared_ptr<Display::MessagingWindow> pMessages,
-		Events::EventPtr event)
+	void PrintTriggerEvent(Events::EventPtr event)
 	{
-		std::shared_ptr<Events::TriggerEvent> pEvent =
-			std::dynamic_pointer_cast<Events::TriggerEvent>(event);
-		std::wstringstream message;
-		if (event->VGetEventType() == Events::EventType::ENTER_TRIGGER)
+		auto pDisplay = GameData::GetInstance()->GetDisplayComponent();
+		if (!pDisplay) return;
+
+		auto pMessages = pDisplay->VGetMessageWindow();
+		if (pMessages)
 		{
-			message << L"ENTER";
+			std::shared_ptr<Events::TriggerEvent> pEvent =
+				std::dynamic_pointer_cast<Events::TriggerEvent>(event);
+			std::wstringstream message;
+			if (event->VGetEventType() == Events::EventType::ENTER_TRIGGER)
+			{
+				message << L"ENTER";
+			}
+			else if (event->VGetEventType() == Events::EventType::EXIT_TRIGGER)
+			{
+				message << L"EXIT";
+			}
+			message << " TRIGGER (";
+			AppendActorNameForDisplay(message, pEvent->GetActorId());
+			message << ")";
+			pMessages->VAddMessage(message.str());
 		}
-		else if (event->VGetEventType() == Events::EventType::EXIT_TRIGGER)
-		{
-			message << L"EXIT";
-		}
-		message << " TRIGGER (";
-		AppendActorNameForDisplay(message, pEvent->GetActorId());
-		message << ")";
-		pMessages->VAddMessage(message.str());
 	}
 
-	void DebugPrintCollisionEvent(Events::EventPtr pEvent)
+	void PrintCollisionEvent(Events::EventPtr pEvent)
 	{
 		bool isCollisionEvent = pEvent->VGetEventType() == Events::EventType::COLLISION_EVENT ||
 			pEvent->VGetEventType() == Events::EventType::SEPARATION_EVENT;
@@ -225,16 +231,25 @@ namespace Demo
 		if (!isCollisionEvent)
 			return;
 
-		auto pCollisionEvent = std::dynamic_pointer_cast<Events::CollisionEvent>(pEvent);
-		if (pEvent->VGetEventType() == Events::EventType::COLLISION_EVENT)
-			std::wcerr << L"Collided: ";
-		else
-			std::wcerr << L"Separated: ";
-		auto collisionPair = pCollisionEvent->GetCollisionPair();
-		AppendActorNameForDisplay(std::wcerr, collisionPair.first);
-		std::wcerr << L" and ";
-		AppendActorNameForDisplay(std::wcerr, collisionPair.second);
-		std::wcerr << std::endl;
+		auto pDisplay = GameData::GetInstance()->GetDisplayComponent();
+		if (!pDisplay) return;
+
+		auto pMessages = pDisplay->VGetMessageWindow();
+		if (pMessages)
+		{
+			std::wstringstream message;
+			auto pCollisionEvent = std::dynamic_pointer_cast<Events::CollisionEvent>(pEvent);
+			if (pEvent->VGetEventType() == Events::EventType::COLLISION_EVENT)
+				message << L"COLLIDED: ";
+			else
+				message << L"SEPARATED: ";
+			auto collisionPair = pCollisionEvent->GetCollisionPair();
+			AppendActorNameForDisplay(message, collisionPair.first);
+			message << L" and ";
+			AppendActorNameForDisplay(message, collisionPair.second);
+
+			pMessages->VAddMessage(message.str());
+		}
 	}
 
 	void ThrowCube(Vec3& throwTowards)
@@ -342,16 +357,16 @@ namespace Demo
 		// Create event handler to print out messages to the in-game message window
 		// when a trigger event is detected.
 		Events::EventHandlerPtr eventPrinter(new std::function<void(Events::EventPtr)>
-			([pMessages] (Events::EventPtr event)
+			([] (Events::EventPtr event)
 		{
-			PrintTriggerEvent(pMessages, event);
+			PrintTriggerEvent(event);
 		}));
 
 		// Create event handler to print collision events to the console as debug information.
 		Events::EventHandlerPtr debugPrinter(new std::function<void(Events::EventPtr)>
 			([] (Events::EventPtr event)
 		{
-			DebugPrintCollisionEvent(event);
+			PrintCollisionEvent(event);
 		}));
 
 		pEventMgr->VRegisterHandler(Events::EventType::ENTER_TRIGGER, eventPrinter);

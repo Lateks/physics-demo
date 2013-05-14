@@ -61,6 +61,12 @@
     <Filter Include="Source Files\BspUtils">
       <UniqueIdentifier>{f209e22f-dc3e-4fd6-9b36-7d2b573033ba}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Demo">
+      <UniqueIdentifier>{8227f5c6-1e9c-49df-b5c9-a4f7a09f024b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Demo">
+      <UniqueIdentifier>{ab7d7f97-be4e-47e6-b8ca-d48a87c0e5a0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -132,14 +138,14 @@
     <ClInclude Include="BulletPhysicsObject.h">
       <Filter>Header Files\Physics\BulletPhysics</Filter>
     </ClInclude>
-    <ClInclude Include="DemoGameLogic.h">
-      <Filter>Header Files\BaseGameLogic</Filter>
-    </ClInclude>
     <ClInclude Include="IGameLogic.h">
       <Filter>Header Files\BaseGameLogic</Filter>
     </ClInclude>
     <ClInclude Include="IrrlichtConversions.h">
       <Filter>Header Files\Display</Filter>
+    </ClInclude>
+    <ClInclude Include="DemoGameLogic.h">
+      <Filter>Header Files\Demo</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -185,14 +191,14 @@
     <ClCompile Include="BulletPhysics.cpp">
       <Filter>Source Files\Physics\BulletPhysics</Filter>
     </ClCompile>
-    <ClCompile Include="DemoGameLogic.cpp">
-      <Filter>Source Files\BaseGameLogic</Filter>
-    </ClCompile>
     <ClCompile Include="WorldTransformComponent.cpp">
       <Filter>Source Files\GameObject</Filter>
     </ClCompile>
     <ClCompile Include="IrrlichtConversions.cpp">
       <Filter>Source Files\Display</Filter>
+    </ClCompile>
+    <ClCompile Include="DemoGameLogic.cpp">
+      <Filter>Source Files\Demo</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

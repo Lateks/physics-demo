@@ -27,7 +27,6 @@ using irr::video::E_DRIVER_TYPE;
 using irr::video::ITexture;
 
 using irr::core::vector3df;
-using irr::core::matrix4;
 using irr::core::quaternion;
 
 using irr::scene::ISceneManager;

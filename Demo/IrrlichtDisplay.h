@@ -13,6 +13,7 @@ namespace GameEngine
 		{
 		public:
 			IrrlichtDisplayFactory(unsigned int width, unsigned int height, DriverType driverType, CameraType cameraType);
+			virtual ~IrrlichtDisplayFactory() { }
 			virtual std::shared_ptr<IDisplay> VCreateDeviceAndOpenWindow() override;
 		private:
 			unsigned int m_width;

@@ -295,7 +295,7 @@ namespace GameEngine
 		void BulletPhysics::VAddConvexMesh(ActorPtr pActor, std::vector<Vec3>& vertices,
 			IPhysicsEngine::PhysicsObjectType type, const std::string& density, const std::string& material)
 		{
-			if (!pActor)
+			if (!pActor || vertices.empty())
 				return;
 
 			// Compute the convex hull of the given vertex cloud.
@@ -313,7 +313,7 @@ namespace GameEngine
 		void BulletPhysics::VAddConvexMesh(ActorPtr pActor, std::vector<Vec4>& planeEquations,
 			IPhysicsEngine::PhysicsObjectType type, const std::string& density, const std::string& material)
 		{
-			if (!pActor)
+			if (!pActor || planeEquations.empty())
 				return;
 
 			btAlignedObjectArray<btVector3> vertices;
@@ -350,16 +350,20 @@ namespace GameEngine
 		
 		void BulletPhysics::VRemoveActor(ActorID id)
 		{
-			std::vector<btRigidBody*> bodies = m_pData->GetPhysicsObject(id)->GetRigidBodies();
-			if (bodies.size() > 0)
+			auto pObject = m_pData->GetPhysicsObject(id);
+			if (pObject)
 			{
-				std::for_each(bodies.begin(), bodies.end(),
-					[this] (btRigidBody *body)
+				std::vector<btRigidBody*> bodies = pObject->GetRigidBodies();
+				if (bodies.size() > 0)
 				{
-					this->m_pData->RemoveCollisionObject(body);
-					this->m_pData->m_rigidBodyToActorMap.erase(body);
-				});
-				m_pData->m_actorToBulletPhysicsObjectMap.erase(id);
+					std::for_each(bodies.begin(), bodies.end(),
+						[this] (btRigidBody *body)
+					{
+						this->m_pData->RemoveCollisionObject(body);
+						this->m_pData->m_rigidBodyToActorMap.erase(body);
+					});
+					m_pData->m_actorToBulletPhysicsObjectMap.erase(id);
+				}
 			}
 		}
 
@@ -504,7 +508,7 @@ namespace GameEngine
 		Vec3 BulletPhysics::VGetLinearVelocity(ActorID id)
 		{
 			std::shared_ptr<BulletPhysicsObject> pObject = m_pData->GetPhysicsObject(id);
-			if (!pObject || pObject->IsStatic() || pObject->IsKinematic() || pObject->GetNumBodies() != 1)
+			if (!pObject || !pObject->IsDynamic() || pObject->GetNumBodies() != 1)
 				return Vec3(0, 0, 0);
 			return btVector3_to_Vec3(pObject->GetRigidBodies()[0]->getLinearVelocity(), m_pData->m_worldScaleFactor);
 		}
@@ -512,7 +516,7 @@ namespace GameEngine
 		Vec3 BulletPhysics::VGetAngularVelocity(ActorID id)
 		{
 			std::shared_ptr<BulletPhysicsObject> pObject = m_pData->GetPhysicsObject(id);
-			if (!pObject || pObject->IsStatic() || pObject->IsKinematic() || pObject->GetNumBodies() != 1)
+			if (!pObject || !pObject->IsDynamic() || pObject->GetNumBodies() != 1)
 				return Vec3(0, 0, 0);
 			return btVector3_to_Vec3(pObject->GetRigidBodies()[0]->getAngularVelocity(), m_pData->m_worldScaleFactor);
 		}
@@ -520,7 +524,7 @@ namespace GameEngine
 		void BulletPhysics::VSetAngularFactor(ActorID id, const Vec3& factor)
 		{
 			std::shared_ptr<BulletPhysicsObject> pObject = m_pData->GetPhysicsObject(id);
-			if (!pObject || pObject->IsStatic() || pObject->IsKinematic() || pObject->GetNumBodies() != 1)
+			if (!pObject || !pObject->IsDynamic() || pObject->GetNumBodies() != 1)
 				return;
 			pObject->GetRigidBodies()[0]->setAngularFactor(Vec3_to_btVector3(factor, m_pData->m_worldScaleFactor));
 		}
@@ -528,7 +532,7 @@ namespace GameEngine
 		Vec3 BulletPhysics::VGetAngularFactor(ActorID id)
 		{
 			std::shared_ptr<BulletPhysicsObject> pObject = m_pData->GetPhysicsObject(id);
-			if (!pObject || pObject->IsStatic() || pObject->IsKinematic() || pObject->GetNumBodies() != 1)
+			if (!pObject || !pObject->IsDynamic() || pObject->GetNumBodies() != 1)
 				return Vec3(0, 0, 0);
 			return btVector3_to_Vec3(pObject->GetRigidBodies()[0]->getAngularFactor(), m_pData->m_worldScaleFactor);
 		}
@@ -575,33 +579,37 @@ namespace GameEngine
 		ConstraintID BulletPhysics::VAddDOF6Constraint(ActorID actorID, const Vec3& pivotPosition)
 		{
 			std::shared_ptr<BulletPhysicsObject> pObject = m_pData->GetPhysicsObject(actorID);
-			if (!pObject || pObject->IsStatic() || pObject->IsKinematic()) // cannot create constraint for static or kinematic objects
+			if (!pObject || !pObject->IsDynamic()) // cannot create constraint for static or kinematic objects
 			{
 				std::cerr << "BulletPhysics: Failed to create constraint. Invalid physics object given." << std::endl;
 				return 0;
 			}
 
 			assert(pObject->GetNumBodies() == 1);
-			btRigidBody *pBody = pObject->GetRigidBodies()[0];
-			pBody->setActivationState(DISABLE_DEACTIVATION);
+			if (pObject->GetNumBodies() > 0)
+			{
+				btRigidBody *pBody = pObject->GetRigidBodies()[0];
+				pBody->setActivationState(DISABLE_DEACTIVATION);
 
-			btVector3 btPivotPosition = Vec3_to_btVector3(pivotPosition, m_pData->m_worldScaleFactor);
-			btVector3 objectSpacePivot = pBody->getCenterOfMassTransform().inverse() * btPivotPosition;
+				btVector3 btPivotPosition = Vec3_to_btVector3(pivotPosition, m_pData->m_worldScaleFactor);
+				btVector3 objectSpacePivot = pBody->getCenterOfMassTransform().inverse() * btPivotPosition;
 
-			btTransform transform;
-			transform.setIdentity();
-			transform.setOrigin(objectSpacePivot);
+				btTransform transform;
+				transform.setIdentity();
+				transform.setOrigin(objectSpacePivot);
 
-			btGeneric6DofConstraint* btPickConstraint =
-				CreateUniformDOF6Constraint(pBody, &transform, 0.8f, 0.1f);
+				btGeneric6DofConstraint* btPickConstraint =
+					CreateUniformDOF6Constraint(pBody, &transform, 0.8f, 0.1f);
 
-			m_pData->m_pDynamicsWorld->addConstraint(btPickConstraint, true);
+				m_pData->m_pDynamicsWorld->addConstraint(btPickConstraint, true);
 
-			ConstraintID constraintId = ++m_pData->m_constraintIdCounter;
-			m_pData->m_constraintMap.insert(std::make_pair(constraintId, btPickConstraint));
-			auto map = m_pData->m_constraintMap;
+				ConstraintID constraintId = ++m_pData->m_constraintIdCounter;
+				m_pData->m_constraintMap.insert(std::make_pair(constraintId, btPickConstraint));
+				auto map = m_pData->m_constraintMap;
 
-			return constraintId;
+				return constraintId;
+			}
+			return 0;
 		}
 
 		void BulletPhysics::VUpdateDOF6PivotPoint(ConstraintID constraintId, const Vec3& pivotPosition)

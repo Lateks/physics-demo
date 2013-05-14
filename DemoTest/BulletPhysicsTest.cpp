@@ -68,6 +68,21 @@ namespace DemoTest
 			Assert::IsFalse(pPhysics->VInitEngine("..\\assets\\materials.xml"));
 		}
 
+		TEST_METHOD(SystemDoesNotCrashWhenNullActorPointerGiven)
+		{
+			pPhysics->VAddSphere(nullptr, 10.f,
+				IPhysicsEngine::PhysicsObjectType::DYNAMIC);
+			pPhysics->VAddBox(nullptr, Vec3(10.f, 10.f, 10.f),
+				IPhysicsEngine::PhysicsObjectType::DYNAMIC);
+			pPhysics->VAddConvexMesh(nullptr, std::vector<GameEngine::Vec4>(),
+				IPhysicsEngine::PhysicsObjectType::DYNAMIC);
+			pPhysics->VAddConvexMesh(nullptr, std::vector<Vec3>(),
+				IPhysicsEngine::PhysicsObjectType::DYNAMIC);
+
+			pPhysics->VUpdateSimulation(DELTA_TIME_STEP);
+			pPhysics->VSyncScene();
+		}
+
 		TEST_METHOD(GravityAffectsObjectsWithNonZeroMass)
 		{
 			Vec3 actorStartPosition(0, 100, 0);

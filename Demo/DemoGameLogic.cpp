@@ -210,15 +210,14 @@ namespace Demo
 			std::wstringstream message;
 			if (event->VGetEventType() == Events::EventType::ENTER_TRIGGER)
 			{
-				message << L"ENTER";
+				message << L"ENTERED";
 			}
 			else if (event->VGetEventType() == Events::EventType::EXIT_TRIGGER)
 			{
-				message << L"EXIT";
+				message << L"EXITED";
 			}
-			message << " TRIGGER (";
+			message << " TRIGGER: ";
 			AppendActorNameForDisplay(message, pEvent->GetActorId());
-			message << ")";
 			pMessages->VAddMessage(message.str());
 		}
 	}

@@ -951,7 +951,12 @@ namespace GameEngine
 			ActorID id1 = GetActorID(pBody1);
 			ActorID id2 = GetActorID(pBody2);
 			if (id1 == 0 || id2 == 0)
+			{
+				std::cerr << "BulletPhysics: Collision detected with an unknown actor. "
+					<< "This implies that there is a rigid body without an owner in the dynamics world."
+					<< std::endl;
 				return;
+			}
 
 			std::shared_ptr<Events::IEventData> event;
 			bool firstIsTrigger;

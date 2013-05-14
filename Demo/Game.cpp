@@ -56,8 +56,8 @@ namespace GameEngine
 
 		// Setup physics. World is scaled by the constant given as parameter
 		// (compared to the size of the rendered world).
-		auto pPhysics = Demo::CreatePhysicsEngine(0.05f);
-		if (!pPhysics || !pPhysics->VInitEngine("..\\assets\\materials.xml"))
+		auto pPhysics = Demo::CreatePhysicsEngine("..\\assets\\materials.xml", 0.05f);
+		if (!pPhysics)
 		{
 			PrintError("Failed to initialize physics engine.");
 			return false;

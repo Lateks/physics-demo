@@ -80,5 +80,12 @@ namespace GameEngine
 			virtual void VRemoveConstraint(ConstraintID constraintId) = 0;
 			//virtual void VRemoveConstraints(ActorID actorID) = 0;
 		};
+
+		class IPhysicsEngineFactory
+		{
+		public:
+			virtual ~IPhysicsEngineFactory() { }
+			virtual std::shared_ptr<IPhysicsEngine> CreatePhysicsEngine() = 0;
+		};
 	}
 }

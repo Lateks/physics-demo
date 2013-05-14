@@ -21,9 +21,10 @@ namespace Demo
 		return std::make_shared<Events::EventManager>();
 	}
 
-	std::shared_ptr<Physics::IPhysicsEngine> CreatePhysicsEngine(float worldScale)
+	std::shared_ptr<Physics::IPhysicsEngine> CreatePhysicsEngine(const std::string& materialFileName, float worldScale)
 	{
-		return std::make_shared<Physics::BulletPhysics>(worldScale);
+		Physics::BulletPhysicsFactory factory(materialFileName, worldScale);
+		return factory.CreatePhysicsEngine();
 	}
 
 	std::shared_ptr<GameEngine::IGameLogic> CreateDemoGameLogic()

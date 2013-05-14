@@ -40,10 +40,8 @@ namespace DemoTest
 	public:
 		TEST_METHOD_INITIALIZE(SetupBulletPhysics)
 		{
-			// TODO: make a factory for the physics engine as well,
-			// to ensure initialization before use.
-			pPhysics.reset(new BulletPhysics(WORLD_SCALE));
-			pPhysics->VInitEngine("..\\assets\\materials.xml");
+			GameEngine::Physics::BulletPhysicsFactory factory("..\\assets\\materials.xml", WORLD_SCALE);
+			pPhysics = factory.CreatePhysicsEngine();
 
 			pActor.reset(new GameActor());
 			pEvents.reset(new EventManager());

@@ -236,6 +236,7 @@ namespace GameEngine
 			if (!pActor)
 				return;
 
+
 			float btRadius = m_pData->m_worldScaleConst * radius;
 			btSphereShape * const sphereShape = new btSphereShape(btRadius);
 
@@ -385,15 +386,30 @@ namespace GameEngine
 		void BulletPhysics::VSetGlobalGravity(Vec3& gravity)
 		{
 			assert(m_pData && m_pData->m_pDynamicsWorld);
-			m_pData->m_pDynamicsWorld->setGravity(
-				Vec3_to_btVector3(gravity, m_pData->m_worldScaleConst));
+			if (m_pData && m_pData->m_pDynamicsWorld)
+			{
+				m_pData->m_pDynamicsWorld->setGravity(
+					Vec3_to_btVector3(gravity, m_pData->m_worldScaleConst));
+			}
+			else
+			{
+				std::cerr << "BulletPhysics: Cannot set gravity. Dynamics world not present." << std::endl;
+			}
 		}
 
 		Vec3 BulletPhysics::VGetGlobalGravity()
 		{
 			assert(m_pData && m_pData->m_pDynamicsWorld);
-			return btVector3_to_Vec3(
-				m_pData->m_pDynamicsWorld->getGravity(), m_pData->m_worldScaleConst);
+			if (m_pData && m_pData->m_pDynamicsWorld)
+			{
+				return btVector3_to_Vec3(
+					m_pData->m_pDynamicsWorld->getGravity(), m_pData->m_worldScaleConst);
+			}
+			else
+			{
+				std::cerr << "BulletPhysics: Cannot get gravity. Dynamics world not present. Returning zero vector." << std::endl;
+				return Vec3(0, 0, 0);
+			}
 		}
 
 		// Use a raycast to get the first non-static body that was hit (for picking objects).
@@ -528,7 +544,10 @@ namespace GameEngine
 		{
 			std::shared_ptr<BulletPhysicsObject> pObject = m_pData->GetPhysicsObject(actorID);
 			if (!pObject || pObject->IsStatic() || pObject->IsKinematic()) // cannot create constraint for static or kinematic objects
+			{
+				std::cerr << "BulletPhysics: Failed to create constraint. Invalid physics object given." << std::endl;
 				return 0;
+			}
 
 			assert(pObject->GetNumBodies() == 1);
 			btRigidBody *pBody = pObject->GetRigidBodies()[0];
@@ -708,9 +727,16 @@ namespace GameEngine
 		{
 			assert(pWorld);
 			assert(pWorld->getWorldUserInfo());
-			BulletPhysicsData * const pBulletPhysics =
-				static_cast<BulletPhysicsData*>(pWorld->getWorldUserInfo());
-			pBulletPhysics->HandleCallback();
+			if (pWorld && pWorld->getWorldUserInfo())
+			{
+				BulletPhysicsData * const pBulletPhysics =
+					static_cast<BulletPhysicsData*>(pWorld->getWorldUserInfo());
+				pBulletPhysics->HandleCallback();
+			}
+			else
+			{
+				std::cerr << "BulletPhysics: Internal tick callback called with invalid parameters." << std::endl;
+			}
 		}
 
 		void BulletPhysicsData::HandleCallback()
@@ -794,11 +820,14 @@ namespace GameEngine
 		{
 			std::shared_ptr<BulletPhysicsObject> pObject = GetPhysicsObject(id);
 			assert(pObject);
-			// Could e.g. log an error if the body is not found.
 			if (pObject && !pObject->IsStatic() && pObject->GetNumBodies() > 0)
 			{
 				auto &bodies = pObject->GetRigidBodies();
 				std::for_each(bodies.begin(), bodies.end(), func);
+			}
+			else
+			{
+				std::cerr << "BulletPhysics: Rigid body dynamics altering method called for invalid physics object." << std::endl;
 			}
 		}
 

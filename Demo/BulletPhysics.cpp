@@ -85,7 +85,11 @@ namespace GameEngine
 			void SendNewCollisionEvent(const btPersistentManifold *manifold,
 				const btRigidBody *pBody1, const btRigidBody *pBody2);
 			void SendSeparationEvent(const btRigidBody *pBody1, const btRigidBody *pBody2);
-			void RemoveCollisionObject(btCollisionObject *obj);
+
+			void RemoveCollisionObject(btCollisionObject *pObj);
+			void RemoveCollisionPairsFor(btCollisionObject *pObj);
+			void RemoveConstraintsFor(btRigidBody *pBody);
+
 			void CreateRigidBody(ActorPtr pActor, btCollisionShape *shape, CollisionObject& object);
 
 			btMotionState *GetMotionStateFrom(const WorldTransformComponent& transform);
@@ -707,12 +711,12 @@ namespace GameEngine
 			}
 		}
 
-		void BulletPhysicsData::RemoveCollisionObject(btCollisionObject *obj)
+		void BulletPhysicsData::RemoveCollisionPairsFor(btCollisionObject *pObj)
 		{
 			// Remove the collision pairs that contain the given collision object.
 			for (auto it = m_previousTickCollisions.begin(); it != m_previousTickCollisions.end(); )
 			{
-				if ((*it).first == obj || (*it).second == obj)
+				if ((*it).first == pObj || (*it).second == pObj)
 				{
 					m_previousTickCollisions.erase(it++);
 				}
@@ -721,25 +725,35 @@ namespace GameEngine
 					++it;
 				}
 			}
+		}
 
-			btRigidBody* body = btRigidBody::upcast(obj);
-			if (body)
+		void BulletPhysicsData::RemoveConstraintsFor(btRigidBody *pBody)
+		{
+			if (pBody)
 			{
-				delete body->getMotionState();
-				delete body->getCollisionShape();
+				delete pBody->getMotionState();
+				delete pBody->getCollisionShape();
 
 				// destroy related constraints
-				for (int i = body->getNumConstraintRefs()-1; i >= 0; i--)
+				for (int i = pBody->getNumConstraintRefs()-1; i >= 0; i--)
 				{
-					btTypedConstraint *pConstraint = body->getConstraintRef(i);
+					btTypedConstraint *pConstraint = pBody->getConstraintRef(i);
 					m_pDynamicsWorld->removeConstraint(pConstraint);
 					delete pConstraint;
 				}
 			}
+		}
 
-			m_pDynamicsWorld->removeCollisionObject(obj);
+		void BulletPhysicsData::RemoveCollisionObject(btCollisionObject *pObj)
+		{
+			RemoveCollisionPairsFor(pObj);
 
-			delete obj;
+			btRigidBody* pBody = btRigidBody::upcast(pObj);
+			RemoveConstraintsFor(pBody);
+
+			m_pDynamicsWorld->removeCollisionObject(pObj);
+
+			delete pObj;
 		}
 
 		void BulletPhysicsData::BulletInternalTickCallback(

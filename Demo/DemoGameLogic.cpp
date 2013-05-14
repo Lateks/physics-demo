@@ -290,6 +290,9 @@ namespace Demo
 		if (!pDisplay || !pPhysics || !pEventMgr || !pMessages)
 			return false;
 
+		pDisplay->VSetCameraFOV(75.f);
+		pDisplay->VHideCursor();
+
 		pMessages->VSetFont("..\\assets\\fontcourier.bmp");
 		pMessages->VSetVisible(true);
 		pMessages->VSetWidth(600);

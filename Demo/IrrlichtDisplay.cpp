@@ -82,7 +82,7 @@ namespace GameEngine
 
 			Events::EventHandlerPtr m_pMoveEventHandler;
 			shared_ptr<IrrlichtInputState> m_pInputState;
-			shared_ptr<MessagingWindow> m_messageWindow;
+			shared_ptr<MessagingWindow> m_pMessageWindow;
 
 			void AddSceneNode(ActorPtr pActor, irr::scene::ISceneNode *pNode, unsigned int texture, bool lightingOn);
 			void UpdateActorPosition(Events::EventPtr pEvent);
@@ -116,20 +116,6 @@ namespace GameEngine
 		};
 
 		/*
-		 * Implementation of the IrrlichtTimer class.
-		 */
-		IrrlichtTimer::IrrlichtTimer(shared_ptr<IrrlichtDisplay> pDisplay)
-			: m_pDisplay(pDisplay) { }
-
-		unsigned int IrrlichtTimer::GetTimeMs()
-		{
-			if (m_pDisplay.expired())
-				return 0;
-
-			return shared_ptr<IrrlichtDisplay>(m_pDisplay)->m_pData->GetTime();
-		}
-
-		/*
 		 * Implementation of the IrrlichtDisplay class.
 		 */
 		IrrlichtDisplay::IrrlichtDisplay()
@@ -152,6 +138,11 @@ namespace GameEngine
 			return m_pData->m_pInputState;
 		}
 
+		unsigned int IrrlichtDisplay::VGetDeviceTimeMs() const
+		{
+			return m_pData->GetTime();
+		}
+
 		void IrrlichtDisplay::VDrawScene()
 		{
 			assert(m_pData->m_pDriver);
@@ -161,7 +152,7 @@ namespace GameEngine
 			m_pData->m_pSmgr->drawAll();
 
 			m_pData->m_pGui->drawAll();
-			m_pData->m_messageWindow->VRender();
+			m_pData->m_pMessageWindow->VRender();
 
 			m_pData->m_pDriver->endScene();
 		}
@@ -223,8 +214,8 @@ namespace GameEngine
 			m_pData->m_pSmgr = m_pData->m_pDevice->getSceneManager();
 			m_pData->m_pGui = m_pData->m_pDevice->getGUIEnvironment();
 
-			m_pData->m_messageWindow.reset(new IrrlichtMessagingWindow(10, m_pData->m_pGui));
-			m_pData->m_messageWindow->VSetPosition(10, 10);
+			m_pData->m_pMessageWindow.reset(new IrrlichtMessagingWindow(10, m_pData->m_pGui));
+			m_pData->m_pMessageWindow->VSetPosition(10, 10);
 
 			switch (cameraType)
 			{
@@ -244,7 +235,7 @@ namespace GameEngine
 
 		shared_ptr<MessagingWindow> IrrlichtDisplay::VGetMessageWindow()
 		{
-			return m_pData->m_messageWindow;
+			return m_pData->m_pMessageWindow;
 		}
 
 		IrrlichtDisplay::~IrrlichtDisplay()

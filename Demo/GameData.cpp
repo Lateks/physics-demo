@@ -21,7 +21,6 @@ namespace GameEngine
 		std::shared_ptr<Events::IEventManager> m_pEvents;
 		std::shared_ptr<Physics::IPhysicsEngine> m_pPhysicsEngine;
 		std::shared_ptr<IGameLogic> m_pInputHandler;
-		std::shared_ptr<ITimer> m_pTimer;
 
 		std::map<ActorID, std::shared_ptr<GameActor>> m_actors;
 	};
@@ -37,9 +36,9 @@ namespace GameEngine
 
 	unsigned int GameData::CurrentTimeMs()
 	{
-		if (m_pData->m_pTimer)
+		if (m_pData->m_pDisplay)
 		{
-			return m_pData->m_pTimer->GetTimeMs();
+			return m_pData->m_pDisplay->VGetDeviceTimeMs();
 		}
 		return 0;
 	}
@@ -70,9 +69,14 @@ namespace GameEngine
 		return pInstance;
 	}
 
-	std::shared_ptr<GameActor> GameData::GetActor(ActorID id)
+	std::shared_ptr<GameActor> GameData::GetActor(ActorID id) const
 	{
-		return m_pData->m_actors[id];
+		auto iter = m_pData->m_actors.find(id);
+		if (iter != m_pData->m_actors.end())
+		{
+			return iter->second;
+		}
+		return nullptr;
 	}
 
 	void GameData::SetInputHandler(std::shared_ptr<IGameLogic> pInputHandler)
@@ -117,17 +121,6 @@ namespace GameEngine
 	std::shared_ptr<Display::IDisplay> GameData::GetDisplayComponent() const
 	{
 		return m_pData->m_pDisplay;
-	}
-
-	void GameData::SetTimer(std::shared_ptr<ITimer> pTimer)
-	{
-		m_pData->m_pTimer.reset();
-		m_pData->m_pTimer = pTimer;
-	}
-
-	std::shared_ptr<ITimer> GameData::GetTimer() const
-	{
-		return m_pData->m_pTimer;
 	}
 
 	void GameData::SetEventManager(std::shared_ptr<Events::IEventManager> pManager)

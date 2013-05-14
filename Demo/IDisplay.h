@@ -28,6 +28,8 @@ namespace GameEngine
 		public:
 			virtual ~IDisplay() { }
 
+			virtual unsigned int VGetDeviceTimeMs() const = 0;
+
 			virtual std::shared_ptr<IInputState> VGetInputState() const = 0;
 
 			virtual void VYieldDevice() = 0;

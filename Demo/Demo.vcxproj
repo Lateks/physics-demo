@@ -110,7 +110,6 @@
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameActor.h" />
     <ClInclude Include="GameData.h" />
-    <ClInclude Include="ITimer.h" />
     <ClInclude Include="MessagingWindow.h" />
     <ClInclude Include="Vec3.h" />
     <ClInclude Include="XMLPhysicsData.h" />

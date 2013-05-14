@@ -37,12 +37,6 @@
     <Filter Include="Source Files\LinearAlgebra">
       <UniqueIdentifier>{c0633164-6fc5-4f7f-83f2-b4cae1d18b6d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\TimeKeeping">
-      <UniqueIdentifier>{ba50718e-887b-44b7-8ee8-28eee3cb7770}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\TimeKeeping">
-      <UniqueIdentifier>{30927d3c-a957-4633-8472-b8ca90f97e10}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Events">
       <UniqueIdentifier>{e3b360b5-96e8-4f99-b335-ad01b69f0a9a}</UniqueIdentifier>
     </Filter>
@@ -89,9 +83,6 @@
     </ClInclude>
     <ClInclude Include="XMLPhysicsData.h">
       <Filter>Header Files\Physics</Filter>
-    </ClInclude>
-    <ClInclude Include="ITimer.h">
-      <Filter>Header Files\TimeKeeping</Filter>
     </ClInclude>
     <ClInclude Include="WorldTransformComponent.h">
       <Filter>Header Files\GameObject</Filter>

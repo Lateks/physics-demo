@@ -17,15 +17,17 @@ namespace GameEngine
 		};
 
 		struct IrrlichtDisplayData;
-		class IrrlichtTimer;
 
+		// This class wraps Irrlicht related functionality. In practice, it does everything
+		// from window and camera control to scene management, texture/map loading and timers.
 		class IrrlichtDisplay : public IDisplay
 		{
 		public:
-			friend class IrrlichtTimer;
-			friend class IrrlichtDisplayFactory;
+			friend class IrrlichtDisplayFactory; // this can only be created through the factory
 
 			~IrrlichtDisplay();
+
+			virtual unsigned int VGetDeviceTimeMs() const;
 
 			virtual std::shared_ptr<IInputState> VGetInputState() const override;
 
@@ -75,20 +77,11 @@ namespace GameEngine
 			virtual void VSetSceneNodeShininess(ActorID actorId, float shininess) override;
 		private:
 			IrrlichtDisplay();
-			IrrlichtDisplay(IrrlichtDisplay& other);
+			IrrlichtDisplay(IrrlichtDisplay& other); // cannot be copied
 			IrrlichtDisplay& operator=(IrrlichtDisplay& other);
 			bool IrrlichtDisplay::VSetupAndOpenWindow(unsigned int width, unsigned int height,
 				DriverType driverType, CameraType cameraType);
 			std::unique_ptr<IrrlichtDisplayData> m_pData;
-		};
-
-		class IrrlichtTimer : public ITimer
-		{
-		public:
-			IrrlichtTimer(std::shared_ptr<IrrlichtDisplay> pDisplay);
-			virtual unsigned int GetTimeMs() override;
-		private:
-			std::weak_ptr<IrrlichtDisplay> m_pDisplay;
 		};
 	}
 }

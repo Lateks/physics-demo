@@ -25,28 +25,16 @@ namespace GameEngine
 		auto pGameData = GameData::GetInstance();
 
 		// Setup the display component (rendering and input handling).
-		auto pRenderer = Demo::CreateRenderer(1024, 800,
+		auto pDisplay = Demo::CreateRenderer(1024, 800,
 			Display::DriverType::OPEN_GL, Display::CameraType::FPS_WASD);
-		if (!pRenderer)
+		if (!pDisplay)
 		{
 			PrintError("Failed to create rendering device.");
 			return false;
 		}
 
-		pRenderer->VSetCameraFOV(75.f);
-		pRenderer->VHideCursor();
-
-		pGameData->SetInputStateHandler(pRenderer->VGetInputState());
-		pGameData->SetDisplayComponent(pRenderer);
-
-		// Setup timer.
-		auto pTimer = Demo::CreateTimer();
-		if (!pTimer)
-		{
-			PrintError("Failed to create a timer.");
-			return false;
-		}
-		pGameData->SetTimer(pTimer);
+		pGameData->SetDisplayComponent(pDisplay);
+		pGameData->SetInputStateHandler(pDisplay->VGetInputState());
 
 		// Setup the main game logic handler (handles inputs etc.).
 		auto pGameLogic = Demo::CreateDemoGameLogic();
@@ -84,7 +72,6 @@ namespace GameEngine
 		pGameData->SetPhysicsEngine(nullptr);
 		pGameData->SetEventManager(nullptr);
 		pGameData->SetInputHandler(nullptr);
-		pGameData->SetTimer(nullptr);
 		pGameData->SetDisplayComponent(nullptr);
 	}
 
@@ -95,7 +82,10 @@ namespace GameEngine
 	bool Game::Run()
 	{
 		if (!Initialize())
+		{
+			PrintError("Initialization of some engine components failed.");
 			return false;
+		}
 
 		auto pGameData = GameData::GetInstance();
 		auto pDisplay = pGameData->GetDisplayComponent();
@@ -104,7 +94,10 @@ namespace GameEngine
 		auto pGameLogic = pGameData->GetInputHandler();
 
 		if (!pGameLogic->VSetupInitialScene())
+		{
+			PrintError("Failed to setup the initial scene.");
 			return false;
+		}
 
 		unsigned int timeBegin = pGameData->CurrentTimeMs();
 		unsigned int timeEnd;

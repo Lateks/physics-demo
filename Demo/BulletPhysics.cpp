@@ -519,7 +519,9 @@ namespace GameEngine
 			std::shared_ptr<BulletPhysicsObject> pObject = m_pData->GetPhysicsObject(id);
 			if (!pObject || !pObject->IsDynamic() || pObject->GetNumBodies() != 1)
 				return Vec3(0, 0, 0);
-			return btVector3_to_Vec3(pObject->GetRigidBodies()[0]->getAngularVelocity(), m_pData->m_worldScaleFactor);
+			// No scaling here, value is in radians per second.
+			// Invert sign again to take the right-hand rule into account.
+			return btVector3_to_Vec3(-1.f * pObject->GetRigidBodies()[0]->getAngularVelocity());
 		}
 
 		void BulletPhysics::VSetAngularFactor(ActorID id, const Vec3& factor)

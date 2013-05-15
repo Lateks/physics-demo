@@ -228,6 +228,23 @@ namespace DemoTest
 			Assert::IsTrue(AreEqual(PI*DELTA_TIME_STEP, difference.x(), 0.00001f));
 		}
 
+		// Check that radians per second are not inconsistently scaled as return values
+		// (they should never be scaled).
+		TEST_METHOD(RadiansPerSecondAreNotScaled)
+		{
+			Vec3 actorStartPosition(0, 100, 0);
+			pActor->GetWorldTransform().SetPosition(actorStartPosition);
+			Vec3 startRotation = GameEngine::ConvertVector(
+				GameEngine::QuaternionToEuler(pActor->GetWorldTransform().GetRotation()));
+			pPhysics->VAddSphere(pActor, 10.f,
+				IPhysicsEngine::PhysicsObjectType::DYNAMIC, "balsa", "Normal");
+
+			// Set an angular velocity about the negative x axis in radians per second.
+			Vec3 dir(-1, 0, 0);
+			pPhysics->VSetAngularVelocity(pActor->GetID(), dir, PI);
+			Assert::AreEqual(Vec3(PI * dir), pPhysics->VGetAngularVelocity(pActor->GetID()));
+		}
+
 		TEST_METHOD(ApplyingATorque)
 		{
 			Vec3 actorStartPosition(0, 100, 0);

@@ -92,6 +92,7 @@ namespace GameEngine
 			void RemoveConstraintsFor(btRigidBody *pBody);
 
 			void CreateRigidBody(ActorPtr pActor, btCollisionShape *shape, CollisionObject& object);
+			float CalculateMass(CollisionObject& object);
 
 			btMotionState *GetMotionStateFrom(const WorldTransformComponent& transform);
 
@@ -181,7 +182,7 @@ namespace GameEngine
 		BulletPhysics::BulletPhysics(float worldScale, float contactThreshold, float collisionMargin)
 			: m_pData(new BulletPhysicsData(worldScale, contactThreshold, collisionMargin))
 		{
-			std::cerr << "BulletPhysics: world scale is " << m_pData->m_worldScaleFactor
+			std::cerr << "BulletPhysics (info): world scale is " << m_pData->m_worldScaleFactor
 				<< ", contact threshold is set to " << m_pData->m_contactThreshold
 				<< ", collision margin is " << m_pData->m_collisionMargin << "."
 				<< std::endl;
@@ -191,7 +192,7 @@ namespace GameEngine
 
 		bool BulletPhysics::VInitEngine(const std::string& materialFileName)
 		{
-			std::cerr << "BulletPhysics: using material file '" << materialFileName << "'." << std::endl;
+			std::cerr << "BulletPhysics (info): using material file '" << materialFileName << "'." << std::endl;
 			return m_pData->VInitializeSystems(materialFileName);
 		}
 
@@ -429,7 +430,7 @@ namespace GameEngine
 			}
 			else
 			{
-				std::cerr << "BulletPhysics: Cannot set gravity. Dynamics world not present." << std::endl;
+				std::cerr << "BulletPhysics (warning): Cannot set gravity. Dynamics world not present." << std::endl;
 			}
 		}
 
@@ -443,7 +444,7 @@ namespace GameEngine
 			}
 			else
 			{
-				std::cerr << "BulletPhysics: Cannot get gravity. Dynamics world not present. Returning zero vector." << std::endl;
+				std::cerr << "BulletPhysics (warning): Cannot get gravity. Dynamics world not present. Returning zero vector." << std::endl;
 				return Vec3(0, 0, 0);
 			}
 		}
@@ -674,7 +675,7 @@ namespace GameEngine
 		{
 			if (m_initialized)
 			{
-				std::cerr << "BulletPhysics: Systems already initialized." << std::endl;
+				std::cerr << "BulletPhysics (warning): Systems already initialized." << std::endl;
 				return false;
 			}
 
@@ -792,7 +793,7 @@ namespace GameEngine
 			}
 			else
 			{
-				std::cerr << "BulletPhysics: Internal tick callback called with invalid parameters." << std::endl;
+				std::cerr << "BulletPhysics (warning): Internal tick callback called with invalid parameters." << std::endl;
 			}
 		}
 
@@ -884,7 +885,7 @@ namespace GameEngine
 			}
 			else
 			{
-				std::cerr << "BulletPhysics: Rigid body dynamics altering method called for invalid physics object." << std::endl;
+				std::cerr << "BulletPhysics (warning): Rigid body dynamics altering method called for invalid physics object." << std::endl;
 			}
 		}
 
@@ -910,7 +911,7 @@ namespace GameEngine
 				break;
 			default: // Note: Kinematic objects are not supported.
 				delete shape;
-				throw std::domain_error("Unsupported physics object type given.");
+				throw std::domain_error("BulletPhysics: Unsupported physics object type given.");
 			}
 		}
 
@@ -951,15 +952,32 @@ namespace GameEngine
 			CreateRigidBody(pActor, shape, object);
 		}
 
+		float BulletPhysicsData::CalculateMass(CollisionObject& object)
+		{
+			if (object.m_objectType == IPhysicsEngine::PhysicsObjectType::STATIC ||
+				object.m_objectType == IPhysicsEngine::PhysicsObjectType::TRIGGER)
+			{
+				return 0.f; // objects with zero mass are regarded as immovable by bullet
+			}
+			else
+			{
+				float density = object.m_density.empty() ?
+					0.f : m_physicsMaterialData->LookupDensity(object.m_density);
+				float mass = density > 0.f ? object.m_calculateVolume() * density : 0.f;
+				if (mass == 0.f)
+				{
+					std::cerr << "BulletPhysics (warning): non-static object with 0 mass created. Is the density identifier valid?" << std::endl;
+				}
+				return mass;
+			}
+		}
+
 		void BulletPhysicsData::CreateRigidBody(ActorPtr pActor, btCollisionShape *shape, CollisionObject& object)
 		{
 			static MaterialData defaultMaterial(0.f, 0.f);
 			const MaterialData& matData = object.m_material.empty() ?
 				defaultMaterial : m_physicsMaterialData->LookupMaterial(object.m_material);
-
-			float density = object.m_density.empty() ?
-				0.f : m_physicsMaterialData->LookupDensity(object.m_density);
-			float mass = density > 0.f ? object.m_calculateVolume() * density : 0.f;
+			float mass = CalculateMass(object);
 
 			btMotionState *motionState = GetMotionStateFrom(pActor->GetWorldTransform());
 			btVector3 localInertia(0, 0, 0);
@@ -1007,9 +1025,10 @@ namespace GameEngine
 
 			ActorID id1 = GetActorID(pBody1);
 			ActorID id2 = GetActorID(pBody2);
+			assert(id1 != 0 || id2 != 0);
 			if (id1 == 0 || id2 == 0)
 			{
-				std::cerr << "BulletPhysics: Collision detected with an unknown actor. "
+				std::cerr << "BulletPhysics (warning): Collision detected with an unknown actor. "
 					<< "This implies that there is a rigid body without an owner in the dynamics world."
 					<< std::endl;
 				return;

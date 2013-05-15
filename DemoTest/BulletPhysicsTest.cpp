@@ -824,6 +824,28 @@ namespace DemoTest
 			Assert::AreNotEqual(oldActorPosition, pActor->GetWorldTransform().GetPosition());
 			Assert::AreNotEqual(oldActorRotation, pActor->GetWorldTransform().GetRotation());
 		}
+
+		TEST_METHOD(SetsMassToZeroWhenGivenAnInvalidDensityString)
+		{
+			Vec3 actorStartPosition(0, 100, 0);
+			pActor->GetWorldTransform().SetPosition(actorStartPosition);
+			pPhysics->VAddSphere(pActor, 12.f,
+				IPhysicsEngine::PhysicsObjectType::DYNAMIC, "foobar", "Normal");
+
+			SimulateSteps(10);
+
+			Assert::AreEqual(actorStartPosition, pActor->GetWorldTransform().GetPosition());
+		}
+
+		TEST_METHOD(DoesNotCrashWhenGivenAnInvalidMaterialString)
+		{
+			Vec3 actorStartPosition(0, 100, 0);
+			pActor->GetWorldTransform().SetPosition(actorStartPosition);
+			pPhysics->VAddSphere(pActor, 12.f,
+				IPhysicsEngine::PhysicsObjectType::DYNAMIC, "Titanium", "foobar");
+
+			SimulateSteps(13);
+		}
 	private:
 		std::shared_ptr<IPhysicsEngine> pPhysics;
 		std::shared_ptr<IEventManager> pEvents;

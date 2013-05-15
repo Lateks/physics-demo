@@ -138,7 +138,7 @@ namespace DemoTest
 				IPhysicsEngine::PhysicsObjectType::DYNAMIC, "balsa", "Normal");
 
 			Vec3 directionOfForce(1, 0, 0);
-			pPhysics->VApplyForce(directionOfForce, 10.f, pActor->GetID());
+			pPhysics->VApplyForce(pActor->GetID(), directionOfForce, 10.f);
 			pPhysics->VSetGlobalGravity(Vec3(0, 0, 0)); // disregard gravity
 
 			pPhysics->VUpdateSimulation(DELTA_TIME_STEP);
@@ -157,7 +157,7 @@ namespace DemoTest
 				IPhysicsEngine::PhysicsObjectType::DYNAMIC);
 
 			Vec3 directionOfForce(1, 0, 0);
-			pPhysics->VApplyForce(directionOfForce, 10.f, pActor->GetID());
+			pPhysics->VApplyForce(pActor->GetID(), directionOfForce, 10.f);
 
 			pPhysics->VUpdateSimulation(DELTA_TIME_STEP);
 			pPhysics->VSyncScene();
@@ -175,7 +175,7 @@ namespace DemoTest
 				IPhysicsEngine::PhysicsObjectType::STATIC, "balsa", "Normal");
 
 			Vec3 directionOfForce(1, 0, 0);
-			pPhysics->VApplyForce(directionOfForce, 10.f, pActor->GetID());
+			pPhysics->VApplyForce(pActor->GetID(), directionOfForce, 10.f);
 
 			pPhysics->VUpdateSimulation(DELTA_TIME_STEP);
 			pPhysics->VSyncScene();
@@ -255,7 +255,7 @@ namespace DemoTest
 				GameEngine::Physics::IPhysicsEngine::PhysicsObjectType::DYNAMIC,
 				"balsa", "Normal");
 
-			pPhysics->VApplyTorque(Vec3(-1, 0, 0), PI, pActor->GetID());
+			pPhysics->VApplyTorque(pActor->GetID(), Vec3(-1, 0, 0), PI);
 			pPhysics->VSetGlobalGravity(Vec3(0, 0, 0)); // disregard gravity
 
 			pPhysics->VUpdateSimulation(DELTA_TIME_STEP);
@@ -631,7 +631,7 @@ namespace DemoTest
 
 			pPhysics->VSetAngularFactor(pActor->GetID(), Vec3(0, 0, 0));
 
-			pPhysics->VApplyTorque(Vec3(1.f, 0.f, 0.f), PI, pActor->GetID());
+			pPhysics->VApplyTorque(pActor->GetID(), Vec3(1.f, 0.f, 0.f), PI);
 			Quaternion oldRotation = pActor->GetWorldTransform().GetRotation();
 			SimulateSteps(20);
 
@@ -651,7 +651,7 @@ namespace DemoTest
 			SimulateSteps(1);
 
 			pPhysics->VSetAngularFactor(pActor->GetID(), oldAngularFactor);
-			pPhysics->VApplyTorque(Vec3(-1.f, 0.f, 0.f), PI, pActor->GetID());
+			pPhysics->VApplyTorque(pActor->GetID(), Vec3(-1.f, 0.f, 0.f), PI);
 			Vec3 oldRotation = GameEngine::ConvertVector(
 				GameEngine::QuaternionToEuler(pActor->GetWorldTransform().GetRotation()));
 			SimulateSteps(1);
@@ -790,7 +790,7 @@ namespace DemoTest
 			pPhysics->VAddBox(pFloor, Vec3(2000.f, 0.02f, 2000.f),
 				IPhysicsEngine::PhysicsObjectType::STATIC, "", "Normal");
 
-			pPhysics->VApplyForce(Vec3(1.f, 0.f, 0.f), 1.0f, pActor->GetID()); // apply a slight force to get the ball rolling
+			pPhysics->VApplyForce(pActor->GetID(), Vec3(1.f, 0.f, 0.f), 1.0f); // apply a slight force to get the ball rolling
 
 			SimulateSteps(150);
 			Vec3 oldActorPosition = pActor->GetWorldTransform().GetPosition();
@@ -814,7 +814,7 @@ namespace DemoTest
 			pPhysics->VAddBox(pFloor, Vec3(2000.f, 0.02f, 2000.f),
 				IPhysicsEngine::PhysicsObjectType::STATIC, "", "");
 
-			pPhysics->VApplyForce(Vec3(1.f, 0.f, 0.f), 1.f, pActor->GetID()); // apply a slight force to get the ball rolling
+			pPhysics->VApplyForce(pActor->GetID(), Vec3(1.f, 0.f, 0.f), 1.f); // apply a slight force to get the ball rolling
 
 			SimulateSteps(500);
 			Vec3 oldActorPosition = pActor->GetWorldTransform().GetPosition();

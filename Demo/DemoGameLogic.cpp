@@ -317,7 +317,7 @@ namespace Demo
 		if (!pBspLoader)
 			return false;
 
-		pPhysics->VLoadBspMap(*pBspLoader, world, "Tarmac");
+		pPhysics->VLoadBspMap(world, *pBspLoader, "Tarmac");
 
 		pDisplay->VSetCameraPosition(Vec3(80,40,-60));
 		pDisplay->VSetCameraTarget(Vec3(-80,40,-60));

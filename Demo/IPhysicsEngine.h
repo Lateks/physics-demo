@@ -26,7 +26,7 @@ namespace GameEngine
 
 			virtual ~IPhysicsEngine() { }
 
-			// Initialization routines.
+			// Initialization routine.
 			virtual bool VInitEngine(const std::string& materialFileName) = 0;
 
 			// Updating the simulation.
@@ -34,7 +34,7 @@ namespace GameEngine
 			virtual void VSyncScene() = 0;
 
 			/* Initializing different physics world objects.
-			 * Density and material strings are used only if the PhysicsObjectType is
+			 * The density strings are used only if the PhysicsObjectType is
 			 * dynamic. (Would possibly be used for kinematic objects as well but these
 			 * are not actually implemented in the BulletPhysics class at the moment.)
 			 */
@@ -48,13 +48,13 @@ namespace GameEngine
 				PhysicsObjectType type, const std::string& density = "", const std::string& material = "") = 0;
 
 			// Adding e.g. Quake maps from bsp files.
-			virtual void VLoadBspMap(BspLoader& bspLoad, ActorPtr pActor, const std::string& material) = 0;
+			virtual void VLoadBspMap(ActorPtr pActor, BspLoader& bspLoad, const std::string& material) = 0;
 
 			virtual void VRemoveActor(ActorID id) = 0;
 
-			virtual void VApplyForce(const Vec3& direction, float magnitude, ActorID id) = 0;
-			virtual void VApplyTorque(const Vec3& direction, float magnitude, ActorID id) = 0;
-			virtual void VStopActor(ActorID id) = 0; // set velocity to 0
+			virtual void VApplyForce(ActorID id, const Vec3& direction, float magnitude) = 0;
+			virtual void VApplyTorque(ActorID id, const Vec3& direction, float magnitude) = 0;
+			virtual void VStopActor(ActorID id) = 0; // set velocities to 0
 			virtual void VSetLinearVelocity(ActorID id, const Vec3& direction, float magnitude) = 0;
 			virtual Vec3 VGetLinearVelocity(ActorID id) = 0;
 			virtual void VSetAngularVelocity(ActorID id, const Vec3& rotationAxis, float radiansPerSecond) = 0;
@@ -67,9 +67,9 @@ namespace GameEngine
 
 			/* Uses a ray cast to determine the closest actor intersected by
 			 * the ray. Returns 0 if no actor was hit. The last parameter is an
-			 * output vector specifying the "picking point" of the actor. This is
-			 * the point where the ray intersects the rigid body associated with
-			 * the actor. Only dynamic bodies are picked by this method.
+			 * output vector specifying the point where the ray intersects with
+			 * the rigid body associated with the actor. Only dynamic bodies
+			 * are picked by this method.
 			 */
 			virtual ActorID VGetClosestActorHit(Vec3& rayFrom, Vec3& rayTo, Vec3& hitPosition) const = 0;
 
@@ -78,7 +78,6 @@ namespace GameEngine
 			virtual ConstraintID VAddDOF6Constraint(ActorID actorID, const Vec3& pivotPosition) = 0;
 			virtual void VUpdateDOF6PivotPoint(ConstraintID constraintId, const Vec3& pivotPosition) = 0;
 			virtual void VRemoveConstraint(ConstraintID constraintId) = 0;
-			//virtual void VRemoveConstraints(ActorID actorID) = 0;
 		};
 
 		class IPhysicsEngineFactory

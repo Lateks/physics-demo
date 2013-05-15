@@ -336,7 +336,7 @@ namespace GameEngine
 			m_pData->AddShape(pActor, convexShape, object);
 		}
 
-		void BulletPhysics::VLoadBspMap(BspLoader& bspLoad, ActorPtr pActor, const std::string& material)
+		void BulletPhysics::VLoadBspMap(ActorPtr pActor, BspLoader& bspLoad, const std::string& material)
 		{
 			if (!pActor)
 				return;
@@ -368,7 +368,7 @@ namespace GameEngine
 			}
 		}
 
-		void BulletPhysics::VApplyForce(const Vec3& direction, float magnitude, ActorID id)
+		void BulletPhysics::VApplyForce(ActorID id, const Vec3& direction, float magnitude)
 		{
 			const btVector3 forceVector = Vec3_to_btVector3(direction).normalized()
 				* magnitude * m_pData->m_worldScaleFactor;
@@ -379,7 +379,7 @@ namespace GameEngine
 			}));
 		}
 
-		void BulletPhysics::VApplyTorque(const Vec3& direction, float magnitude, ActorID id)
+		void BulletPhysics::VApplyTorque(ActorID id, const Vec3& direction, float magnitude)
 		{
 			const btVector3 torqueVector = Vec3_to_btVector3(direction).normalized()
 				* magnitude * -1.f * m_pData->m_worldScaleFactor;

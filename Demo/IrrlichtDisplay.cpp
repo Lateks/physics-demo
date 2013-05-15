@@ -571,9 +571,10 @@ namespace GameEngine
 			std::shared_ptr<ActorMoveEvent> pMoveEvent =
 				std::dynamic_pointer_cast<ActorMoveEvent>(pEvent);
 
-			auto pGame = GameData::GetInstance();
-			ActorPtr pActor = pGame->GetActor(pMoveEvent->GetActorId());
-			ISceneNode *pNode = GetSceneNode(pActor->GetID());
+			ActorID id = pMoveEvent->GetActorId();
+
+			ActorPtr pActor = GameData::GetInstance()->GetActor(id);
+			ISceneNode *pNode = GetSceneNode(id);
 
 			if (pActor && pNode)
 			{

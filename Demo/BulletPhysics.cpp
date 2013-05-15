@@ -558,7 +558,7 @@ namespace GameEngine
 			/* Apparently this is the "constraint force mixing factor when
 			 * joint is at limit" (?). From testing, it appears that the value
 			 * should be between 0 and 1 or unexpected bad things (TM) will happen.
-			 * At 1.0 the constraint gets very wonky (or springy?) but I can barely
+			 * At 1.0 the constraint gets very wonky but I can barely
 			 * notice any difference between 0.1 and 0.8.
 			 */
 			dof6->setParam(BT_CONSTRAINT_STOP_CFM, constraintForceMix, 0);
@@ -977,8 +977,6 @@ namespace GameEngine
 		void BulletPhysicsData::CreateRigidBody(ActorPtr pActor, btCollisionShape *shape, CollisionObject& object)
 		{
 			static MaterialData defaultMaterial(0.f, 0.f);
-			const MaterialData& matData = object.m_material.empty() ?
-				defaultMaterial : m_physicsMaterialData->LookupMaterial(object.m_material);
 			float mass = CalculateMass(object);
 
 			btMotionState *motionState = GetMotionStateFrom(pActor->GetWorldTransform());
@@ -990,9 +988,14 @@ namespace GameEngine
 			btRigidBody::btRigidBodyConstructionInfo rbInfo(
 				mass, motionState, shape, localInertia);
 
-			rbInfo.m_restitution = matData.m_restitution;
-			rbInfo.m_friction = matData.m_friction; // this is the sliding friction (as opposed to rolling friction)
-			rbInfo.m_rollingFriction = object.m_calculateRollingFriction(matData.m_friction);
+			if (object.m_objectType != IPhysicsEngine::PhysicsObjectType::TRIGGER) // triggers have no use for these properties
+			{
+				const MaterialData& matData = object.m_material.empty() ?
+					defaultMaterial : m_physicsMaterialData->LookupMaterial(object.m_material);
+				rbInfo.m_restitution = matData.m_restitution;
+				rbInfo.m_friction = matData.m_friction; // this is the sliding friction (as opposed to rolling friction)
+				rbInfo.m_rollingFriction = object.m_calculateRollingFriction(matData.m_friction);
+			}
 
 			btRigidBody * const pBody = new btRigidBody(rbInfo);
 			if (pBody->getRollingFriction() > 0.f)

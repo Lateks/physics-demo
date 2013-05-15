@@ -28,7 +28,7 @@ namespace GameEngine
 			     against setting this to zero to keep the collision system stable.
 			 */
 			BulletPhysicsFactory(const std::string& materialFilePath,
-				float worldScale = 1.0f, float contactThreshold = 0.1f, float collisionMargin = 0.1f);
+				float worldScale = 1.f, float contactThreshold = 0.1f, float collisionMargin = 0.3f);
 			virtual ~BulletPhysicsFactory() { }
 			virtual std::shared_ptr<IPhysicsEngine> CreatePhysicsEngine() const override;
 		private:

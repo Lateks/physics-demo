@@ -29,6 +29,11 @@ namespace GameEngine
 				m_type = type;
 			}
 
+			ObjectType GetPhysicsType()
+			{
+				return m_type;
+			}
+
 			bool IsDynamic() const
 			{
 				return m_type == ObjectType::DYNAMIC;

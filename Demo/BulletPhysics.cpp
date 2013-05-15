@@ -589,7 +589,7 @@ namespace GameEngine
 			}
 
 			assert(pObject->GetNumBodies() == 1);
-			if (pObject->GetNumBodies() > 0)
+			if (pObject->GetNumBodies() == 1)
 			{
 				btRigidBody *pBody = pObject->GetRigidBodies()[0];
 				pBody->setActivationState(DISABLE_DEACTIVATION);
@@ -922,15 +922,13 @@ namespace GameEngine
 			ActorID id = pActor->GetID();
 			auto iter = m_actorToBulletPhysicsObjectMap.find(id);
 			assert(iter == m_actorToBulletPhysicsObjectMap.end());
-			if (iter != m_actorToBulletPhysicsObjectMap.end()) // remove old bodies if found
+			if (iter != m_actorToBulletPhysicsObjectMap.end())
 			{
-				auto &rigidBodies = iter->second->GetRigidBodies();
-				std::for_each(rigidBodies.begin(), rigidBodies.end(),
-					[this] (btRigidBody *pBody)
-				{
-					m_rigidBodyToActorMap.erase(pBody);
-					RemoveCollisionObject(pBody);
-				});
+				std::cerr << "BulletPhysics (warning): Trying to add a multi-body non-static or trigger object or "
+					<< "a non-static or trigger body to a static object. Remove existing bodies before adding a new "
+					<< "non-static body for actor " << id << "." << std::endl;
+				delete shape;
+				return;
 			}
 			m_actorToBulletPhysicsObjectMap[id].reset(new BulletPhysicsObject(id, object.m_objectType));
 
@@ -949,6 +947,12 @@ namespace GameEngine
 			{
 				m_actorToBulletPhysicsObjectMap[id].reset(
 					new BulletPhysicsObject(id, object.m_objectType));
+			}
+			else if (objectIt->second->GetPhysicsType() != object.m_objectType)
+			{
+				std::cerr << "BulletPhysics (warning): Cannot add a static body for an existing non-static actor." << std::endl;
+				delete shape;
+				return;
 			}
 
 			CreateRigidBody(pActor, shape, object);

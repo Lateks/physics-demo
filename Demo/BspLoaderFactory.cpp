@@ -5,11 +5,6 @@
 
 namespace GameEngine
 {
-	struct raw_pointer_deleter
-	{
-		void operator()(void* ptr) { free(ptr); }
-	};
-
 	std::unique_ptr<BspLoader> CreateBspLoader(const std::string& bspFilePath)
 	{
 		std::unique_ptr<BspLoader> bspLoader;
@@ -24,12 +19,12 @@ namespace GameEngine
 			std::size_t fileSize = (std::size_t) bspFile.tellg();
 			bspFile.seekg(0, std::ios::beg);
 
-			std::unique_ptr<void, raw_pointer_deleter> memoryBuffer(malloc(fileSize + 1));
+			std::unique_ptr<char[]> memoryBuffer(new char[fileSize + 1]);
 			if (memoryBuffer && bspFile.is_open())
 			{
-				bspFile.read((char*) memoryBuffer.get(), fileSize);
+				bspFile.read(memoryBuffer.get(), fileSize);
 				bspLoader.reset(new BspLoader());
-				bspLoader->loadBSPFile(memoryBuffer.get());
+				bspLoader->loadBSPFile((void*) memoryBuffer.get());
 			}
 		}
 		bspFile.close();

@@ -24,6 +24,8 @@ namespace GameEngine
 			virtual void VRegisterHandler(EventType type, EventHandlerPtr handler) override;
 			virtual void VDeregisterHandler(EventType type, EventHandlerPtr handler) override;
 		private:
+			EventManager(const EventManager& other);
+			EventManager& operator=(const EventManager& other);
 			std::unique_ptr<EventManagerData> m_pData;
 		};
 	}

@@ -302,9 +302,10 @@ namespace GameEngine
 			// Compute the convex hull of the given vertex cloud.
 			btConvexHullShape * const convexShape = new btConvexHullShape();
 
-			std::for_each(vertices.begin(), vertices.end(),
-				[&convexShape, this] (Vec3& vertex) { convexShape->addPoint(
-				Vec3_to_btVector3(vertex, this->m_pData->m_worldScaleFactor)); });
+			for(Vec3& vertex : vertices)
+			{
+				convexShape->addPoint(Vec3_to_btVector3(vertex, this->m_pData->m_worldScaleFactor));
+			}
 
 			CollisionObject object(type, material, density,
 				[convexShape] () { return AABBVolume(convexShape); });
@@ -320,13 +321,12 @@ namespace GameEngine
 			btAlignedObjectArray<btVector3> vertices;
 			btAlignedObjectArray<btVector3> btPlaneEquations;
 			float scaling = m_pData->m_worldScaleFactor;
-			std::for_each(planeEquations.begin(), planeEquations.end(),
-				[&btPlaneEquations, scaling] (Vec4& eq)
+			for(Vec4& eq : planeEquations)
 			{
 				btVector3 btEq = Vec4_to_btVector3(eq);
 				btEq[3] *= scaling;
 				btPlaneEquations.push_back(btEq);
-			});
+			}
 			btGeometryUtil::getVerticesFromPlaneEquations(btPlaneEquations, vertices);
 
 			btConvexHullShape *convexShape = new btConvexHullShape(&(vertices[0].getX()), vertices.size());
@@ -357,12 +357,11 @@ namespace GameEngine
 				std::vector<btRigidBody*> bodies = pObject->GetRigidBodies();
 				if (bodies.size() > 0)
 				{
-					std::for_each(bodies.begin(), bodies.end(),
-						[this] (btRigidBody *body)
+					for(btRigidBody *pBody : bodies)
 					{
-						this->m_pData->RemoveCollisionObject(body);
-						this->m_pData->m_rigidBodyToActorMap.erase(body);
-					});
+						this->m_pData->RemoveCollisionObject(pBody);
+						this->m_pData->m_rigidBodyToActorMap.erase(pBody);
+					}
 					m_pData->m_actorToBulletPhysicsObjectMap.erase(id);
 				}
 			}
@@ -865,14 +864,13 @@ namespace GameEngine
 								currentTickCollisions.begin(), currentTickCollisions.end(),
 								std::inserter(removedCollisions, removedCollisions.end()));
 
-			std::for_each(removedCollisions.begin(), removedCollisions.end(),
-				[this] (const CollisionPair& pair)
+			for(auto &pair : removedCollisions)
 			{
 				const btRigidBody * const body1 = pair.first;
 				const btRigidBody * const body2 = pair.second;
 
 				this->SendSeparationEvent(body1, body2);
-			});
+			}
 		}
 
 		void BulletPhysicsData::ApplyOnNonStaticBodies(ActorID id,

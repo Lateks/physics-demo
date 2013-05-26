@@ -82,18 +82,17 @@ namespace DemoTest
 		TEST_METHOD(CanSetIrrlichtCameraFOV)
 		{
 			std::vector<float> testValues;
-			testValues.push_back(75.f); // FFUUU, no initializer lists in MSVC.
+			testValues.push_back(75.f);
 			testValues.push_back(90.f);
 			testValues.push_back(120.f);
 			testValues.push_back(50.f);
 			float epsilon = 0.00001f;
 
-			std::for_each(testValues.begin(), testValues.end(),
-				[this, epsilon] (float newFovDegrees)
+			for (auto newFovDegrees : testValues)
 			{
 				pDisplay->VSetCameraFOV(newFovDegrees);
 				Assert::IsTrue(AreEqual(newFovDegrees, pDisplay->VGetCameraFOV(), epsilon));
-			});
+			}
 		}
 
 		TEST_METHOD(CanSetIrrlichtCameraTarget)
